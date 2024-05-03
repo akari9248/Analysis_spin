@@ -36,6 +36,7 @@ IFNPlugin is a FastJet plugin for implementing interleaved flavour neutralisatio
 git clone https://github.com/jetflav/IFNPlugin.git
 cd IFNPlugin
 make
+make install
 ```
 
 ## Boost Library
