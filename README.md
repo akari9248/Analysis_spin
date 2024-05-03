@@ -1,6 +1,3 @@
-# Machine_learning
-Certainly! Here is the README content in Markdown format, translated into English:
-
 # Project Dependencies
 
 This project depends on FastJet and its extensions fjcontrib and IFNPlugin, as well as boost Library. Below are the steps to install and configure these dependencies:
