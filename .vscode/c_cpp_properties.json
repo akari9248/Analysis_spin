@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/analysis/simulation",
+                "/usr/local/opt/root/include/root",
+                "/usr/local/root/6.24.04/include",
+                "/home/zlin/CA_recluster/fastjet-install/include",
+                "${env:HOME}/.local/include",
+                "${env:HOME}/.local/include/nlo++",
+                "${env:HOME}/.local/include/cteq",
+                "${env:HOME}/app/IFNPlugin"
+            ],
+            "defines": [],
+            "macFrameworkPath": [],
+            "compilerPath": "/usr/bin/g++",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}

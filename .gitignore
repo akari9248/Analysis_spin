@@ -1,4 +1,8 @@
 *.root
 *.pdf
+*.csv
+ML_OUT
 */*.root
 */*.pdf
+*/*.csv
+test
