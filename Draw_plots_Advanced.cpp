@@ -12,7 +12,7 @@ class EventsAnalyzer : public SampleAnalyzer<AdvancedDataInfo> {
 public:
     void initialize() override {
         for(int i=0;i<1;i++)
-            t->Add(TString::Format("test/validation_data_CA_lundplane_partonz00pt200IFN_matchsecond/Chunk%d.root/DataInfo",i));
+            t->Add(TString::Format("test/validation_data_CA_lundplane_partonz00pt200IFN_matchsecond_test/Chunk%d.root/DataInfo",i));
 
         hists.addHist("Spinon_parton_qq",100,0,TMath::Pi());
         hists.addHist("Spinon_parton_gg",100,0,TMath::Pi());

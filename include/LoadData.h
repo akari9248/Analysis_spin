@@ -227,6 +227,21 @@ public:
       int pdgid12 = JetBranch::netflavour(twoplane.first.softer,particlesinfo, minflavourpt);
       int pdgid21 = JetBranch::netflavour(twoplane.second.harder,particlesinfo, minflavourpt);
       int pdgid22 = JetBranch::netflavour(twoplane.second.softer,particlesinfo, minflavourpt);
+      // if(JetBranch::netflavour(twoplane.first.harder,particlesinfo,0)!=JetBranch::GetIFNFlavour(twoplane.first.harder)){
+      //   for(auto &constituent : twoplane.first.harder.constituents()){
+      //     cout<<particlesinfo.at(constituent.user_index()).pdgid<<" ";
+      //   }
+      //   cout<<endl;
+      //   for(auto &constituent : twoplane.first.harder.constituents()){
+      //     cout<<FlavHistory::initial_flavor_of(constituent).pdg_code()<<" ";
+      //   }
+      //   cout<<endl;
+      //   for(auto &constituent : twoplane.first.harder.constituents()){
+      //     cout<<FlavHistory::current_flavour_of(constituent).pdg_code()<<" ";
+      //   }
+      //   cout<<endl;
+      // }
+      // cout<<JetBranch::netflavour(twoplane.first.harder,particlesinfo,0)<<" "<<JetBranch::GetIFNFlavour(twoplane.first.harder)<<endl;
       if (FlavourAlgorithm.EqualTo("IFN")) {
         pdgid11 = JetBranch::GetIFNFlavour(twoplane.first.harder);
         pdgid12 = JetBranch::GetIFNFlavour(twoplane.first.softer);

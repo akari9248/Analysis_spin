@@ -79,9 +79,8 @@ public:
     treeEvents_spinoff.addBranches("type/I");
   }
   void initialize() override {
-    for (int i = 0; i < 5; i++)
-      for(int i=0;i<1;i++)
-            t->Add(TString::Format("test/validation_data_CA_lundplane_partonz00pt200IFN_matchsecond/Chunk%d.root/DataInfo",i));
+      for(int i=0;i<48;i++)
+            t->Add(TString::Format("test/validation_data_CA_lundplane_partonz00pt200IFN_matchsecond_test/Chunk%d.root/DataInfo",i));
   }
   void analyze() override {
     double ktcut = 4;
@@ -101,19 +100,19 @@ public:
         treeEvent.assign("eta1", events->eta1_Parton->at(i));
         treeEvent.assign("phi1", events->phi1_Parton->at(i));
         treeEvent.assign("e1", events->e1_Parton->at(i));
-        treeEvent.assign("ntracks1", events->phi3_Parton->at(i));
+        treeEvent.assign("ntracks1", events->ntracks1_Parton->at(i));
 
         treeEvent.assign("pt2", events->pt3_Parton->at(i));
         treeEvent.assign("eta2", events->eta3_Parton->at(i));
         treeEvent.assign("phi2", events->phi3_Parton->at(i));
         treeEvent.assign("e2", events->e3_Parton->at(i));
-        treeEvent.assign("ntracks2", events->phi3_Parton->at(i));
+        treeEvent.assign("ntracks2", events->ntracks3_Parton->at(i));
 
         treeEvent.assign("pt3", events->pt4_Parton->at(i));
         treeEvent.assign("eta3", events->eta4_Parton->at(i));
         treeEvent.assign("phi3", events->phi4_Parton->at(i));
         treeEvent.assign("e3", events->e4_Parton->at(i));
-        treeEvent.assign("ntracks3", events->phi3_Parton->at(i));
+        treeEvent.assign("ntracks3", events->ntracks4_Parton->at(i));
 
         treeEvent.assign("z1", events->z1_Parton->at(i));
         treeEvent.assign("kt1", events->kt1_Parton->at(i));
@@ -148,14 +147,19 @@ public:
         treeEvent.assign("eta1", events->eta1_Hadron->at(i));
         treeEvent.assign("phi1", events->phi1_Hadron->at(i));
         treeEvent.assign("e1", events->e1_Hadron->at(i));
+        treeEvent.assign("ntracks1", events->ntracks1_Hadron->at(i));
+
         treeEvent.assign("pt2", events->pt3_Hadron->at(i));
         treeEvent.assign("eta2", events->eta3_Hadron->at(i));
         treeEvent.assign("phi2", events->phi3_Hadron->at(i));
         treeEvent.assign("e2", events->e3_Hadron->at(i));
+        treeEvent.assign("ntracks2", events->ntracks3_Hadron->at(i));
+
         treeEvent.assign("pt3", events->pt4_Hadron->at(i));
         treeEvent.assign("eta3", events->eta4_Hadron->at(i));
         treeEvent.assign("phi3", events->phi4_Hadron->at(i));
         treeEvent.assign("e3", events->e4_Hadron->at(i));
+        treeEvent.assign("ntracks3", events->ntracks4_Hadron->at(i));
 
         treeEvent.assign("z1", events->z1_Hadron->at(i));
         treeEvent.assign("kt1", events->kt1_Hadron->at(i));

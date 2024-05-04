@@ -33,8 +33,8 @@ int main() {
     chain_off.Add(Form("/storage/xiaoxue/code/git_file/QCDAnalysis/OfflineExamples/data/herwig/Decay_1_spinoff_450_forai/chunk%d/Decay_1_spinoff_450_forai.root/JetsAndDaughters",
                       i));
   }
-  for(int chunki=0;chunki<10;chunki++){
-    int chunkentries=1000000;
+  for(int chunki=0;chunki<100;chunki++){
+    int chunkentries=100000;
     std::vector<std::vector<double>> xdata_on, xdata_off;
   std::vector<int> ydata_on, ydata_off;
   // 初始化空的列表来存储数据和标签

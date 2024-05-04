@@ -103,6 +103,22 @@ public :
    vector<double>  *z1_Parton;
    vector<double>  *z2_Hadron;
    vector<double>  *z2_Parton;
+   vector<int>     *nparticles1_Hadron;
+   vector<int>     *nparticles1_Parton;
+   vector<int>     *nparticles2_Hadron;
+   vector<int>     *nparticles2_Parton;
+   vector<int>     *nparticles3_Hadron;
+   vector<int>     *nparticles3_Parton;
+   vector<int>     *nparticles4_Hadron;
+   vector<int>     *nparticles4_Parton;
+   vector<int>     *ntracks1_Hadron;
+   vector<int>     *ntracks1_Parton;
+   vector<int>     *ntracks2_Hadron;
+   vector<int>     *ntracks2_Parton;
+   vector<int>     *ntracks3_Hadron;
+   vector<int>     *ntracks3_Parton;
+   vector<int>     *ntracks4_Hadron;
+   vector<int>     *ntracks4_Parton;
 
    // List of branches
    TBranch        *b_deltaR1_Hadron;   //!
@@ -185,6 +201,22 @@ public :
    TBranch        *b_z1_Parton;   //!
    TBranch        *b_z2_Hadron;   //!
    TBranch        *b_z2_Parton;   //!
+      TBranch        *b_nparticles1_Hadron;   //!
+   TBranch        *b_nparticles1_Parton;   //!
+   TBranch        *b_nparticles2_Hadron;   //!
+   TBranch        *b_nparticles2_Parton;   //!
+   TBranch        *b_nparticles3_Hadron;   //!
+   TBranch        *b_nparticles3_Parton;   //!
+   TBranch        *b_nparticles4_Hadron;   //!
+   TBranch        *b_nparticles4_Parton;   //!
+   TBranch        *b_ntracks1_Hadron;   //!
+   TBranch        *b_ntracks1_Parton;   //!
+   TBranch        *b_ntracks2_Hadron;   //!
+   TBranch        *b_ntracks2_Parton;   //!
+   TBranch        *b_ntracks3_Hadron;   //!
+   TBranch        *b_ntracks3_Parton;   //!
+   TBranch        *b_ntracks4_Hadron;   //!
+   TBranch        *b_ntracks4_Parton;   //!
 
    AdvancedDataInfo(TTree *tree=0);
    virtual ~AdvancedDataInfo();
@@ -322,6 +354,22 @@ void AdvancedDataInfo::Init(TTree *tree)
    z1_Parton = 0;
    z2_Hadron = 0;
    z2_Parton = 0;
+   nparticles1_Hadron = 0;
+   nparticles1_Parton = 0;
+   nparticles2_Hadron = 0;
+   nparticles2_Parton = 0;
+   nparticles3_Hadron = 0;
+   nparticles3_Parton = 0;
+   nparticles4_Hadron = 0;
+   nparticles4_Parton = 0;
+   ntracks1_Hadron = 0;
+   ntracks1_Parton = 0;
+   ntracks2_Hadron = 0;
+   ntracks2_Parton = 0;
+   ntracks3_Hadron = 0;
+   ntracks3_Parton = 0;
+   ntracks4_Hadron = 0;
+   ntracks4_Parton = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -408,6 +456,22 @@ void AdvancedDataInfo::Init(TTree *tree)
    fChain->SetBranchAddress("z1_Parton", &z1_Parton, &b_z1_Parton);
    fChain->SetBranchAddress("z2_Hadron", &z2_Hadron, &b_z2_Hadron);
    fChain->SetBranchAddress("z2_Parton", &z2_Parton, &b_z2_Parton);
+   fChain->SetBranchAddress("nparticles1_Hadron", &nparticles1_Hadron, &b_nparticles1_Hadron);
+   fChain->SetBranchAddress("nparticles1_Parton", &nparticles1_Parton, &b_nparticles1_Parton);
+   fChain->SetBranchAddress("nparticles2_Hadron", &nparticles2_Hadron, &b_nparticles2_Hadron);
+   fChain->SetBranchAddress("nparticles2_Parton", &nparticles2_Parton, &b_nparticles2_Parton);
+   fChain->SetBranchAddress("nparticles3_Hadron", &nparticles3_Hadron, &b_nparticles3_Hadron);
+   fChain->SetBranchAddress("nparticles3_Parton", &nparticles3_Parton, &b_nparticles3_Parton);
+   fChain->SetBranchAddress("nparticles4_Hadron", &nparticles4_Hadron, &b_nparticles4_Hadron);
+   fChain->SetBranchAddress("nparticles4_Parton", &nparticles4_Parton, &b_nparticles4_Parton);
+   fChain->SetBranchAddress("ntracks1_Hadron", &ntracks1_Hadron, &b_ntracks1_Hadron);
+   fChain->SetBranchAddress("ntracks1_Parton", &ntracks1_Parton, &b_ntracks1_Parton);
+   fChain->SetBranchAddress("ntracks2_Hadron", &ntracks2_Hadron, &b_ntracks2_Hadron);
+   fChain->SetBranchAddress("ntracks2_Parton", &ntracks2_Parton, &b_ntracks2_Parton);
+   fChain->SetBranchAddress("ntracks3_Hadron", &ntracks3_Hadron, &b_ntracks3_Hadron);
+   fChain->SetBranchAddress("ntracks3_Parton", &ntracks3_Parton, &b_ntracks3_Parton);
+   fChain->SetBranchAddress("ntracks4_Hadron", &ntracks4_Hadron, &b_ntracks4_Hadron);
+   fChain->SetBranchAddress("ntracks4_Parton", &ntracks4_Parton, &b_ntracks4_Parton);
    Notify();
 }
 
