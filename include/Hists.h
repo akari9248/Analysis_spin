@@ -47,7 +47,7 @@ public:
         }
 
         for (auto& pair : hists) {
-            pair.second->Write();  
+            pair.second->Write(pair.second->GetTitle());  
         }
 
         file.Close(); 
