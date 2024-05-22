@@ -2,13 +2,53 @@
 
 class Draw_Template{
     public:
-    static void SymmetryTwoPads(vector<TH1D *> hists,TString filename,TString ExtraText=""){
+    static void SymmetryTwoPads(vector<TH1D *> hists,TString filename,TString ExtraText="",vector<TString> legend_name={}){
       auto hists_sym = SymmetryHists(hists,true);
       ROOTPlot plot1(hists_sym);
       plot1.Load.TwoPads();
       plot1.SetXbinRange(1,hists_sym.at(0)->GetNbinsX());
       plot1.SetLegend(0.15, 0.35, 0.32, 0.7);
-      plot1.SetLegendName(GetTitles(hists));
+      if(legend_name.size()==0)
+        plot1.SetLegendName(GetTitles(hists));
+      else
+        plot1.SetLegendName(legend_name);
+      plot1.ratios_Xtitle = "#varphi";
+      plot1.AddExtraText({ExtraText});
+      plot1.Draw();
+      // plot1.Write(TString::Format("output/Unweighted%d.png", i));
+      plot1.Write(
+          "plots/"+filename);
+      // plot1.Write(
+      //     "zlin://mnt/c/Users/win10/machine_learning/plots2/"+filename);
+    }
+    static void TwoPads(vector<TH1D *> hists,TString filename,TString ExtraText="",vector<TString> legend_name={}){
+      ROOTPlot plot1(hists);
+      plot1.Load.TwoPads();
+      plot1.SetXbinRange(1,hists.at(0)->GetNbinsX());
+      plot1.SetLegend(0.15, 0.35, 0.32, 0.7);
+      if(legend_name.size()==0)
+        plot1.SetLegendName(GetTitles(hists));
+      else
+        plot1.SetLegendName(legend_name);
+      plot1.ratios_Xtitle = "#varphi";
+      plot1.AddExtraText({ExtraText});
+      plot1.Draw();
+      // plot1.Write(TString::Format("output/Unweighted%d.png", i));
+      plot1.Write(
+          "plots/"+filename);
+      // plot1.Write(
+      //     "zlin://mnt/c/Users/win10/machine_learning/plots2/"+filename);
+    }
+    static void NorTwoPads(vector<TH1D *> hists,TString filename,TString ExtraText="",vector<TString> legend_name={}){
+      auto hists_nor = NorHists(hists);
+      ROOTPlot plot1(hists_nor);
+      plot1.Load.TwoPads();
+      plot1.SetXbinRange(1,hists.at(0)->GetNbinsX());
+      plot1.SetLegend(0.15, 0.35, 0.32, 0.7);
+      if(legend_name.size()==0)
+        plot1.SetLegendName(GetTitles(hists));
+      else
+        plot1.SetLegendName(legend_name);
       plot1.ratios_Xtitle = "#varphi";
       plot1.AddExtraText({ExtraText});
       plot1.Draw();

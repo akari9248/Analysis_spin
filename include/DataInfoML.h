@@ -23,6 +23,7 @@ public :
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
    // Declaration of leaf types
+   Double_t        z1;
    Double_t        z2;
    Double_t        kt2;
    Double_t        deltaR2;
@@ -33,6 +34,7 @@ public :
    Int_t           validate;
    Double_t        spin;
    // List of branches
+   TBranch        *b_z1;   //!
    TBranch        *b_z2;   //!
    TBranch        *b_kt2;   //!
    TBranch        *b_deltaR2;   //!
@@ -105,7 +107,7 @@ void DataInfoML::Init(TTree *tree)
    fChain = tree;
    fCurrent = -1;
    fChain->SetMakeClass(1);
-
+   fChain->SetBranchAddress("z1", &z1, &b_z1);
    fChain->SetBranchAddress("z2", &z2, &b_z2);
    fChain->SetBranchAddress("kt2", &kt2, &b_kt2);
    fChain->SetBranchAddress("deltaR2", &deltaR2, &b_deltaR2);

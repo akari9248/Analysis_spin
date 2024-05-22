@@ -60,7 +60,9 @@ public:
   int count;
   TString lasttime;
   int lastk;
-  ProcessBar(int _entries) : entries(_entries) {
+  int show_num = 1000;
+  ProcessBar(int _entries,int _show_num = 1000) : entries(_entries) {
+    show_num = _show_num;
     startTime = clock();
   }
 
@@ -80,7 +82,7 @@ public:
   }
   void show2(int k,TString prefix="Analyzing ") {
     int unit_entry=1;
-    if(entries>1000) unit_entry=entries/1000;
+    if(entries>show_num) unit_entry=entries/show_num;
     if (k  % unit_entry == 0&&k!=lastk) {
       clock_t endTime = clock();
       TString usedtime = time_Cal(startTime, endTime);

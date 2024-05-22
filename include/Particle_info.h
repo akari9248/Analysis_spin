@@ -23,6 +23,7 @@ class ParticleInfo : public PseudoJet::UserInfoBase{
   int pdgid,index;
   double charge;
   double px,py,pz,e;
+  double pt,eta,phi;
   ParticleInfo(int pdgid_,int index_,double px_,double py_,double pz_,double e_){
     pdgid = pdgid_;
     index = index_;
@@ -31,10 +32,25 @@ class ParticleInfo : public PseudoJet::UserInfoBase{
     pz = pz_;
     e = e_;
   }
+  ParticleInfo(int pdgid_,double charge_,double pt_,double eta_,double phi_,double e_){
+    pdgid = pdgid_;
+    charge = charge_;
+    pt = pt_;
+    eta = eta_;
+    phi = phi_;
+    e = e_;
+  }
+  ParticleInfo(double pt_,double eta_,double phi_,double e_){
+    pt = pt_;
+    eta = eta_;
+    phi = phi_;
+    e = e_;
+  }
   ParticleInfo(int pdgid_,int charge_){
     pdgid = pdgid_;
     charge = charge_;
   }
+  ParticleInfo(){}
 };
 class ExtendedFlavHistory : public FlavHistory {
 public:

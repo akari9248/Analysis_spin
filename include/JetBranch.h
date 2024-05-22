@@ -41,6 +41,8 @@ public:
     int softer_ntracks;
     int harder_nparticles;
     int softer_nparticles;
+    vector<ParticleInfo> harder_constituents_info;
+    vector<ParticleInfo> softer_constituents_info;
     void GetVector(vector<ParticleInfo> particlesinfo) {
       harder_vect = JetBranch::PseudoJetToTLorentzVector(harder);
       softer_vect = JetBranch::PseudoJetToTLorentzVector(softer);
@@ -49,6 +51,20 @@ public:
       softer_ntracks = GetNtracks(softer_constituents,particlesinfo);
       harder_nparticles = harder_constituents.size();
       softer_nparticles = softer_constituents.size();
+      for(int i=0;i<harder_constituents.size();i++){
+        auto particle = harder_constituents.at(i);
+        harder_constituents_info.push_back(ParticleInfo(
+            particlesinfo.at(particle.user_index()).pdgid,
+            particlesinfo.at(particle.user_index()).charge, particle.pt(),
+            particle.eta(), particle.phi(), particle.e()));
+      }
+      for(int i=0;i<softer_constituents.size();i++){
+        auto particle = softer_constituents.at(i);
+        softer_constituents_info.push_back(ParticleInfo(
+            particlesinfo.at(particle.user_index()).pdgid,
+            particlesinfo.at(particle.user_index()).charge, particle.pt(),
+            particle.eta(), particle.phi(), particle.e()));
+      }
     }
     void GetPlaneVector() {
       n = harder_vect.Vect().Cross(softer_vect.Vect());
@@ -315,8 +331,6 @@ public:
       int particle_index = particle.user_index();
 
       double charge = particlesinfo.at(particle_index).charge;
-      if(particlesinfo.at(particle_index).pdgid==21)
-      cout<<charge<<" "<<particlesinfo.at(particle_index).pdgid<<endl;
       if(abs(charge)>=0.1) ncharge++;
     }
     return ncharge;

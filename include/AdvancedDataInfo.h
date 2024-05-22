@@ -76,6 +76,78 @@ public :
    vector<double>  *n2y_Parton;
    vector<double>  *n2z_Hadron;
    vector<double>  *n2z_Parton;
+   vector<int>     *nparticles1_Hadron;
+   vector<int>     *nparticles1_Parton;
+   vector<int>     *nparticles2_Hadron;
+   vector<int>     *nparticles2_Parton;
+   vector<int>     *nparticles3_Hadron;
+   vector<int>     *nparticles3_Parton;
+   vector<int>     *nparticles4_Hadron;
+   vector<int>     *nparticles4_Parton;
+   vector<int>     *ntracks1_Hadron;
+   vector<int>     *ntracks1_Parton;
+   vector<int>     *ntracks2_Hadron;
+   vector<int>     *ntracks2_Parton;
+   vector<int>     *ntracks3_Hadron;
+   vector<int>     *ntracks3_Parton;
+   vector<int>     *ntracks4_Hadron;
+   vector<int>     *ntracks4_Parton;
+   vector<double>  *particle1_charge_Hadron;
+   vector<double>  *particle1_charge_Parton;
+   vector<double>  *particle1_e_Hadron;
+   vector<double>  *particle1_e_Parton;
+   vector<double>  *particle1_eta_Hadron;
+   vector<double>  *particle1_eta_Parton;
+   vector<int>     *particle1_jetid_Hadron;
+   vector<int>     *particle1_jetid_Parton;
+   vector<double>  *particle1_phi_Hadron;
+   vector<double>  *particle1_phi_Parton;
+   vector<int>     *particle1_pid_Hadron;
+   vector<int>     *particle1_pid_Parton;
+   vector<double>  *particle1_pt_Hadron;
+   vector<double>  *particle1_pt_Parton;
+   vector<double>  *particle2_charge_Hadron;
+   vector<double>  *particle2_charge_Parton;
+   vector<double>  *particle2_e_Hadron;
+   vector<double>  *particle2_e_Parton;
+   vector<double>  *particle2_eta_Hadron;
+   vector<double>  *particle2_eta_Parton;
+   vector<int>     *particle2_jetid_Hadron;
+   vector<int>     *particle2_jetid_Parton;
+   vector<double>  *particle2_phi_Hadron;
+   vector<double>  *particle2_phi_Parton;
+   vector<int>     *particle2_pid_Hadron;
+   vector<int>     *particle2_pid_Parton;
+   vector<double>  *particle2_pt_Hadron;
+   vector<double>  *particle2_pt_Parton;
+   vector<double>  *particle3_charge_Hadron;
+   vector<double>  *particle3_charge_Parton;
+   vector<double>  *particle3_e_Hadron;
+   vector<double>  *particle3_e_Parton;
+   vector<double>  *particle3_eta_Hadron;
+   vector<double>  *particle3_eta_Parton;
+   vector<int>     *particle3_jetid_Hadron;
+   vector<int>     *particle3_jetid_Parton;
+   vector<double>  *particle3_phi_Hadron;
+   vector<double>  *particle3_phi_Parton;
+   vector<int>     *particle3_pid_Hadron;
+   vector<int>     *particle3_pid_Parton;
+   vector<double>  *particle3_pt_Hadron;
+   vector<double>  *particle3_pt_Parton;
+   vector<double>  *particle4_charge_Hadron;
+   vector<double>  *particle4_charge_Parton;
+   vector<double>  *particle4_e_Hadron;
+   vector<double>  *particle4_e_Parton;
+   vector<double>  *particle4_eta_Hadron;
+   vector<double>  *particle4_eta_Parton;
+   vector<int>     *particle4_jetid_Hadron;
+   vector<int>     *particle4_jetid_Parton;
+   vector<double>  *particle4_phi_Hadron;
+   vector<double>  *particle4_phi_Parton;
+   vector<int>     *particle4_pid_Hadron;
+   vector<int>     *particle4_pid_Parton;
+   vector<double>  *particle4_pt_Hadron;
+   vector<double>  *particle4_pt_Parton;
    vector<double>  *phi1_Hadron;
    vector<double>  *phi1_Parton;
    vector<double>  *phi2_Hadron;
@@ -103,22 +175,6 @@ public :
    vector<double>  *z1_Parton;
    vector<double>  *z2_Hadron;
    vector<double>  *z2_Parton;
-   vector<int>     *nparticles1_Hadron;
-   vector<int>     *nparticles1_Parton;
-   vector<int>     *nparticles2_Hadron;
-   vector<int>     *nparticles2_Parton;
-   vector<int>     *nparticles3_Hadron;
-   vector<int>     *nparticles3_Parton;
-   vector<int>     *nparticles4_Hadron;
-   vector<int>     *nparticles4_Parton;
-   vector<int>     *ntracks1_Hadron;
-   vector<int>     *ntracks1_Parton;
-   vector<int>     *ntracks2_Hadron;
-   vector<int>     *ntracks2_Parton;
-   vector<int>     *ntracks3_Hadron;
-   vector<int>     *ntracks3_Parton;
-   vector<int>     *ntracks4_Hadron;
-   vector<int>     *ntracks4_Parton;
 
    // List of branches
    TBranch        *b_deltaR1_Hadron;   //!
@@ -174,6 +230,78 @@ public :
    TBranch        *b_n2y_Parton;   //!
    TBranch        *b_n2z_Hadron;   //!
    TBranch        *b_n2z_Parton;   //!
+   TBranch        *b_nparticles1_Hadron;   //!
+   TBranch        *b_nparticles1_Parton;   //!
+   TBranch        *b_nparticles2_Hadron;   //!
+   TBranch        *b_nparticles2_Parton;   //!
+   TBranch        *b_nparticles3_Hadron;   //!
+   TBranch        *b_nparticles3_Parton;   //!
+   TBranch        *b_nparticles4_Hadron;   //!
+   TBranch        *b_nparticles4_Parton;   //!
+   TBranch        *b_ntracks1_Hadron;   //!
+   TBranch        *b_ntracks1_Parton;   //!
+   TBranch        *b_ntracks2_Hadron;   //!
+   TBranch        *b_ntracks2_Parton;   //!
+   TBranch        *b_ntracks3_Hadron;   //!
+   TBranch        *b_ntracks3_Parton;   //!
+   TBranch        *b_ntracks4_Hadron;   //!
+   TBranch        *b_ntracks4_Parton;   //!
+   TBranch        *b_particle1_charge_Hadron;   //!
+   TBranch        *b_particle1_charge_Parton;   //!
+   TBranch        *b_particle1_e_Hadron;   //!
+   TBranch        *b_particle1_e_Parton;   //!
+   TBranch        *b_particle1_eta_Hadron;   //!
+   TBranch        *b_particle1_eta_Parton;   //!
+   TBranch        *b_particle1_jetid_Hadron;   //!
+   TBranch        *b_particle1_jetid_Parton;   //!
+   TBranch        *b_particle1_phi_Hadron;   //!
+   TBranch        *b_particle1_phi_Parton;   //!
+   TBranch        *b_particle1_pid_Hadron;   //!
+   TBranch        *b_particle1_pid_Parton;   //!
+   TBranch        *b_particle1_pt_Hadron;   //!
+   TBranch        *b_particle1_pt_Parton;   //!
+   TBranch        *b_particle2_charge_Hadron;   //!
+   TBranch        *b_particle2_charge_Parton;   //!
+   TBranch        *b_particle2_e_Hadron;   //!
+   TBranch        *b_particle2_e_Parton;   //!
+   TBranch        *b_particle2_eta_Hadron;   //!
+   TBranch        *b_particle2_eta_Parton;   //!
+   TBranch        *b_particle2_jetid_Hadron;   //!
+   TBranch        *b_particle2_jetid_Parton;   //!
+   TBranch        *b_particle2_phi_Hadron;   //!
+   TBranch        *b_particle2_phi_Parton;   //!
+   TBranch        *b_particle2_pid_Hadron;   //!
+   TBranch        *b_particle2_pid_Parton;   //!
+   TBranch        *b_particle2_pt_Hadron;   //!
+   TBranch        *b_particle2_pt_Parton;   //!
+   TBranch        *b_particle3_charge_Hadron;   //!
+   TBranch        *b_particle3_charge_Parton;   //!
+   TBranch        *b_particle3_e_Hadron;   //!
+   TBranch        *b_particle3_e_Parton;   //!
+   TBranch        *b_particle3_eta_Hadron;   //!
+   TBranch        *b_particle3_eta_Parton;   //!
+   TBranch        *b_particle3_jetid_Hadron;   //!
+   TBranch        *b_particle3_jetid_Parton;   //!
+   TBranch        *b_particle3_phi_Hadron;   //!
+   TBranch        *b_particle3_phi_Parton;   //!
+   TBranch        *b_particle3_pid_Hadron;   //!
+   TBranch        *b_particle3_pid_Parton;   //!
+   TBranch        *b_particle3_pt_Hadron;   //!
+   TBranch        *b_particle3_pt_Parton;   //!
+   TBranch        *b_particle4_charge_Hadron;   //!
+   TBranch        *b_particle4_charge_Parton;   //!
+   TBranch        *b_particle4_e_Hadron;   //!
+   TBranch        *b_particle4_e_Parton;   //!
+   TBranch        *b_particle4_eta_Hadron;   //!
+   TBranch        *b_particle4_eta_Parton;   //!
+   TBranch        *b_particle4_jetid_Hadron;   //!
+   TBranch        *b_particle4_jetid_Parton;   //!
+   TBranch        *b_particle4_phi_Hadron;   //!
+   TBranch        *b_particle4_phi_Parton;   //!
+   TBranch        *b_particle4_pid_Hadron;   //!
+   TBranch        *b_particle4_pid_Parton;   //!
+   TBranch        *b_particle4_pt_Hadron;   //!
+   TBranch        *b_particle4_pt_Parton;   //!
    TBranch        *b_phi1_Hadron;   //!
    TBranch        *b_phi1_Parton;   //!
    TBranch        *b_phi2_Hadron;   //!
@@ -201,22 +329,6 @@ public :
    TBranch        *b_z1_Parton;   //!
    TBranch        *b_z2_Hadron;   //!
    TBranch        *b_z2_Parton;   //!
-      TBranch        *b_nparticles1_Hadron;   //!
-   TBranch        *b_nparticles1_Parton;   //!
-   TBranch        *b_nparticles2_Hadron;   //!
-   TBranch        *b_nparticles2_Parton;   //!
-   TBranch        *b_nparticles3_Hadron;   //!
-   TBranch        *b_nparticles3_Parton;   //!
-   TBranch        *b_nparticles4_Hadron;   //!
-   TBranch        *b_nparticles4_Parton;   //!
-   TBranch        *b_ntracks1_Hadron;   //!
-   TBranch        *b_ntracks1_Parton;   //!
-   TBranch        *b_ntracks2_Hadron;   //!
-   TBranch        *b_ntracks2_Parton;   //!
-   TBranch        *b_ntracks3_Hadron;   //!
-   TBranch        *b_ntracks3_Parton;   //!
-   TBranch        *b_ntracks4_Hadron;   //!
-   TBranch        *b_ntracks4_Parton;   //!
 
    AdvancedDataInfo(TTree *tree=0);
    virtual ~AdvancedDataInfo();
@@ -274,7 +386,7 @@ void AdvancedDataInfo::Init(TTree *tree)
    // Init() will be called many times when running on PROOF
    // (once per file to be processed).
 
-   // Set object pointer
+  // Set object pointer
    deltaR1_Hadron = 0;
    deltaR1_Parton = 0;
    deltaR2_Hadron = 0;
@@ -328,6 +440,78 @@ void AdvancedDataInfo::Init(TTree *tree)
    n2y_Parton = 0;
    n2z_Hadron = 0;
    n2z_Parton = 0;
+   nparticles1_Hadron = 0;
+   nparticles1_Parton = 0;
+   nparticles2_Hadron = 0;
+   nparticles2_Parton = 0;
+   nparticles3_Hadron = 0;
+   nparticles3_Parton = 0;
+   nparticles4_Hadron = 0;
+   nparticles4_Parton = 0;
+   ntracks1_Hadron = 0;
+   ntracks1_Parton = 0;
+   ntracks2_Hadron = 0;
+   ntracks2_Parton = 0;
+   ntracks3_Hadron = 0;
+   ntracks3_Parton = 0;
+   ntracks4_Hadron = 0;
+   ntracks4_Parton = 0;
+   particle1_charge_Hadron = 0;
+   particle1_charge_Parton = 0;
+   particle1_e_Hadron = 0;
+   particle1_e_Parton = 0;
+   particle1_eta_Hadron = 0;
+   particle1_eta_Parton = 0;
+   particle1_jetid_Hadron = 0;
+   particle1_jetid_Parton = 0;
+   particle1_phi_Hadron = 0;
+   particle1_phi_Parton = 0;
+   particle1_pid_Hadron = 0;
+   particle1_pid_Parton = 0;
+   particle1_pt_Hadron = 0;
+   particle1_pt_Parton = 0;
+   particle2_charge_Hadron = 0;
+   particle2_charge_Parton = 0;
+   particle2_e_Hadron = 0;
+   particle2_e_Parton = 0;
+   particle2_eta_Hadron = 0;
+   particle2_eta_Parton = 0;
+   particle2_jetid_Hadron = 0;
+   particle2_jetid_Parton = 0;
+   particle2_phi_Hadron = 0;
+   particle2_phi_Parton = 0;
+   particle2_pid_Hadron = 0;
+   particle2_pid_Parton = 0;
+   particle2_pt_Hadron = 0;
+   particle2_pt_Parton = 0;
+   particle3_charge_Hadron = 0;
+   particle3_charge_Parton = 0;
+   particle3_e_Hadron = 0;
+   particle3_e_Parton = 0;
+   particle3_eta_Hadron = 0;
+   particle3_eta_Parton = 0;
+   particle3_jetid_Hadron = 0;
+   particle3_jetid_Parton = 0;
+   particle3_phi_Hadron = 0;
+   particle3_phi_Parton = 0;
+   particle3_pid_Hadron = 0;
+   particle3_pid_Parton = 0;
+   particle3_pt_Hadron = 0;
+   particle3_pt_Parton = 0;
+   particle4_charge_Hadron = 0;
+   particle4_charge_Parton = 0;
+   particle4_e_Hadron = 0;
+   particle4_e_Parton = 0;
+   particle4_eta_Hadron = 0;
+   particle4_eta_Parton = 0;
+   particle4_jetid_Hadron = 0;
+   particle4_jetid_Parton = 0;
+   particle4_phi_Hadron = 0;
+   particle4_phi_Parton = 0;
+   particle4_pid_Hadron = 0;
+   particle4_pid_Parton = 0;
+   particle4_pt_Hadron = 0;
+   particle4_pt_Parton = 0;
    phi1_Hadron = 0;
    phi1_Parton = 0;
    phi2_Hadron = 0;
@@ -354,22 +538,6 @@ void AdvancedDataInfo::Init(TTree *tree)
    z1_Parton = 0;
    z2_Hadron = 0;
    z2_Parton = 0;
-   nparticles1_Hadron = 0;
-   nparticles1_Parton = 0;
-   nparticles2_Hadron = 0;
-   nparticles2_Parton = 0;
-   nparticles3_Hadron = 0;
-   nparticles3_Parton = 0;
-   nparticles4_Hadron = 0;
-   nparticles4_Parton = 0;
-   ntracks1_Hadron = 0;
-   ntracks1_Parton = 0;
-   ntracks2_Hadron = 0;
-   ntracks2_Parton = 0;
-   ntracks3_Hadron = 0;
-   ntracks3_Parton = 0;
-   ntracks4_Hadron = 0;
-   ntracks4_Parton = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -429,6 +597,78 @@ void AdvancedDataInfo::Init(TTree *tree)
    fChain->SetBranchAddress("n2y_Parton", &n2y_Parton, &b_n2y_Parton);
    fChain->SetBranchAddress("n2z_Hadron", &n2z_Hadron, &b_n2z_Hadron);
    fChain->SetBranchAddress("n2z_Parton", &n2z_Parton, &b_n2z_Parton);
+   fChain->SetBranchAddress("nparticles1_Hadron", &nparticles1_Hadron, &b_nparticles1_Hadron);
+   fChain->SetBranchAddress("nparticles1_Parton", &nparticles1_Parton, &b_nparticles1_Parton);
+   fChain->SetBranchAddress("nparticles2_Hadron", &nparticles2_Hadron, &b_nparticles2_Hadron);
+   fChain->SetBranchAddress("nparticles2_Parton", &nparticles2_Parton, &b_nparticles2_Parton);
+   fChain->SetBranchAddress("nparticles3_Hadron", &nparticles3_Hadron, &b_nparticles3_Hadron);
+   fChain->SetBranchAddress("nparticles3_Parton", &nparticles3_Parton, &b_nparticles3_Parton);
+   fChain->SetBranchAddress("nparticles4_Hadron", &nparticles4_Hadron, &b_nparticles4_Hadron);
+   fChain->SetBranchAddress("nparticles4_Parton", &nparticles4_Parton, &b_nparticles4_Parton);
+   fChain->SetBranchAddress("ntracks1_Hadron", &ntracks1_Hadron, &b_ntracks1_Hadron);
+   fChain->SetBranchAddress("ntracks1_Parton", &ntracks1_Parton, &b_ntracks1_Parton);
+   fChain->SetBranchAddress("ntracks2_Hadron", &ntracks2_Hadron, &b_ntracks2_Hadron);
+   fChain->SetBranchAddress("ntracks2_Parton", &ntracks2_Parton, &b_ntracks2_Parton);
+   fChain->SetBranchAddress("ntracks3_Hadron", &ntracks3_Hadron, &b_ntracks3_Hadron);
+   fChain->SetBranchAddress("ntracks3_Parton", &ntracks3_Parton, &b_ntracks3_Parton);
+   fChain->SetBranchAddress("ntracks4_Hadron", &ntracks4_Hadron, &b_ntracks4_Hadron);
+   fChain->SetBranchAddress("ntracks4_Parton", &ntracks4_Parton, &b_ntracks4_Parton);
+   fChain->SetBranchAddress("particle1_charge_Hadron", &particle1_charge_Hadron, &b_particle1_charge_Hadron);
+   fChain->SetBranchAddress("particle1_charge_Parton", &particle1_charge_Parton, &b_particle1_charge_Parton);
+   fChain->SetBranchAddress("particle1_e_Hadron", &particle1_e_Hadron, &b_particle1_e_Hadron);
+   fChain->SetBranchAddress("particle1_e_Parton", &particle1_e_Parton, &b_particle1_e_Parton);
+   fChain->SetBranchAddress("particle1_eta_Hadron", &particle1_eta_Hadron, &b_particle1_eta_Hadron);
+   fChain->SetBranchAddress("particle1_eta_Parton", &particle1_eta_Parton, &b_particle1_eta_Parton);
+   fChain->SetBranchAddress("particle1_jetid_Hadron", &particle1_jetid_Hadron, &b_particle1_jetid_Hadron);
+   fChain->SetBranchAddress("particle1_jetid_Parton", &particle1_jetid_Parton, &b_particle1_jetid_Parton);
+   fChain->SetBranchAddress("particle1_phi_Hadron", &particle1_phi_Hadron, &b_particle1_phi_Hadron);
+   fChain->SetBranchAddress("particle1_phi_Parton", &particle1_phi_Parton, &b_particle1_phi_Parton);
+   fChain->SetBranchAddress("particle1_pid_Hadron", &particle1_pid_Hadron, &b_particle1_pid_Hadron);
+   fChain->SetBranchAddress("particle1_pid_Parton", &particle1_pid_Parton, &b_particle1_pid_Parton);
+   fChain->SetBranchAddress("particle1_pt_Hadron", &particle1_pt_Hadron, &b_particle1_pt_Hadron);
+   fChain->SetBranchAddress("particle1_pt_Parton", &particle1_pt_Parton, &b_particle1_pt_Parton);
+   fChain->SetBranchAddress("particle2_charge_Hadron", &particle2_charge_Hadron, &b_particle2_charge_Hadron);
+   fChain->SetBranchAddress("particle2_charge_Parton", &particle2_charge_Parton, &b_particle2_charge_Parton);
+   fChain->SetBranchAddress("particle2_e_Hadron", &particle2_e_Hadron, &b_particle2_e_Hadron);
+   fChain->SetBranchAddress("particle2_e_Parton", &particle2_e_Parton, &b_particle2_e_Parton);
+   fChain->SetBranchAddress("particle2_eta_Hadron", &particle2_eta_Hadron, &b_particle2_eta_Hadron);
+   fChain->SetBranchAddress("particle2_eta_Parton", &particle2_eta_Parton, &b_particle2_eta_Parton);
+   fChain->SetBranchAddress("particle2_jetid_Hadron", &particle2_jetid_Hadron, &b_particle2_jetid_Hadron);
+   fChain->SetBranchAddress("particle2_jetid_Parton", &particle2_jetid_Parton, &b_particle2_jetid_Parton);
+   fChain->SetBranchAddress("particle2_phi_Hadron", &particle2_phi_Hadron, &b_particle2_phi_Hadron);
+   fChain->SetBranchAddress("particle2_phi_Parton", &particle2_phi_Parton, &b_particle2_phi_Parton);
+   fChain->SetBranchAddress("particle2_pid_Hadron", &particle2_pid_Hadron, &b_particle2_pid_Hadron);
+   fChain->SetBranchAddress("particle2_pid_Parton", &particle2_pid_Parton, &b_particle2_pid_Parton);
+   fChain->SetBranchAddress("particle2_pt_Hadron", &particle2_pt_Hadron, &b_particle2_pt_Hadron);
+   fChain->SetBranchAddress("particle2_pt_Parton", &particle2_pt_Parton, &b_particle2_pt_Parton);
+   fChain->SetBranchAddress("particle3_charge_Hadron", &particle3_charge_Hadron, &b_particle3_charge_Hadron);
+   fChain->SetBranchAddress("particle3_charge_Parton", &particle3_charge_Parton, &b_particle3_charge_Parton);
+   fChain->SetBranchAddress("particle3_e_Hadron", &particle3_e_Hadron, &b_particle3_e_Hadron);
+   fChain->SetBranchAddress("particle3_e_Parton", &particle3_e_Parton, &b_particle3_e_Parton);
+   fChain->SetBranchAddress("particle3_eta_Hadron", &particle3_eta_Hadron, &b_particle3_eta_Hadron);
+   fChain->SetBranchAddress("particle3_eta_Parton", &particle3_eta_Parton, &b_particle3_eta_Parton);
+   fChain->SetBranchAddress("particle3_jetid_Hadron", &particle3_jetid_Hadron, &b_particle3_jetid_Hadron);
+   fChain->SetBranchAddress("particle3_jetid_Parton", &particle3_jetid_Parton, &b_particle3_jetid_Parton);
+   fChain->SetBranchAddress("particle3_phi_Hadron", &particle3_phi_Hadron, &b_particle3_phi_Hadron);
+   fChain->SetBranchAddress("particle3_phi_Parton", &particle3_phi_Parton, &b_particle3_phi_Parton);
+   fChain->SetBranchAddress("particle3_pid_Hadron", &particle3_pid_Hadron, &b_particle3_pid_Hadron);
+   fChain->SetBranchAddress("particle3_pid_Parton", &particle3_pid_Parton, &b_particle3_pid_Parton);
+   fChain->SetBranchAddress("particle3_pt_Hadron", &particle3_pt_Hadron, &b_particle3_pt_Hadron);
+   fChain->SetBranchAddress("particle3_pt_Parton", &particle3_pt_Parton, &b_particle3_pt_Parton);
+   fChain->SetBranchAddress("particle4_charge_Hadron", &particle4_charge_Hadron, &b_particle4_charge_Hadron);
+   fChain->SetBranchAddress("particle4_charge_Parton", &particle4_charge_Parton, &b_particle4_charge_Parton);
+   fChain->SetBranchAddress("particle4_e_Hadron", &particle4_e_Hadron, &b_particle4_e_Hadron);
+   fChain->SetBranchAddress("particle4_e_Parton", &particle4_e_Parton, &b_particle4_e_Parton);
+   fChain->SetBranchAddress("particle4_eta_Hadron", &particle4_eta_Hadron, &b_particle4_eta_Hadron);
+   fChain->SetBranchAddress("particle4_eta_Parton", &particle4_eta_Parton, &b_particle4_eta_Parton);
+   fChain->SetBranchAddress("particle4_jetid_Hadron", &particle4_jetid_Hadron, &b_particle4_jetid_Hadron);
+   fChain->SetBranchAddress("particle4_jetid_Parton", &particle4_jetid_Parton, &b_particle4_jetid_Parton);
+   fChain->SetBranchAddress("particle4_phi_Hadron", &particle4_phi_Hadron, &b_particle4_phi_Hadron);
+   fChain->SetBranchAddress("particle4_phi_Parton", &particle4_phi_Parton, &b_particle4_phi_Parton);
+   fChain->SetBranchAddress("particle4_pid_Hadron", &particle4_pid_Hadron, &b_particle4_pid_Hadron);
+   fChain->SetBranchAddress("particle4_pid_Parton", &particle4_pid_Parton, &b_particle4_pid_Parton);
+   fChain->SetBranchAddress("particle4_pt_Hadron", &particle4_pt_Hadron, &b_particle4_pt_Hadron);
+   fChain->SetBranchAddress("particle4_pt_Parton", &particle4_pt_Parton, &b_particle4_pt_Parton);
    fChain->SetBranchAddress("phi1_Hadron", &phi1_Hadron, &b_phi1_Hadron);
    fChain->SetBranchAddress("phi1_Parton", &phi1_Parton, &b_phi1_Parton);
    fChain->SetBranchAddress("phi2_Hadron", &phi2_Hadron, &b_phi2_Hadron);
@@ -456,22 +696,6 @@ void AdvancedDataInfo::Init(TTree *tree)
    fChain->SetBranchAddress("z1_Parton", &z1_Parton, &b_z1_Parton);
    fChain->SetBranchAddress("z2_Hadron", &z2_Hadron, &b_z2_Hadron);
    fChain->SetBranchAddress("z2_Parton", &z2_Parton, &b_z2_Parton);
-   fChain->SetBranchAddress("nparticles1_Hadron", &nparticles1_Hadron, &b_nparticles1_Hadron);
-   fChain->SetBranchAddress("nparticles1_Parton", &nparticles1_Parton, &b_nparticles1_Parton);
-   fChain->SetBranchAddress("nparticles2_Hadron", &nparticles2_Hadron, &b_nparticles2_Hadron);
-   fChain->SetBranchAddress("nparticles2_Parton", &nparticles2_Parton, &b_nparticles2_Parton);
-   fChain->SetBranchAddress("nparticles3_Hadron", &nparticles3_Hadron, &b_nparticles3_Hadron);
-   fChain->SetBranchAddress("nparticles3_Parton", &nparticles3_Parton, &b_nparticles3_Parton);
-   fChain->SetBranchAddress("nparticles4_Hadron", &nparticles4_Hadron, &b_nparticles4_Hadron);
-   fChain->SetBranchAddress("nparticles4_Parton", &nparticles4_Parton, &b_nparticles4_Parton);
-   fChain->SetBranchAddress("ntracks1_Hadron", &ntracks1_Hadron, &b_ntracks1_Hadron);
-   fChain->SetBranchAddress("ntracks1_Parton", &ntracks1_Parton, &b_ntracks1_Parton);
-   fChain->SetBranchAddress("ntracks2_Hadron", &ntracks2_Hadron, &b_ntracks2_Hadron);
-   fChain->SetBranchAddress("ntracks2_Parton", &ntracks2_Parton, &b_ntracks2_Parton);
-   fChain->SetBranchAddress("ntracks3_Hadron", &ntracks3_Hadron, &b_ntracks3_Hadron);
-   fChain->SetBranchAddress("ntracks3_Parton", &ntracks3_Parton, &b_ntracks3_Parton);
-   fChain->SetBranchAddress("ntracks4_Hadron", &ntracks4_Hadron, &b_ntracks4_Hadron);
-   fChain->SetBranchAddress("ntracks4_Parton", &ntracks4_Parton, &b_ntracks4_Parton);
    Notify();
 }
 

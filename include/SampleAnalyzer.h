@@ -5,7 +5,7 @@
 #include "TLorentzVector.h"
 #include "Hists.h"
 #include "Process_bar.h"
-
+#include "TString.h"
 template <typename T>
 class SampleAnalyzer {
 protected:
@@ -36,7 +36,7 @@ public:
         entries = _entries;
       }
       cout<<entries<<endl;
-      ProcessBar ProcessBar(entries);
+      ProcessBar ProcessBar(entries,100);
       for (int i = 0; i < entries; i++) {
         ProcessBar.show2(i);
         t->GetEntry(i);

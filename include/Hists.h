@@ -16,11 +16,11 @@ private:
 
 public:
     void addHist(const std::string& histName, int nbins, double binbegin, double binend) {
-        TH1D *hist = new TH1D(histName.c_str(), histName.c_str(), nbins, binbegin, binend);
+        TH1D *hist = new TH1D((TString)getUniqueName(histName), histName.c_str(), nbins, binbegin, binend);
         hists[histName] = hist;
     }
     void addHist(const std::string& histName, int nbinsX, double binbeginX, double binendX, int nbinsY, double binbeginY, double binendY) {
-        TH2D *hist = new TH2D(histName.c_str(), histName.c_str(), nbinsX, binbeginX, binendX, nbinsY, binbeginY, binendY);
+        TH2D *hist = new TH2D((TString)getUniqueName(histName), histName.c_str(), nbinsX, binbeginX, binendX, nbinsY, binbeginY, binendY);
         hists[histName] = hist;
     }
     TH1* operator[](const std::string& histName) {
@@ -29,7 +29,15 @@ public:
     int size(){
         return hists.size();
     }
-
+    std::string getUniqueName(std::string baseName) {
+        int suffix = 1; 
+        std::string uniqueName = baseName + std::to_string(suffix);  
+        while (gDirectory->Get(uniqueName.c_str())) {
+            suffix++; 
+            uniqueName = baseName + std::to_string(suffix);  
+        }
+        return uniqueName;  
+    }
     // 将所有直方图写入指定的 ROOT 文件
     void Write(const TString& filename = "output.root") {
         TFile file(filename, "RECREATE");  

@@ -134,13 +134,21 @@ public:
         "z1",  "kt1",    "theta1",  "deltaR1", "eec1",     "z2",
         "kt2", "theta2", "deltaR2", "eec2",    "n1x",      "n1y",
         "n1z", "n2x",    "n2y",     "n2z",     "isqq",     "isgg",
-        "phi", "jpt",    "jeta",    "jphi",    "je"};
+        "phi", "jpt",    "jeta",    "jphi",    "je" ,
+        "particle1_pt","particle1_eta","particle1_phi","particle1_e","particle1_charge","particle1_pid","particle1_jetid",
+        "particle2_pt","particle2_eta","particle2_phi","particle2_e","particle2_charge","particle2_pid","particle2_jetid",
+        "particle3_pt","particle3_eta","particle3_phi","particle3_e","particle3_charge","particle3_pid","particle3_jetid",
+        "particle4_pt","particle4_eta","particle4_phi","particle4_e","particle4_charge","particle4_pid","particle4_jetid"};
     for (auto &branch_name : branch_names) {
       if (branch_name == "isqq" || branch_name == "isgg" ||
           branch_name == "ntracks1" || branch_name == "ntracks2" ||
           branch_name == "ntracks3" || branch_name == "ntracks4" ||
           branch_name == "nparticles1" || branch_name == "nparticles2" ||
-          branch_name == "nparticles3" || branch_name == "nparticles4") {
+          branch_name == "nparticles3" || branch_name == "nparticles4" || 
+           branch_name == "particle1_pid"|| branch_name == "particle1_jetid"||
+           branch_name == "particle2_pid"|| branch_name == "particle2_jetid"||
+           branch_name == "particle3_pid"|| branch_name == "particle3_jetid"||
+           branch_name == "particle4_pid"|| branch_name == "particle4_jetid") {
         treeEvents.addBranches(branch_name + suffix + "/vI");
       } else {
         treeEvents.addBranches(branch_name + suffix + "/vD");
@@ -168,26 +176,16 @@ public:
       particle.set_user_info(new FlavHistory(branchvector.PdgId->at(i)));
       particles.push_back(particle);
     }
-    // 使用FastJet聚类
-    JetDefinition jet_def(antikt_algorithm, 0.4); // 使用 anti-k_t 算法
-    // double alpha = 1.0;
-    // double omega = 3.0 - alpha;
-    // fastjet::contrib::FlavRecombiner::FlavSummation flav_summation_ak =
-    // fastjet::contrib::FlavRecombiner::net; auto ifn_plugin_ak = new
-    // IFNPlugin(jet_def, alpha, omega, flav_summation_ak); JetDefinition
-    // IFN_ak_jet_def(ifn_plugin_ak);
-    // IFN_ak_jet_def.delete_plugin_when_unused();
 
+    JetDefinition jet_def(antikt_algorithm, 0.4); 
     ClusterSequence cs(particles, jet_def);
     std::vector<PseudoJet> jets = cs.inclusive_jets(ptcut); // ptmin
-    // ClusterSequence cs_IFN_ak(particles, IFN_ak_jet_def);
-    // vector<PseudoJet> jets = sorted_by_pt(cs_IFN_ak.inclusive_jets());
+
     auto new_end =
         std::remove_if(jets.begin(), jets.end(), [](const PseudoJet &jet) {
           return std::abs(jet.eta()) > 2.5;
         });
     jets.erase(new_end, jets.end());
-    // 对jets进行操作
     for (auto &jet : jets) {
       std::vector<PseudoJet> constituents = jet.constituents();
       JetDefinition jet_def_CA(cambridge_algorithm,
@@ -210,6 +208,9 @@ public:
       // JetBranch::SetPseudoCAJetsIndex(jets_IFN);
 
       PseudoJet jet_CA = jets_IFN[0];
+      if(FlavourAlgorithm.EqualTo("Net")){
+        jet_CA = jets_CA[0];
+      }
       PseudoJet j0, j1, j2, j3, j4;
       j0 = jet_CA;
       double Q = j0.e();
@@ -242,7 +243,7 @@ public:
       //   cout<<endl;
       // }
       // cout<<JetBranch::netflavour(twoplane.first.harder,particlesinfo,0)<<" "<<JetBranch::GetIFNFlavour(twoplane.first.harder)<<endl;
-      if (FlavourAlgorithm.EqualTo("IFN")) {
+      if (FlavourAlgorithm.EqualTo("IFN")||FlavourAlgorithm.EqualTo("Net")) {
         pdgid11 = JetBranch::GetIFNFlavour(twoplane.first.harder);
         pdgid12 = JetBranch::GetIFNFlavour(twoplane.first.softer);
         pdgid21 = JetBranch::GetIFNFlavour(twoplane.second.harder);
@@ -340,6 +341,50 @@ public:
         treeEvent.push_back("jeta" + suffix, twoplanes.first.initJet.Eta());
         treeEvent.push_back("jphi" + suffix, twoplanes.first.initJet.Phi());
         treeEvent.push_back("je" + suffix, twoplanes.first.initJet.E());
+
+        for(int ii=0;ii<twoplanes.first.harder_constituents_info.size();ii++){
+          auto particle = twoplanes.first.harder_constituents_info.at(ii);
+          treeEvent.push_back("particle1_pt" + suffix, particle.pt);
+          treeEvent.push_back("particle1_eta" + suffix, particle.eta);
+          treeEvent.push_back("particle1_phi" + suffix,  particle.phi);
+          treeEvent.push_back("particle1_e" + suffix,  particle.e);
+          treeEvent.push_back("particle1_charge" + suffix, particle.charge);
+          treeEvent.push_back("particle1_pid" + suffix, particle.pdgid);
+          treeEvent.push_back("particle1_jetid" + suffix, i);
+        }
+        for(int ii=0;ii<twoplanes.first.softer_constituents_info.size();ii++){
+          auto particle = twoplanes.first.softer_constituents_info.at(ii);
+          treeEvent.push_back("particle2_pt" + suffix, particle.pt);
+          treeEvent.push_back("particle2_eta" + suffix, particle.eta);
+          treeEvent.push_back("particle2_phi" + suffix,  particle.phi);
+          treeEvent.push_back("particle2_e" + suffix,  particle.e);
+          treeEvent.push_back("particle2_charge" + suffix, particle.charge);
+          treeEvent.push_back("particle2_pid" + suffix, particle.pdgid);
+          treeEvent.push_back("particle2_jetid" + suffix, i);
+        }
+
+        for(int ii=0;ii<twoplanes.second.harder_constituents_info.size();ii++){
+          auto particle = twoplanes.second.harder_constituents_info.at(ii);
+          treeEvent.push_back("particle3_pt" + suffix, particle.pt);
+          treeEvent.push_back("particle3_eta" + suffix, particle.eta);
+          treeEvent.push_back("particle3_phi" + suffix,  particle.phi);
+          treeEvent.push_back("particle3_e" + suffix,  particle.e);
+          treeEvent.push_back("particle3_charge" + suffix, particle.charge);
+          treeEvent.push_back("particle3_pid" + suffix, particle.pdgid);
+          treeEvent.push_back("particle3_jetid" + suffix, i);
+        }
+        for(int ii=0;ii<twoplanes.second.softer_constituents_info.size();ii++){
+          auto particle = twoplanes.second.softer_constituents_info.at(ii);
+          treeEvent.push_back("particle4_pt" + suffix, particle.pt);
+          treeEvent.push_back("particle4_eta" + suffix, particle.eta);
+          treeEvent.push_back("particle4_phi" + suffix,  particle.phi);
+          treeEvent.push_back("particle4_e" + suffix,  particle.e);
+          treeEvent.push_back("particle4_charge" + suffix, particle.charge);
+          treeEvent.push_back("particle4_pid" + suffix, particle.pdgid);
+          treeEvent.push_back("particle4_jetid" + suffix, i);
+        }
+        
+
       }
       treeEvents.treeEvents.push_back(treeEvent);
     }
