@@ -31,7 +31,7 @@ public:
     }
     std::string getUniqueName(std::string baseName) {
         int suffix = 1; 
-        std::string uniqueName = baseName + std::to_string(suffix);  
+        std::string uniqueName = baseName ;  
         while (gDirectory->Get(uniqueName.c_str())) {
             suffix++; 
             uniqueName = baseName + std::to_string(suffix);  

@@ -14,8 +14,10 @@
 // #include "CMS_lumi.C"
 #include "TGaxis.h"
 #include "TGraphAsymmErrors.h"
-
 using namespace std;
+
+Style_t recommeded_font = 43;
+Float_t recommeded_fontsize = 38;
 class ROOTPlot {
 public:
   // Hists number in each pad must lower than 11 due to the size of Colors.
