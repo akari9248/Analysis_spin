@@ -63,7 +63,7 @@ class Draw_Template{
       ROOTPlot plot1(hists_nor);
       plot1.Load.SinglePad();
       plot1.SetXbinRange(1,hists_nor.at(0)->GetNbinsX());
-      plot1.SetLegend(0.15, 0.35, 0.32, 0.7);
+      plot1.SetLegend(0.45, 0.5, 0.72, 0.85);
       plot1.SetLegendName(GetTitles(hists));
       plot1.SetXTitle("score") ;
       plot1.AddExtraText({ExtraText});
@@ -87,7 +87,7 @@ class Draw_Template{
       ROOTPlot plot1(frac_hists);
       plot1.Load.SinglePad();
       plot1.SetXbinRange(1,frac_hists.at(0)->GetNbinsX());
-      plot1.SetLegend(0.75, 0.05, 0.92, 0.25);
+      plot1.SetLegend(0.55, 0.15, 0.72, 0.35);
       plot1.SetLegendName(GetTitles(hists));
       plot1.SetXTitle("score") ;
       plot1.AddExtraText({ExtraText});

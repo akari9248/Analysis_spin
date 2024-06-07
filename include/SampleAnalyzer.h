@@ -6,6 +6,8 @@
 #include "Hists.h"
 #include "Process_bar.h"
 #include "TString.h"
+#include <numeric>
+#include <random>
 template <typename T>
 class SampleAnalyzer {
 protected:

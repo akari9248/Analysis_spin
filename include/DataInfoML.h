@@ -49,6 +49,7 @@ public :
    Double_t        z2;
    Double_t        DeltaR;
    Double_t        kt;
+   Double_t        kt0;
    Double_t        match;
    Float_t         score;
    Float_t         score0;
@@ -88,6 +89,7 @@ public :
    TBranch        *b_z2;
    TBranch        *b_DeltaR;
    TBranch        *b_kt;
+   TBranch        *b_kt0;
    TBranch        *b_match;
    TBranch        *b_score;   //!
    TBranch        *b_score0;
@@ -189,6 +191,7 @@ void DataInfoML::Init(TTree *tree)
    fChain->SetBranchAddress("z2", &z2, &b_z2);
    fChain->SetBranchAddress("DeltaR", &DeltaR, &b_DeltaR);
    fChain->SetBranchAddress("kt", &kt, &b_kt);
+   fChain->SetBranchAddress("kt0", &kt0, &b_kt0);
    fChain->SetBranchAddress("match", &match, &b_match);
    fChain->SetBranchAddress("score", &score, &b_score);
    fChain->SetBranchAddress("score1", &score1, &b_score1);

@@ -15,6 +15,10 @@ private:
     std::map<std::string, TH1*> hists;
 
 public:
+    Hists(){}
+    Hists(TString filename){
+        Hists::Load(filename);
+    }
     void addHist(const std::string& histName, int nbins, double binbegin, double binend) {
         TH1D *hist = new TH1D((TString)getUniqueName(histName), histName.c_str(), nbins, binbegin, binend);
         hists[histName] = hist;
@@ -24,7 +28,13 @@ public:
         hists[histName] = hist;
     }
     TH1* operator[](const std::string& histName) {
-        return hists[histName];
+        auto it = hists.find(histName);
+        if (it != hists.end()) {
+            return it->second;
+        } else {
+            std::cerr << "Error: Histogram not found: " << histName << std::endl;
+            return nullptr;
+        }
     }
     int size(){
         return hists.size();
@@ -63,8 +73,8 @@ public:
       TIter nextkey(file->GetListOfKeys());
       while ((key = (TKey *)nextkey())) {
         auto hist = (TH1 *)key->ReadObj();
-        hists[hist->GetName()] = (TH1*)hist->Clone();
-        hists[hist->GetName()]->SetDirectory(0); // 防止随文件关闭而被删除
+        hists[hist->GetTitle()] = (TH1*)hist->Clone();
+        hists[hist->GetTitle()]->SetDirectory(0); // 防止随文件关闭而被删除
       }
       file->Close();
       delete file;
