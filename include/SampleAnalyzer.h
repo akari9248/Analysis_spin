@@ -18,6 +18,7 @@ protected:
 
 public:
     Hists hists;
+    int entryi;
     SampleAnalyzer() {
         t = new TChain();
         events = new T(t);
@@ -38,9 +39,9 @@ public:
         entries = _entries;
       }
       ProcessBar ProcessBar(entries,100);
-      for (int i = _entrybegin; i < _entrybegin + entries; i++) {
-        ProcessBar.show2(i-_entrybegin,TString::Format("Analyzing entries %d - %d",_entrybegin,_entrybegin + entries));
-        t->GetEntry(i);
+      for (entryi = _entrybegin; entryi < _entrybegin + entries; entryi++) {
+        ProcessBar.show2(entryi-_entrybegin,TString::Format("Analyzing entries %d - %d, now %d",_entrybegin,_entrybegin + entries,entryi));
+        t->GetEntry(entryi);
         analyze();
       }
     }

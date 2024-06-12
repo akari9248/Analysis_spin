@@ -12,13 +12,12 @@
 #include <unordered_map>
 #include <vector>
 #include "Matching.cc"
-#include "Particle_info.h"
+#include "ParticleInfo.h"
 #include <fastjet/ClusterSequence.hh>
 #include <fastjet/PseudoJet.hh>
 #include "fastjet/contrib/IFNPlugin.hh"
 #include "TDatabasePDG.h"
 #include "TParticlePDG.h"
-#include "ParticleChargeInfo.h"
 class Matching;
 using namespace fastjet;
 using namespace fastjet::contrib;

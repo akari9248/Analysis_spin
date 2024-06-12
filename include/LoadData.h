@@ -1,6 +1,6 @@
 #include "JetBranch.h"
 #include "Matching.cc"
-#include "Particle_info.h"
+#include "ParticleInfo.h"
 #include "Process_bar.h"
 #include "TLorentzVector.h"
 #include "TreeEvents.h"
@@ -39,7 +39,6 @@ public:
   double ptcut;
   double minflavourpt;
   TString FlavourAlgorithm;
-  ParticleChargeInfo particleChargeInfo;
   struct BranchVectors {
     std::vector<double> *Pt = new std::vector<double>;
     std::vector<double> *Eta = new std::vector<double>;
@@ -64,7 +63,6 @@ public:
     ptcut = 450;
     minflavourpt = 0;
     FlavourAlgorithm = "";
-    particleChargeInfo = ParticleChargeInfo("tabel/particle_charge.csv");
   }
   void setzkcut(double _z1cut, double _z2cut, double _kt1cut, double _kt2cut) {
     z1cut = _z1cut;
@@ -156,7 +154,6 @@ public:
     }
   }
   DataFormat opt1(BranchVectors branchvector) {
-
     int qqnum = 0;
     int ggnum = 0;
     vector<JetBranch::twoplanes> twoplanes;

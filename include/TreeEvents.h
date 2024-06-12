@@ -24,9 +24,10 @@ public:
       return branches.at(key); // 使用 at 以确保抛出异常，如果 key 不存在
     }
     template <typename T>
-    void push_back(const std::string &key, const T &value) {
+    bool push_back(const std::string &key, const T &value) {
       auto &vec = boost::get<vector<T>>(branches[key]);
       vec.push_back(value);
+      return true;
     }
     template <typename T> bool assign(const std::string &key, const T &value) {
       try {

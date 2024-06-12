@@ -1,5 +1,5 @@
 #pragma once
-#include "Particle_info.h"
+#include "ParticleInfo.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -7,8 +7,8 @@ using namespace std;
 class JetObservable {
   ParticleInfo jet;
   vector<ParticleInfo> particles;
-
 public:
+  TLorentzVector jet_lorentzvector;
   struct Jetwidth {
     double sigma1;
     double sigma2;
@@ -20,6 +20,19 @@ public:
   JetObservable(ParticleInfo _jet, vector<ParticleInfo> _particles) {
     jet = _jet;
     particles = _particles;
+    for(auto &particle:particles){
+      TLorentzVector p;
+      p.SetPtEtaPhiE(particle.pt,particle.eta,particle.phi,particle.e);
+      jet_lorentzvector+=p;
+    }
+  }
+  JetObservable(vector<ParticleInfo> _particles) {
+    particles = _particles;
+    for(auto &particle:particles){
+      TLorentzVector p;
+      p.SetPtEtaPhiE(particle.pt,particle.eta,particle.phi,particle.e);
+      jet_lorentzvector+=p;
+    }
   }
   int Ntracks() {
     int ntracks = 0;
@@ -45,8 +58,8 @@ public:
     double M12 = 0;
     double M21 = 0;
     double pt2_sum = 0;
-    TLorentzVector jet_lorentzvector;
-    jet_lorentzvector.SetPtEtaPhiE(jet.pt, jet.eta, jet.phi, jet.e);
+    // TLorentzVector jet_lorentzvector;
+    // jet_lorentzvector.SetPtEtaPhiE(jet.pt, jet.eta, jet.phi, jet.e);
 
     for (auto particle : particles) {
       TLorentzVector particle_lorentzvector;

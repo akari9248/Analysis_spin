@@ -60,6 +60,8 @@ public :
    Int_t           validate1;
    Int_t           validate2;
    Int_t           validate3;
+   Double_t        GeneratorWeight;
+   Double_t PassPileUpRm;
 
    // List of branches
    TBranch        *b_Nparticles_3;   //!
@@ -100,6 +102,8 @@ public :
    TBranch        *b_validate1;   //!
    TBranch        *b_validate2;   //!
    TBranch        *b_validate3;   //!
+   TBranch        *b_GeneratorWeight;
+   TBranch        *b_PassPileUpRm;
    DataInfoML(TTree *tree=0);
    virtual ~DataInfoML();
    virtual Int_t    Cut(Long64_t entry);
@@ -202,6 +206,9 @@ void DataInfoML::Init(TTree *tree)
    fChain->SetBranchAddress("validate1", &validate1, &b_validate1);
    fChain->SetBranchAddress("validate2", &validate2, &b_validate2);
    fChain->SetBranchAddress("validate3", &validate3, &b_validate3);
+
+   fChain->SetBranchAddress("GeneratorWeight", &GeneratorWeight, &b_GeneratorWeight);
+   fChain->SetBranchAddress("PassPileUpRm", &PassPileUpRm, &b_PassPileUpRm);
    Notify();
 }
 
