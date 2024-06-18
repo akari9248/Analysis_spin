@@ -4,6 +4,7 @@ path = "python"
 sys.path.append(path)
 from keras.optimizers import Adam
 import tensorflow as tf
+# import keras
 import pandas as pd
 import uproot
 import numpy as np
@@ -16,9 +17,8 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-
 import dnn
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 def main(args):
     sample_path0 = args.sample_path0
     sample_path1 = args.sample_path1

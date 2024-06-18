@@ -1,3 +1,5 @@
+*[^.]*
+!*/
 *.root
 *.pdf
 *.csv
@@ -6,3 +8,4 @@ ML_OUT
 */*.pdf
 */*.csv
 test
+log/

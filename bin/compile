@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# 检查是否提供了输入文件
+if [ "$#" -lt 1 ]; then
+  echo "Usage: $0 <input.cpp> [output]"
+  exit 1
+fi
+
+# 获取输入文件名
+input_file=$1
+
+# 获取输出文件名，如果没有提供，则使用输入文件名去掉 .cpp 扩展名
+if [ "$#" -eq 2 ]; then
+  output_file=$2
+else
+  output_file="${input_file%.cpp}"
+fi
+
+# 编译命令
+g++ "$input_file" \
+    -I/home/zlin/.local/include \
+    -I/home/zlin/app/IFNPlugin \
+    -L/home/zlin/app/IFNPlugin \
+    -L/home/zlin/.local/lib \
+    -lRecursiveTools \
+    -lIFNPlugin \
+    $(root-config --cflags --ldflags --glibs) \
+    $(fastjet-config --cxxflags --libs --plugins) \
+    -o "$output_file"
+
+# 检查编译是否成功
+if [ $? -ne 0 ]; then
+  echo "Compilation failed. Exiting."
+  exit 1
+fi
+
+echo "Compilation succeeded. Output file: $output_file"

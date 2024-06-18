@@ -735,7 +735,7 @@ def save_multiclass_predictions_to_root(X_data,train_val_index,full_predictions,
     for i in range(n_chunks):
         start = i * max_entries_per_chunk
         end = min((i + 1) * max_entries_per_chunk, n_entries)
-        chunk_filename = f"{root_filename}_Chunk{i}.root"
+        chunk_filename = f"{root_filename}Chunk{i}.root"
         chunk_data_dict = {k: v[start:end] for k, v in data_dict.items()}
         with uproot.recreate(chunk_filename) as f:
             f['DNNTrainTree'] = chunk_data_dict

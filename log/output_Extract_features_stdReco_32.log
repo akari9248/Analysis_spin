@@ -1,0 +1,18 @@
+ Analyzing entries 5150 - 5166, now 5150 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5151 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5152 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5153 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5154 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5155 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5156 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5157 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5158 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5159 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5160 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5161 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5162 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5163 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5164 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+ Analyzing entries 5150 - 5166, now 5165 , sum entries = 16095 . . . Used time: 0s Expected left time: 0s          
+terminate called after throwing an instance of 'std::out_of_range'
+  what():  vector::_M_range_check: __n (which is 0) >= this->size() (which is 0)

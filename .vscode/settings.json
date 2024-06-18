@@ -98,7 +98,13 @@
         "scoped_allocator": "cpp",
         "DataInfo_test.C": "cpp",
         "AdvancedDataInfo.C": "cpp",
-        "DataInfoML.C": "cpp"
+        "DataInfoML.C": "cpp",
+        "temp.C": "cpp",
+        "GetNpointpairinfox.C": "cpp",
+        "CMSJetsAndDaughters.C": "cpp"
     },
-    "C_Cpp.errorSquiggles": "disabled"
+    "C_Cpp.errorSquiggles": "disabled",
+    "python.analysis.extraPaths": [
+        "./python"
+    ]
 }

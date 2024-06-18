@@ -129,4 +129,7 @@ public:
     }
     return treeEvents.back().push_back(key, value);
   }
+  void clear(){
+    treeEvents.clear();
+  }
 };

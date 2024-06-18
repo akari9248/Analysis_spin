@@ -17,7 +17,7 @@ class Draw_Template{
       plot1.Draw();
       // plot1.Write(TString::Format("output/Unweighted%d.png", i));
       plot1.Write(
-          "plots/"+filename);
+          filename);
       // plot1.Write(
       //     "zlin://mnt/c/Users/win10/machine_learning/plots2/"+filename);
     }
@@ -35,7 +35,7 @@ class Draw_Template{
       plot1.Draw();
       // plot1.Write(TString::Format("output/Unweighted%d.png", i));
       plot1.Write(
-          "plots/"+filename);
+          filename);
       // plot1.Write(
       //     "zlin://mnt/c/Users/win10/machine_learning/plots2/"+filename);
     }
@@ -54,7 +54,7 @@ class Draw_Template{
       plot1.Draw();
       // plot1.Write(TString::Format("output/Unweighted%d.png", i));
       plot1.Write(
-          "plots/"+filename);
+          filename);
       // plot1.Write(
       //     "zlin://mnt/c/Users/win10/machine_learning/plots2/"+filename);
     }
@@ -70,7 +70,7 @@ class Draw_Template{
       plot1.Draw();
       // plot1.Write(TString::Format("output/Unweighted%d.png", i));
       plot1.Write(
-          "plots/"+filename);
+          filename);
       // plot1.Write(
       //     "zlin://mnt/c/Users/win10/machine_learning/plots2/"+filename);
     }
@@ -95,7 +95,7 @@ class Draw_Template{
       plot1.Draw();
       // plot1.Write(TString::Format("output/Unweighted%d.png", i));
       plot1.Write(
-          "plots/"+filename);
+          filename);
       // plot1.Write(
       //     "zlin://mnt/c/Users/win10/machine_learning/plots2/"+filename);
     }

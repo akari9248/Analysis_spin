@@ -97,6 +97,8 @@ public :
    vector<double>  *Gentheta2;
    vector<double>  *Genz1;
    vector<double>  *Genz2;
+   vector<double>  *Genjes_scale;
+   vector<double>  *Recojes_scale;
    vector<double>  *RecodeltaR1;
    vector<double>  *RecodeltaR2;
    vector<double>  *Recoe1;
@@ -251,6 +253,8 @@ public :
    TBranch        *b_Gentheta2;   //!
    TBranch        *b_Genz1;   //!
    TBranch        *b_Genz2;   //!
+   TBranch        *b_Genjes_scale;
+   TBranch        *b_Recojes_scale;
    TBranch        *b_RecodeltaR1;   //!
    TBranch        *b_RecodeltaR2;   //!
    TBranch        *b_Recoe1;   //!
@@ -460,6 +464,8 @@ void AdvancedDataInfoCMS::Init(TTree *tree)
    Gentheta2 = 0;
    Genz1 = 0;
    Genz2 = 0;
+   Genjes_scale = 0 ;
+   Recojes_scale = 0;
    RecodeltaR1 = 0;
    RecodeltaR2 = 0;
    Recoe1 = 0;
@@ -617,6 +623,8 @@ void AdvancedDataInfoCMS::Init(TTree *tree)
    fChain->SetBranchAddress("Gentheta2", &Gentheta2, &b_Gentheta2);
    fChain->SetBranchAddress("Genz1", &Genz1, &b_Genz1);
    fChain->SetBranchAddress("Genz2", &Genz2, &b_Genz2);
+   fChain->SetBranchAddress("Genjes_scale", &Genjes_scale, &b_Genjes_scale);
+   fChain->SetBranchAddress("Recojes_scale", &Recojes_scale, &b_Recojes_scale);
    fChain->SetBranchAddress("RecodeltaR1", &RecodeltaR1, &b_RecodeltaR1);
    fChain->SetBranchAddress("RecodeltaR2", &RecodeltaR2, &b_RecodeltaR2);
    fChain->SetBranchAddress("Recoe1", &Recoe1, &b_Recoe1);

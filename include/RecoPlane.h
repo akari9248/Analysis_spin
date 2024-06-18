@@ -63,7 +63,6 @@ public:
     auto twoplane = JetBranch::findPrimaryAndSecondaryJets(
         j0, z1cut, z2cut, kt1cut * 2 * Q, kt2cut * 2 * Q, particlesinfo,
         issecondsoft);
-    
     return twoplane;
   }
   static void SavePlanes(JetBranch::twoplanes twoplanes, TreeEvents &treeEvents,

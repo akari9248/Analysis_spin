@@ -48,6 +48,15 @@ public:
         }
         return uniqueName;  
     }
+    void Add(Hists &histIn)
+    {
+        for (const auto &pair : hists)
+        {
+            const std::string &histName = pair.first;
+            hists[histName]->Add(histIn[histName]);
+        }
+    }
+
     // 将所有直方图写入指定的 ROOT 文件
     void Write(const TString& filename = "output.root") {
         TFile file(filename, "RECREATE");  
