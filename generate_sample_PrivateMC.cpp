@@ -46,7 +46,7 @@ public:
     vector<string> suffixs;
     string inputFolder;
     CommonTool::Options options;
-    double NextPassedNumberAccumulative;
+
     EventsAnalyzer(CommonTool::Options _options) { options = _options; }
     void initialize() override
     {

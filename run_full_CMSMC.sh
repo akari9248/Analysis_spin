@@ -48,8 +48,8 @@ outputFeatureFolder=$baseOutputFolder"/RecoPlanesFeatures/"$SampleType$ptselecti
 outputTrainFolder=$baseOutputFolder"/RecoPlanesFeaturesTrain/"$SampleType$ptselection
 
 ############ Reco Planes #######################
-compile generate_sample_PrivateMC.cpp
-run_parallel generate_sample_PrivateMC -nchunks $nchunks -nparts $nparts -opt "-I $inputFolder -O $outputRecoFolder"
+compile generate_sample_CMSMC.cpp
+run_parallel generate_sample_CMSMC -nchunks $nchunks -nparts $nparts -opt "-I $inputFolder -O $outputRecoFolder"
 ############ Extract features #######################
 ## Reco #####
 compile Extract_features_stdReco.cpp
