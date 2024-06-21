@@ -56,5 +56,5 @@ cd boost_1_85_0_rc3
 To add the `bin` directory of the current project to your `PATH` environment variable, run the following command in your terminal:
 
 ```sh
-echo 'export PATH="$PATH:$(pwd)/bin"' >> ~/.bashrc
+echo "export PATH=\"\$PATH:$(pwd)/bin\"" >> ~/.bashrc
 source ~/.bashrc
