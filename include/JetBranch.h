@@ -311,11 +311,17 @@ public:
       SetUserIndex(jet, k);
     }
   }
-  static int GetIFNFlavour(PseudoJet jet) {
+  static int GetIFNFlavour(PseudoJet &jet)
+  {
+    if (jet.pt() == 0)
+      return 0;
     int pdgid = FlavHistory::current_flavour_of(jet).pdg_code();
-    if (pdgid == 0) {
-      TString flav=FlavHistory::current_flavour_of(jet).description();
-      if (flav.EqualTo("[g]")){
+
+    if (pdgid == 0)
+    {
+      TString flav = FlavHistory::current_flavour_of(jet).description();
+      if (flav.EqualTo("[g]"))
+      {
         pdgid = 21;
       }
     }

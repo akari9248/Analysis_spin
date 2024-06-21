@@ -380,8 +380,6 @@ public:
           treeEvent.push_back("particle4_pid" + suffix, particle.pdgid);
           treeEvent.push_back("particle4_jetid" + suffix, i);
         }
-        
-
       }
       treeEvents.treeEvents.push_back(treeEvent);
     }

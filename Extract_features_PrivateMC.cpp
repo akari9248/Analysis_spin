@@ -32,6 +32,7 @@ public:
     vector<int> j0_range;
     vector<int> j2_range;
     CommonTool::Options options;
+    int NextPassedNumberAccumulative;
     EventsAnalyzer(CommonTool::Options _options) { 
         options=_options;
         inputFolder = options.inputFolder; 
@@ -48,7 +49,7 @@ public:
     void initialize() override {
         
         t->Add((TString)inputFolder+"/Chunk*.root/DataInfo");
-
+        
         treeEvents.addBranches("PassPileUpRm/I");
         treeEvents.addBranches("Nparticles_2/I");
         treeEvents.addBranches("Ntracks_2/I");
@@ -95,10 +96,11 @@ public:
 
         treeEvents.addBranches("pt/D");
         treeEvents.addBranches("GeneratorWeight/D");
+        
     }
     void analyze() override {
-        int spin = events->spin;
-        if(spin!=options.spin) return;
+        // int spin = events->spin;
+        // if(spin!=options.spin) return;
         bool isoneGeVCut = options.OneGeVCut==1;
         int plane_num = events->pt3_Hadron->size();
         vector<ParticleInfo> jet2s(plane_num);

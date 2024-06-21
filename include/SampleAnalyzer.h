@@ -94,4 +94,10 @@ public:
       analyze();
     }
   }
+
+};
+class EmptyTree
+{
+public:
+  EmptyTree(TChain *t){};
 };

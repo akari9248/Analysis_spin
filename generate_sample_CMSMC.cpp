@@ -43,6 +43,7 @@ public:
     vector<BranchVectors> Branches;
     vector<string> prefixs;
     string inputFolder;
+    double NextPassedNumberAccumulative;
     EventsAnalyzer(string _inputFolder) { inputFolder = _inputFolder; }
     void initialize() override
     {
@@ -84,6 +85,9 @@ public:
         }
         treeEvents.addBranches("PassPileUpRm/I");
         treeEvents.addBranches("GeneratorWeight/D");
+
+        treeEvents.addBranches("NextPassedNumber/D");
+        NextPassedNumberAccumulative=0;
     }
     void BranchAlias()
     {
@@ -112,6 +116,7 @@ public:
     {
         BranchAlias();
         treeEvents.BeginEvent();
+        double 
         treeEvents.assign("GeneratorWeight", events->GeneratorWeight);
         treeEvents.assign("PassPileUpRm", passpileuprm());
         int branchindex = 0;
@@ -120,7 +125,6 @@ public:
             int jetnum = Branch.JetPt->size();
             int daughternum = Branch.JetId->size();
             vector<vector<ParticleInfo>> daughtersjets(jetnum, vector<ParticleInfo>());
-            vector<TLorentzVector> jets_sum(jetnum, TLorentzVector());
             for (int i = 0; i < daughternum; i++)
             {
                 int jetid = Branch.JetId->at(i);
@@ -132,18 +136,11 @@ public:
                                                                Branch.Energy->at(i)));
                 TLorentzVector p;
                 p.SetPtEtaPhiE(Branch.Pt->at(i), Branch.Eta->at(i), Branch.Phi->at(i), Branch.Energy->at(i));
-                jets_sum.at(jetid) += p;
             }
             for (int i = 0; i < daughtersjets.size(); i++)
             {
                 auto daughtersjet = daughtersjets.at(i);
                 auto planes = RecoPlane::JetConstituents(daughtersjet);
-                // if (planes.first.harder.pt() == 0 ||
-                //     planes.first.softer.pt() == 0 ||
-                //     planes.second.harder.pt() == 0 ||
-                //     planes.second.softer.pt() == 0) {
-                //   continue;
-                // }
                 RecoPlane::SavePlanes(planes, treeEvents, i, prefixs.at(branchindex), "");
                 double jes_scale = Branch.JetPt->at(i) * 1.0 / planes.first.initJet.Pt();
                 treeEvents.push_back(prefixs.at(branchindex) + "jes_scale", jes_scale);

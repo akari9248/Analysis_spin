@@ -56,6 +56,11 @@ public:
             hists[histName]->Add(histIn[histName]);
         }
     }
+    void Add(TString root_file)
+    {
+        Hists histIn(root_file);
+        this->Add(histIn);
+    }
 
     // 将所有直方图写入指定的 ROOT 文件
     void Write(const TString& filename = "output.root") {

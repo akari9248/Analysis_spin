@@ -50,19 +50,27 @@ public:
       particle.set_user_info(new FlavHistory(pdgid));
       particles.push_back(particle);
     }
-
     JetDefinition jet_def_CA(cambridge_algorithm,
                              JetDefinition::max_allowable_R);
-    ClusterSequence cs_CA(particles, jet_def_CA);
-    vector<PseudoJet> jets_CA = sorted_by_pt(cs_CA.inclusive_jets());
-
-    PseudoJet jet_CA = jets_CA[0];
+    fastjet::contrib::FlavRecombiner flav_recombiner;
+    jet_def_CA.set_recombiner(&flav_recombiner);
+    double alpha = 1.0;
+    double omega = 3.0 - alpha;
+    fastjet::contrib::FlavRecombiner::FlavSummation flav_summation =
+        fastjet::contrib::FlavRecombiner::net;
+    auto ifn_plugin = new IFNPlugin(jet_def_CA, alpha, omega, flav_summation);
+    JetDefinition IFN_jet_def(ifn_plugin);
+    IFN_jet_def.delete_plugin_when_unused();
+    ClusterSequence cs_IFN(particles, IFN_jet_def);
+    vector<PseudoJet> jets_IFN = sorted_by_pt(cs_IFN.inclusive_jets());
     PseudoJet j0, j1, j2, j3, j4;
-    j0 = jet_CA;
+    j0 = jets_IFN[0];
+    
     double Q = j0.e();
     auto twoplane = JetBranch::findPrimaryAndSecondaryJets(
         j0, z1cut, z2cut, kt1cut * 2 * Q, kt2cut * 2 * Q, particlesinfo,
         issecondsoft);
+
     return twoplane;
   }
   static void SavePlanes(JetBranch::twoplanes twoplanes, TreeEvents &treeEvents,
