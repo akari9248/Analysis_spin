@@ -55,6 +55,10 @@ public:
           t->Add((TString)options.inputFolder +
                      Form("chunk%d/*.root/JetsAndDaughters",
                  i));
+          t->Add(Form(
+              (TString)options.inputFolder +
+              "Chunk%d/Part_pt450_-1_Ak8.root/JetsAndDaughters",
+              i));
         }
         suffixs = {"_Parton", "_Hadron"};
         for (auto suffix : suffixs)
