@@ -176,8 +176,10 @@ public :
    vector<double>  *Recoz2;
    double GeneratorWeight;
    int PassPileUpRm;
+   double NextPassedNumber;
    // List of branches
    TBranch        *b_GeneratorWeight;   //!
+   TBranch        *b_NextPassedNumber;   //!
    TBranch        *b_GendeltaR1;   //!
    TBranch        *b_GendeltaR2;   //!
    TBranch        *b_Gene1;   //!
@@ -546,6 +548,7 @@ void AdvancedDataInfoCMS::Init(TTree *tree)
    fChain = tree;
    fCurrent = -1;
    fChain->SetMakeClass(1);
+   fChain->SetBranchAddress("NextPassedNumber", &NextPassedNumber, &b_NextPassedNumber);
    fChain->SetBranchAddress("GeneratorWeight", &GeneratorWeight, &b_GeneratorWeight);
    fChain->SetBranchAddress("PassPileUpRm", &PassPileUpRm, &b_PassPileUpRm);
    fChain->SetBranchAddress("GendeltaR1", &GendeltaR1, &b_GendeltaR1);

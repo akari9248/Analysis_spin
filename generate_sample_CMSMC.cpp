@@ -43,7 +43,7 @@ public:
     vector<BranchVectors> Branches;
     vector<string> prefixs;
     string inputFolder;
-    double NextPassedNumberAccumulative;
+    double NextPassedNumber;
     EventsAnalyzer(string _inputFolder) { inputFolder = _inputFolder; }
     void initialize() override
     {
@@ -87,7 +87,6 @@ public:
         treeEvents.addBranches("GeneratorWeight/D");
 
         treeEvents.addBranches("NextPassedNumber/D");
-        NextPassedNumberAccumulative=0;
     }
     void BranchAlias()
     {
@@ -116,7 +115,7 @@ public:
     {
         BranchAlias();
         treeEvents.BeginEvent();
-        double 
+        treeEvents.assign("NextPassedNumber", events->NextPassedNumber);
         treeEvents.assign("GeneratorWeight", events->GeneratorWeight);
         treeEvents.assign("PassPileUpRm", passpileuprm());
         int branchindex = 0;

@@ -62,7 +62,7 @@ public :
    Int_t           validate3;
    Double_t        GeneratorWeight;
    Double_t PassPileUpRm;
-
+   Double_t NextPassedNumber;
    // List of branches
    TBranch        *b_Nparticles_3;   //!
    TBranch        *b_Ntracks_3;   //!
@@ -104,6 +104,7 @@ public :
    TBranch        *b_validate3;   //!
    TBranch        *b_GeneratorWeight;
    TBranch        *b_PassPileUpRm;
+   TBranch        *b_NextPassedNumber;
    DataInfoML(TTree *tree=0);
    virtual ~DataInfoML();
    virtual Int_t    Cut(Long64_t entry);
@@ -167,6 +168,7 @@ void DataInfoML::Init(TTree *tree)
    fChain = tree;
    fCurrent = -1;
    fChain->SetMakeClass(1);
+   fChain->SetBranchAddress("NextPassedNumber", &NextPassedNumber, &b_NextPassedNumber);
    fChain->SetBranchAddress("Nparticles_3", &Nparticles_3, &b_Nparticles_3);
    fChain->SetBranchAddress("Ntracks_3", &Ntracks_3, &b_Ntracks_3);
    fChain->SetBranchAddress("pTD_3", &pTD_3, &b_pTD_3);

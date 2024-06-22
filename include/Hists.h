@@ -33,6 +33,7 @@ public:
             return it->second;
         } else {
             std::cerr << "Error: Histogram not found: " << histName << std::endl;
+            exit(0);
             return nullptr;
         }
     }
@@ -48,21 +49,24 @@ public:
         }
         return uniqueName;  
     }
-    void Add(Hists &histIn)
+    void Add(Hists &histIn,double scale=1)
     {
         for (const auto &pair : hists)
         {
             const std::string &histName = pair.first;
-            hists[histName]->Add(histIn[histName]);
+            hists[histName]->Add(histIn[histName],scale);
         }
     }
-    void Add(TString root_file)
+    void Add(TString root_file,double scale=1)
     {
         Hists histIn(root_file);
-        this->Add(histIn);
+        this->Add(histIn,scale);
     }
-
-    // 将所有直方图写入指定的 ROOT 文件
+    void Scale(double scale){
+        for (auto& pair : hists) {
+            pair.second->Scale(scale);  
+        }
+    }
     void Write(const TString& filename = "output.root") {
         TFile file(filename, "RECREATE");  
         if (!file.IsOpen()) {
@@ -93,10 +97,10 @@ public:
       file->Close();
       delete file;
     }
-    ~Hists() {
-        for (auto& pair : hists) {
-            delete pair.second;
-        }
-        hists.clear();
-    }
+    // ~Hists() {
+    //     for (auto& pair : hists) {
+    //         delete pair.second;
+    //     }
+    //     hists.clear();
+    // }
 };

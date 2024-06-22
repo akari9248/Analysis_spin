@@ -33,7 +33,10 @@ public:
     vector<int> jinit_range;
     vector<int> j0_range;
     vector<int> j2_range;
-    EventsAnalyzer(CommonTool::Options options) { 
+    CommonTool::Options options;
+    double NextPassedNumber;
+    EventsAnalyzer(CommonTool::Options _options) { 
+        options=_options;
         inputFolder = options.inputFolder; 
         jinit_ptlow = options.jinit_ptlow;
         jinit_pthigh = options.jinit_pthigh;
@@ -94,10 +97,13 @@ public:
 
         treeEvents.addBranches("pt/D");
         treeEvents.addBranches("GeneratorWeight/D");
+        treeEvents.addBranches("NextPassedNumber/D");
+        NextPassedNumber=0;
     }
     void analyze() override
     {
         int plane_num = events->Genpt3->size();
+        
         vector<ParticleInfo> jet2s(plane_num);
         vector<ParticleInfo> jet3s(plane_num);
         vector<ParticleInfo> jet4s(plane_num);
@@ -166,8 +172,10 @@ public:
         }
 
         int spin = 0;
+        int unit_NextPassedNumber = events->NextPassedNumber*1.0/plane_num;
         for (int i = 0; i < plane_num; i++)
         {
+            NextPassedNumber+= unit_NextPassedNumber;
             double jesscale = events->Genjes_scale->at(i);
             if (!Selection::isWithinRange(events->Genjpt->at(i) * jesscale, jinit_range))
                 continue;
@@ -188,7 +196,8 @@ public:
                 continue;
             }
             treeEvents.BeginEvent();
-            treeEvents.assign("PassPileUpRm", events->PassPileUpRm);
+            treeEvents.assign("NextPassedNumber", NextPassedNumber);
+            NextPassedNumber=0;
             treeEvents.assign("GeneratorWeight", events->GeneratorWeight);
             treeEvents.assign("Nparticles_2", JetObservable2.Nparticles());
             treeEvents.assign("Ntracks_2", JetObservable2.Ntracks());

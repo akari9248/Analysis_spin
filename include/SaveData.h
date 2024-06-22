@@ -121,6 +121,10 @@ public:
         buffers;
 
     // 初始化所有 branches 和 buffers
+    if(events.treeEvents.size()==0) {
+      cout<<" None of Events can be stored. "<<endl;
+      return;
+    }
     for (const auto &kv : events.treeEvents.at(0).branches) {
       boost::apply_visitor(
           [&](auto &&arg) {
@@ -150,12 +154,9 @@ public:
           },
           kv.second);
     }
-
-    // 创建索引数组
     std::vector<size_t> indices(events.treeEvents.size());
     std::iota(indices.begin(), indices.end(), 0);
 
-    // 如果需要，打乱索引
     if (shuffle) {
       std::random_device rd;
       std::mt19937 g(rd());

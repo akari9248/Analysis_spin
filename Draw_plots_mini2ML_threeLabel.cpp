@@ -24,6 +24,7 @@ public:
   }
   void initialize() override {
     t->Add((TString)options.inputFolder+"/Chunk*.root/DNNTrainTree");
+    hists.addHist("MC_number", 2, 0, 2);
     cut_strs={"","_z2cut01","_z2cut12","_z2cut23","_z2cut34","_z2cut45","_z1cut01","_z1cut12","_z1cut23","_z1cut34","_z1cut45","_ktcut01","_ktcut12","_ktcut25","_ktcut5"};
     for(auto cut_str:cut_strs){
       hists.addHist("phi_qq_spinon"+cut_str, 100, 0, TMath::Pi());
@@ -87,6 +88,8 @@ public:
     if(events->PassPileUpRm==0) {
       return;
     }
+    hists["MC_number"]->Fill(0);
+    hists["MC_number"]->Fill(1,events->NextPassedNumber);
     double likelihoods[4] = {events->score0, events->score1, events->score2, events->score3};
     double priors[4] = {0.004, 0.09, 0.004, 0.86};
     double marginal_probability = 0.0;
@@ -164,9 +167,7 @@ public:
       if(cut_str=="_ktcut5"&&!ktcut5) weight=0;
       if (spin == 1) {
         if (isqq) {
-           if(cut_str==""){
-            cout<<" "<<i0<<" "<<phi<<" "<<entryi<<" "<<events->pt_3<<" "<<cut_str<<endl;
-          }
+           
           hists["phi_qq_spinon"+cut_str]->Fill(phi,weight);
           if (events->type == 0 && events->match >= 0)
             hists["phi_qq_rest_spinon"+cut_str]->Fill(phi,weight);

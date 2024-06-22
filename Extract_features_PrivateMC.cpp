@@ -32,7 +32,7 @@ public:
     vector<int> j0_range;
     vector<int> j2_range;
     CommonTool::Options options;
-    int NextPassedNumberAccumulative;
+    int NextPassedNumber;
     EventsAnalyzer(CommonTool::Options _options) { 
         options=_options;
         inputFolder = options.inputFolder; 
@@ -96,6 +96,8 @@ public:
 
         treeEvents.addBranches("pt/D");
         treeEvents.addBranches("GeneratorWeight/D");
+        treeEvents.addBranches("NextPassedNumber/D");
+        NextPassedNumber=0;
         
     }
     void analyze() override {
@@ -167,22 +169,36 @@ public:
         }
 
         
-        for(int i=0;i<plane_num;i++){
-            if(events->jpt_Hadron->at(i)<450||events->jpt_Hadron->at(i)>600) continue;
-            int isqq=events->isqq_Hadron->at(i);
-            int isgg=events->isgg_Hadron->at(i);
+        int unit_NextPassedNumber = events->GeneratorWeight*1.0/plane_num;
+        for (int i = 0; i < plane_num; i++)
+        {
+            NextPassedNumber+= unit_NextPassedNumber;
+            double jesscale = 1;
+            if (!Selection::isWithinRange(events->jpt_Hadron->at(i) * jesscale, jinit_range))
+                continue;
+            int isqq = events->isqq_Hadron->at(i);
+            int isgg = events->isgg_Hadron->at(i);
             JetObservable JetObservable2(particles2.at(i));
-            if(JetObservable2.jet_lorentzvector.Pt() >200||JetObservable2.jet_lorentzvector.Pt() <160) continue;
-            JetObservable JetObservable3(particles3.at(i));
-            JetObservable JetObservable4(particles4.at(i));
-            
+            if (!Selection::isWithinRange(JetObservable2.jet_lorentzvector.Pt() * jesscale, j2_range))
+                continue;
             auto width2 = JetObservable2.jetwidth();
+            JetObservable JetObservable3(particles3.at(i));
             auto width3 = JetObservable3.jetwidth();
+            JetObservable JetObservable4(particles4.at(i));
             auto width4 = JetObservable4.jetwidth();
+            if (JetObservable3.Nparticles() == 0 || JetObservable4.Nparticles() == 0)
+            {
+                continue;
+            }
 
             int type = events->isqq_Hadron->at(i) * 2 +
                                      events->isgg_Hadron->at(i);
+
+            
             treeEvents.BeginEvent();
+            treeEvents.assign("NextPassedNumber", NextPassedNumber);
+            NextPassedNumber=0;
+            treeEvents.assign("PassPileUpRm", 1);
             treeEvents.assign("GeneratorWeight", 1.0);
             treeEvents.assign("Nparticles_2",JetObservable2.Nparticles());
             treeEvents.assign("Ntracks_2",JetObservable2.Ntracks());

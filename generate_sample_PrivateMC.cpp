@@ -50,7 +50,7 @@ public:
     EventsAnalyzer(CommonTool::Options _options) { options = _options; }
     void initialize() override
     {
-        for (int i = 51; i <= 100; ++i)
+        for (int i = 1; i <= 100; ++i)
         {
           t->Add((TString)options.inputFolder +
                      Form("chunk%d/*.root/JetsAndDaughters",
