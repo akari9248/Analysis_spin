@@ -169,7 +169,7 @@ public:
         }
 
         
-        int unit_NextPassedNumber = events->GeneratorWeight*1.0/plane_num;
+        int unit_NextPassedNumber = 1.0/plane_num;
         for (int i = 0; i < plane_num; i++)
         {
             NextPassedNumber+= unit_NextPassedNumber;

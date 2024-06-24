@@ -37,11 +37,17 @@ void drawqq_herwigvsherwigCMS2(){
     // Hists herwigSpinon("../plots/ML_plots/herwig_pt450_IFN_May28j2pt160_200Spinon/ML_plot.root");
     // Hists herwigSpinoff("../plots/ML_plots/herwig_pt450_IFN_May28j2pt160_200Spinoff/ML_plot.root");
 
-    Hists herwigSpinon("../plots/ML_plots/Private_Herwig_spinonj2pt80_120/ML_plot.root");
-    Hists herwigSpinoff("../plots/ML_plots/Private_Herwig_spinoffj2pt80_120//ML_plot.root");
+    Hists herwigSpinon("../plots/ML_plots/Private_pythia_spinonj2pt160_200/ML_plot.root");
+    Hists herwigSpinoff("../plots/ML_plots/Private_pythia_spinoffj2pt160_200/ML_plot.root");
 
-    Hists herwigGen("../plots/ML_plots/CMS_herwig_HT700toInfj2pt80_120Gen/ML_plot.root");
-    Hists herwigReco("../plots/ML_plots/CMS_herwig_HT700toInfj2pt80_120Reco/ML_plot.root");
+    Hists herwigGen("../plots/ML_plots/CMS_pythia_Pt470to600j2pt160_200Gen/ML_plot.root");
+    Hists herwigReco("../plots/ML_plots/CMS_pythia_Pt470to600j2pt160_200Reco/ML_plot.root");
+
+    // Hists herwigSpinon("../plots/ML_plots/Private_Herwig_spinonj2pt80_120/ML_plot.root");
+    // Hists herwigSpinoff("../plots/ML_plots/Private_Herwig_spinoffj2pt80_120//ML_plot.root");
+
+    // Hists herwigGen("../plots/ML_plots/CMS_herwig_HT700toInfj2pt80_120Gen/ML_plot.root");
+    // Hists herwigReco("../plots/ML_plots/CMS_herwig_HT700toInfj2pt80_120Reco/ML_plot.root");
 
 
     TH1D *herwigqqoff = GetHist(herwigSpinoff,{"phi_qq_spinon_ktcut25","phi_qq_spinon_ktcut5"});
@@ -56,6 +62,7 @@ void drawqq_herwigvsherwigCMS2(){
     //   herwigGenqq->SetBinError(i,sqrt(herwigGenqq->GetBinContent(i)));
     //   herwigRecoqq->SetBinError(i,sqrt(herwigRecoqq->GetBinContent(i)));
     // }
+    cout<<herwigGenqq->GetBinError(1)*1.0/herwigGenqq->GetBinContent(1)<<endl;
     
     SymmetryTwoPads({herwigqqoff,herwigqqon,herwigGenqq,herwigRecoqq},"herwigvspythiaqq_80_120.pdf","80<pt2<120",{"herwig spin off","herwig spin on","herwig Gen spin on","herwig Reco spin on"});
 

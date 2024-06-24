@@ -1,0 +1,3 @@
+QCD_Pt_470to600_pythia8-RunIISummer20UL16	551.2
+QCD_Pt_600to800_pythia8-RunIISummer20UL16	156.7
+QCD_Pt_800to1000_pythia8-RunIISummer20UL16 26.25

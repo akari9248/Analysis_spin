@@ -1,18 +1,27 @@
 #!/bin/bash
 
-# 定义数组
 inputFolders=(
-    "/home/public/Datasets/herwight/QCD_HT700to1000-madgraphMLM-herwig7-RunIISummer20UL16"
-    "/home/public/Datasets/herwight/QCD_HT1000to1500-madgraphMLM-herwig7-RunIISummer20UL16"
-    "/home/public/Datasets/herwight/QCD_HT1500to2000-madgraphMLM-herwig7-RunIISummer20UL16"
-    "/home/public/Datasets/herwight/QCD_HT2000toInf-madgraphMLM-herwig7-RunIISummer20UL16"
+    "/storage/shuangyuan/code/analysis_spin/dataset/QCD_Pt_470to600_pythia8-RunIISummer20UL16"
+    "/storage/shuangyuan/code/analysis_spin/dataset/QCD_Pt_600to800_pythia8-RunIISummer20UL16"
+    "/storage/shuangyuan/code/analysis_spin/dataset/QCD_Pt_800to1000_pythia8-RunIISummer20UL16"
 )
 sampleTypes=(
-    "CMS_herwig_HT700to1000"
-    "CMS_herwig_HT1000to1500"
-    "CMS_herwig_HT1500to2000"
-    "CMS_herwig_HT2000toInf"
+    "CMS_pythia_Pt470to600"
+    "CMS_pythia_Pt600to800"
+    "CMS_pythia_Pt800to1000"
 )
+# inputFolders=(
+#     "/home/public/Datasets/herwight/QCD_HT700to1000-madgraphMLM-herwig7-RunIISummer20UL16"
+#     "/home/public/Datasets/herwight/QCD_HT1000to1500-madgraphMLM-herwig7-RunIISummer20UL16"
+#     "/home/public/Datasets/herwight/QCD_HT1500to2000-madgraphMLM-herwig7-RunIISummer20UL16"
+#     "/home/public/Datasets/herwight/QCD_HT2000toInf-madgraphMLM-herwig7-RunIISummer20UL16"
+# )
+# sampleTypes=(
+#     "CMS_herwig_HT700to1000"
+#     "CMS_herwig_HT1000to1500"
+#     "CMS_herwig_HT1500to2000"
+#     "CMS_herwig_HT2000toInf"
+# )
 
 # 确保两个数组长度相同
 if [ ${#inputFolders[@]} -ne ${#sampleTypes[@]} ]; then
@@ -29,10 +38,10 @@ nparts=10
 jinit_ptlow=450
 jinit_pthigh=600
 
-j2_ptlow=80
-j2_pthigh=120
-# j2_ptlow=160
-# j2_pthigh=200
+# j2_ptlow=80
+# j2_pthigh=120
+j2_ptlow=160
+j2_pthigh=200
 
 ptselection="_jinitpt${jinit_ptlow}_${jinit_pthigh}_j2pt${j2_ptlow}_${j2_pthigh}"
 
