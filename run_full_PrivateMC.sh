@@ -4,8 +4,8 @@ mkdir -p log
 nchunks=100
 nparts=100
 
-spin="spinon"
-inputFolder="/storage/shuangyuan/code/analysis_qq_qcd/event/particle_pp_pythia_on/"
+spin="spinoff"
+inputFolder="/storage/shuangyuan/code/analysis_qq_qcd/event/particle_pp_pythia_off/"
 SampleType="Private_pythia_"$spin
 
 # spin="spinoff"
@@ -30,7 +30,7 @@ ptselection=_jinitpt${jinit_ptlow}_${jinit_pthigh}_j2pt${j2_ptlow}_${j2_pthigh}
 outputRecoFolder=$baseOutputFolder"/RecoPlanes/"$SampleType
 outputFeatureFolder=$baseOutputFolder"/RecoPlanesFeatures/"$SampleType$ptselection
 outputTrainFolder=$baseOutputFolder"/RecoPlanesFeaturesTrain/"$SampleType$ptselection
-
+outputPredictedFolder=$baseOutputFolder"/ML/predict/"
 ############ Reco Planes #######################
 # compile generate_sample_PrivateMC.cpp
 # rm $outputRecoFolder/*.root
@@ -40,7 +40,7 @@ compile Extract_features_PrivateMC.cpp
 rm $outputFeatureFolder/*.root
 run_parallel Extract_features_PrivateMC -nchunks $nchunks -nparts $nparts -opt "-I $outputRecoFolder -O ${outputFeatureFolder} --jinit_ptlow $jinit_ptlow  --jinit_pthigh $jinit_pthigh --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --spin 1 --OneGeVCut 1"
 ################### Get train results ##############
-python dnn_load_FourLabel.py --sample_path0  ${outputFeatureFolder}'/*.root'  --model_path ML/model/fourLabels_j2pt${j2_ptlow}_${j2_pthigh} --entries 100000000 --suffix ${SampleType}j2pt${j2_ptlow}_${j2_pthigh}
+python dnn_load_FourLabel.py --sample_path0  ${outputFeatureFolder}'/*.root'  --model_path ML/model/fourLabels_j2pt${j2_ptlow}_${j2_pthigh} --entries 100000000 --suffix $outputPredictedFolder${SampleType}j2pt${j2_ptlow}_${j2_pthigh}
 ##################  Derive final results ############
 compile Draw_plots_mini2ML_threeLabel.cpp
-./Draw_plots_mini2ML_threeLabel -I "ML/predict/"${SampleType}j2pt${j2_ptlow}_${j2_pthigh}""  -O  "plots/ML_plots/"${SampleType}j2pt${j2_ptlow}_${j2_pthigh}"/"
+./Draw_plots_mini2ML_threeLabel -I $outputPredictedFolder${SampleType}j2pt${j2_ptlow}_${j2_pthigh}""  -O  "plots/ML_plots/"${SampleType}j2pt${j2_ptlow}_${j2_pthigh}"/"

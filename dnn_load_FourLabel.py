@@ -38,7 +38,7 @@ def main(args):
         #1.select the coloum for train features
         select_index_feature = [branch_to_index[name] for name in select_item[i]]
         model = load_model(model_path)
-        folder_name = "ML/predict/"+suffix
+        folder_name = suffix
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
         ##########################  Saving root file ############################################################################################

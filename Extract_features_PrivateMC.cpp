@@ -32,7 +32,7 @@ public:
     vector<int> j0_range;
     vector<int> j2_range;
     CommonTool::Options options;
-    int NextPassedNumber;
+    double NextPassedNumber;
     EventsAnalyzer(CommonTool::Options _options) { 
         options=_options;
         inputFolder = options.inputFolder; 
@@ -169,7 +169,7 @@ public:
         }
 
         
-        int unit_NextPassedNumber = 1.0/plane_num;
+        double unit_NextPassedNumber = 1.0/plane_num;
         for (int i = 0; i < plane_num; i++)
         {
             NextPassedNumber+= unit_NextPassedNumber;
