@@ -18,6 +18,7 @@
 #include "include/SaveData.h"
 #include "include/AdvancedDataInfoCMS.h"
 #include "include/Selection.h"
+#include "include/SpinObservable.h"
 // #include "include/common_tool.h"
 class EventsAnalyzer : public SampleAnalyzer<AdvancedDataInfoCMS>
 {
@@ -98,6 +99,9 @@ public:
         treeEvents.addBranches("pt/D");
         treeEvents.addBranches("GeneratorWeight/D");
         treeEvents.addBranches("NextPassedNumber/D");
+        treeEvents.addBranches("dphi12_X/D");
+        treeEvents.addBranches("theta/D");
+        treeEvents.addBranches("theta2/D");
         NextPassedNumber=0;
     }
     void analyze() override
@@ -107,6 +111,7 @@ public:
         vector<ParticleInfo> jet2s(plane_num);
         vector<ParticleInfo> jet3s(plane_num);
         vector<ParticleInfo> jet4s(plane_num);
+        vector<vector<ParticleInfo>> particles1(plane_num);
         vector<vector<ParticleInfo>> particles2(plane_num);
         vector<vector<ParticleInfo>> particles3(plane_num);
         vector<vector<ParticleInfo>> particles4(plane_num);
@@ -136,6 +141,17 @@ public:
                                   events->Genphi4->at(i),
                                   events->Gene4->at(i));
             jet4s.at(i) = particle;
+        }
+        for (int i = 0; i < events->Genparticle1_jetid->size(); i++)
+        {
+            int jetid = events->Genparticle1_jetid->at(i);
+            ParticleInfo particle(events->Genparticle1_pid->at(i),
+                                  events->Genparticle1_charge->at(i),
+                                  events->Genparticle1_pt->at(i),
+                                  events->Genparticle1_eta->at(i),
+                                  events->Genparticle1_phi->at(i),
+                                  events->Genparticle1_e->at(i));
+            particles1.at(jetid).push_back(particle);
         }
         for (int i = 0; i < events->Genparticle2_jetid->size(); i++)
         {
@@ -195,6 +211,8 @@ public:
             {
                 continue;
             }
+            SpinObservable spinobservable(particles1.at(i),particles2.at(i),particles3.at(i),particles4.at(i));
+            auto planetheta=spinobservable.GetPlaneTheta();
             treeEvents.BeginEvent();
             treeEvents.assign("NextPassedNumber", NextPassedNumber);
             NextPassedNumber=0;
@@ -241,6 +259,9 @@ public:
 
             treeEvents.assign("Phi", events->Genphi->at(i));
             treeEvents.assign("type", type);
+            treeEvents.assign("dphi12_X",planetheta.dphi12_X);
+            treeEvents.assign("theta",planetheta.theta);
+            treeEvents.assign("theta2",planetheta.theta2);
         }
     }
 };

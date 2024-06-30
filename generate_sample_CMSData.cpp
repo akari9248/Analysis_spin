@@ -50,7 +50,7 @@ public:
         // t->Add("/home/public/Datasets/newherwig/QCD_Pt-15to7000_Flat_herwig7-RunIISummer19UL16/Chunk*.root/jetInfos/JetsAndDaughters");
         // t->Add("/home/public/Datasets/newherwig/QCD_Pt-15to7000_Flat_herwig7-RunIISummer19UL16-preVFP/Chunk*.root/jetInfos/JetsAndDaughters");
         t->Add((TString)inputFolder + "/Chunk*.root/jetInfos/JetsAndDaughters");
-        prefixs = {"Gen","Reco"};
+        prefixs = {"Reco"};
         for (auto prefix : prefixs)
         {
             std::vector<std::string> branch_names = {
@@ -84,6 +84,7 @@ public:
             }
         }
         treeEvents.addBranches("PassPileUpRm/I");
+        treeEvents.addBranches("NextPassedNumber/D");
         treeEvents.addBranches("GeneratorWeight/D");
         treeEvents.addBranches("TriggerBits/vI");
         treeEvents.addBranches("TriggerPrescales/vD");
@@ -92,15 +93,6 @@ public:
     {
         if (Branches.size() != 0)
             return;
-        GenBranches.Charge = events->GenDaughterCharge;
-        GenBranches.PdgId = events->GenDaughterPdgId;
-        GenBranches.Pt = events->GenDaughterPt;
-        GenBranches.Eta = events->GenDaughterEta;
-        GenBranches.Phi = events->GenDaughterPhi;
-        GenBranches.Energy = events->GenDaughterEnergy;
-        GenBranches.JetPt = events->GenJetPt;
-        GenBranches.JetId = events->GenDaughterJetId;
-
         RecoBranches.Charge = events->RecoDaughterCharge;
         RecoBranches.PdgId = events->RecoDaughterPdgId;
         RecoBranches.Pt = events->RecoDaughterPt;
@@ -109,15 +101,16 @@ public:
         RecoBranches.Energy = events->RecoDaughterEnergy;
         RecoBranches.JetPt = events->RecoJetPt;
         RecoBranches.JetId = events->RecoDaughterJetId;
-        Branches = {GenBranches, RecoBranches};
+        Branches = {RecoBranches};
     }
     void analyze() override
     {
         BranchAlias();
+        if(!events->TriggerBits->at(9)) return;
         treeEvents.BeginEvent();
-        treeEvents.assign("NextPassedNumber", events->NextPassedNumber);
-        treeEvents.assign("GeneratorWeight", events->GeneratorWeight);
-        treeEvents.assign("PassPileUpRm", passpileuprm());
+        treeEvents.assign("NextPassedNumber", 1.0);
+        treeEvents.assign("GeneratorWeight", 1.0);
+        treeEvents.assign("PassPileUpRm", 1);
         for(int i=0;i<events->TriggerBits->size();i++){
             int triggerbits=events->TriggerBits->at(i);
             treeEvents.push_back("TriggerBits",triggerbits);
@@ -126,7 +119,7 @@ public:
         int branchindex = 0;
         for (auto &Branch : Branches)
         {
-            int jetnum = Branch.JetPt->size();
+            int jetnum = events->RecoJetPt->size();
             int daughternum = Branch.JetId->size();
             vector<vector<ParticleInfo>> daughtersjets(jetnum, vector<ParticleInfo>());
             for (int i = 0; i < daughternum; i++)

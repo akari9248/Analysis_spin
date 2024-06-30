@@ -53,7 +53,39 @@ public:
         infile.close();
         return result;
     }
-    static std::vector<double> readSecondColumn(const std::string &filename)
+    static std::vector<std::string> readSecondColumnAsString(const std::string &filename)
+    {
+        std::vector<string> result;
+        std::ifstream infile(filename);
+
+        if (!infile.is_open())
+        {
+            std::cerr << "Error opening file: " << filename << std::endl;
+            return result;
+        }
+
+        std::string line;
+        while (std::getline(infile, line))
+        {
+            std::istringstream iss(line);
+            std::string firstColumn, secondColumn;
+            if (iss >> firstColumn >> secondColumn)
+            {
+                try
+                {
+                    result.push_back(secondColumn);
+                }
+                catch (const std::invalid_argument &e)
+                {
+                    std::cerr << "Invalid data encountered: " << secondColumn << " in file: " << filename << std::endl;
+                }
+            }
+        }
+
+        infile.close();
+        return result;
+    }
+    static std::vector<double> readSecondColumnAsDouble(const std::string &filename)
     {
         std::vector<double> result;
         std::ifstream infile(filename);

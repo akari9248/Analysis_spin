@@ -43,13 +43,16 @@ public :
    Double_t        phi_4;
    Double_t        e_4;
    Double_t        Phi;
-   Double_t        type;
+   Double_t        theta;
+   Double_t        theta2;
+   int             type;
    Double_t        spin;
    Double_t        z1;
    Double_t        z2;
    Double_t        DeltaR;
    Double_t        kt;
    Double_t        kt0;
+   Double_t        kt2;
    Double_t        match;
    Float_t         score;
    Float_t         score0;
@@ -85,12 +88,15 @@ public :
    TBranch        *b_phi_4;   //!
    TBranch        *b_e_4;   //!
    TBranch        *b_Phi;   //!
+   TBranch        *b_theta;   //!
+   TBranch        *b_theta2;   //!
    TBranch        *b_type;   //!
    TBranch        *b_spin;   //!
    TBranch        *b_z1;
    TBranch        *b_z2;
    TBranch        *b_DeltaR;
    TBranch        *b_kt;
+   TBranch        *b_kt2;
    TBranch        *b_kt0;
    TBranch        *b_match;
    TBranch        *b_score;   //!
@@ -190,6 +196,8 @@ void DataInfoML::Init(TTree *tree)
    fChain->SetBranchAddress("phi_4", &phi_4, &b_phi_4);
    fChain->SetBranchAddress("e_4", &e_4, &b_e_4);
    fChain->SetBranchAddress("Phi", &Phi, &b_Phi);
+   fChain->SetBranchAddress("theta", &theta, &b_theta);
+   fChain->SetBranchAddress("theta2", &theta2, &b_theta2);
    fChain->SetBranchAddress("type", &type, &b_type);
    fChain->SetBranchAddress("spin", &spin, &b_spin);
    
@@ -198,6 +206,7 @@ void DataInfoML::Init(TTree *tree)
    fChain->SetBranchAddress("DeltaR", &DeltaR, &b_DeltaR);
    fChain->SetBranchAddress("kt", &kt, &b_kt);
    fChain->SetBranchAddress("kt0", &kt0, &b_kt0);
+   fChain->SetBranchAddress("kt2", &kt2, &b_kt2);
    fChain->SetBranchAddress("match", &match, &b_match);
    fChain->SetBranchAddress("score", &score, &b_score);
    fChain->SetBranchAddress("score1", &score1, &b_score1);

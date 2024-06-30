@@ -18,6 +18,7 @@
 #include "include/SaveData.h"
 #include "include/AdvancedDataInfo.h"
 #include "include/Selection.h"
+#include "include/SpinObservable.h"
 class EventsAnalyzer : public SampleAnalyzer<AdvancedDataInfo> {
 public:
     TreeEvents treeEvents;
@@ -97,6 +98,10 @@ public:
         treeEvents.addBranches("pt/D");
         treeEvents.addBranches("GeneratorWeight/D");
         treeEvents.addBranches("NextPassedNumber/D");
+
+        treeEvents.addBranches("dphi12_X/D");
+        treeEvents.addBranches("theta/D");
+        treeEvents.addBranches("theta2/D");
         NextPassedNumber=0;
         
     }
@@ -108,6 +113,7 @@ public:
         vector<ParticleInfo> jet2s(plane_num);
         vector<ParticleInfo> jet3s(plane_num);
         vector<ParticleInfo> jet4s(plane_num);
+        vector<vector<ParticleInfo>> particles1(plane_num);
         vector<vector<ParticleInfo>> particles2(plane_num);
         vector<vector<ParticleInfo>> particles3(plane_num);
         vector<vector<ParticleInfo>> particles4(plane_num);
@@ -133,6 +139,17 @@ public:
                                   events->phi4_Hadron->at(i),
                                   events->e4_Hadron->at(i));
             jet4s.at(i)=particle;
+        }
+        for(int i=0;i<events->particle1_jetid_Hadron->size();i++){
+            int jetid = events->particle1_jetid_Hadron->at(i);
+            if(isoneGeVCut&&events->particle1_pt_Hadron->at(i)<1) continue;
+            ParticleInfo particle(events->particle1_pid_Hadron->at(i),
+                                  events->particle1_charge_Hadron->at(i),
+                                  events->particle1_pt_Hadron->at(i),
+                                  events->particle1_eta_Hadron->at(i),
+                                  events->particle1_phi_Hadron->at(i),
+                                  events->particle1_e_Hadron->at(i));
+            particles1.at(jetid).push_back(particle);
         }
         for(int i=0;i<events->particle2_jetid_Hadron->size();i++){
             int jetid = events->particle2_jetid_Hadron->at(i);
@@ -194,7 +211,9 @@ public:
             int type = events->isqq_Hadron->at(i) * 2 +
                                      events->isgg_Hadron->at(i);
 
-            
+            SpinObservable spinobservable(particles1.at(i),particles2.at(i),particles3.at(i),particles4.at(i));
+            auto planetheta=spinobservable.GetPlaneTheta();
+
             treeEvents.BeginEvent();
             treeEvents.assign("NextPassedNumber", NextPassedNumber);
             NextPassedNumber=0;
@@ -240,6 +259,10 @@ public:
             treeEvents.assign("Phi",events->phi_Hadron->at(i));
             treeEvents.assign("type",type);
             treeEvents.assign("match",events->match->at(i));
+
+            treeEvents.assign("dphi12_X",planetheta.dphi12_X);
+            treeEvents.assign("theta",planetheta.theta);
+            treeEvents.assign("theta2",planetheta.theta2);
         }
     }
 };

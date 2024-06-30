@@ -18,6 +18,7 @@
 #include "include/SaveData.h"
 #include "include/AdvancedDataInfoCMS.h"
 #include "include/Selection.h"
+#include "include/SpinObservable.h"
 // #include "include/common_tool.h"
 class EventsAnalyzer : public SampleAnalyzer<AdvancedDataInfoCMS>
 {
@@ -33,8 +34,10 @@ public:
     vector<int> jinit_range;
     vector<int> j0_range;
     vector<int> j2_range;
+    CommonTool::Options options;
     double NextPassedNumber;
-    EventsAnalyzer(CommonTool::Options options) { 
+    EventsAnalyzer(CommonTool::Options _options) { 
+        options=_options;
         inputFolder = options.inputFolder; 
         jinit_ptlow = options.jinit_ptlow;
         jinit_pthigh = options.jinit_pthigh;
@@ -96,14 +99,19 @@ public:
         treeEvents.addBranches("pt/D");
         treeEvents.addBranches("GeneratorWeight/D");
         treeEvents.addBranches("NextPassedNumber/D");
+        treeEvents.addBranches("dphi12_X/D");
+        treeEvents.addBranches("theta/D");
+        treeEvents.addBranches("theta2/D");
         NextPassedNumber=0;
     }
     void analyze() override
     {
         int plane_num = events->Recopt3->size();
+        
         vector<ParticleInfo> jet2s(plane_num);
         vector<ParticleInfo> jet3s(plane_num);
         vector<ParticleInfo> jet4s(plane_num);
+        vector<vector<ParticleInfo>> particles1(plane_num);
         vector<vector<ParticleInfo>> particles2(plane_num);
         vector<vector<ParticleInfo>> particles3(plane_num);
         vector<vector<ParticleInfo>> particles4(plane_num);
@@ -133,6 +141,17 @@ public:
                                   events->Recophi4->at(i),
                                   events->Recoe4->at(i));
             jet4s.at(i) = particle;
+        }
+        for (int i = 0; i < events->Recoparticle1_jetid->size(); i++)
+        {
+            int jetid = events->Recoparticle1_jetid->at(i);
+            ParticleInfo particle(events->Recoparticle1_pid->at(i),
+                                  events->Recoparticle1_charge->at(i),
+                                  events->Recoparticle1_pt->at(i),
+                                  events->Recoparticle1_eta->at(i),
+                                  events->Recoparticle1_phi->at(i),
+                                  events->Recoparticle1_e->at(i));
+            particles1.at(jetid).push_back(particle);
         }
         for (int i = 0; i < events->Recoparticle2_jetid->size(); i++)
         {
@@ -181,7 +200,7 @@ public:
             JetObservable JetObservable2(particles2.at(i));
             if (!Selection::isWithinRange(JetObservable2.jet_lorentzvector.Pt() * jesscale, j2_range))
                 continue;
-                
+
             auto width2 = JetObservable2.jetwidth();
             JetObservable JetObservable3(particles3.at(i));
             auto width3 = JetObservable3.jetwidth();
@@ -192,10 +211,11 @@ public:
             {
                 continue;
             }
+            SpinObservable spinobservable(particles1.at(i),particles2.at(i),particles3.at(i),particles4.at(i));
+            auto planetheta=spinobservable.GetPlaneTheta();
             treeEvents.BeginEvent();
             treeEvents.assign("NextPassedNumber", NextPassedNumber);
             NextPassedNumber=0;
-            treeEvents.assign("PassPileUpRm", events->PassPileUpRm);
             treeEvents.assign("GeneratorWeight", events->GeneratorWeight);
             treeEvents.assign("Nparticles_2", JetObservable2.Nparticles());
             treeEvents.assign("Ntracks_2", JetObservable2.Ntracks());
@@ -239,6 +259,9 @@ public:
 
             treeEvents.assign("Phi", events->Recophi->at(i));
             treeEvents.assign("type", type);
+            treeEvents.assign("dphi12_X",planetheta.dphi12_X);
+            treeEvents.assign("theta",planetheta.theta);
+            treeEvents.assign("theta2",planetheta.theta2);
         }
     }
 };

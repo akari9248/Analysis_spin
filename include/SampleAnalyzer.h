@@ -16,7 +16,7 @@ protected:
   T *events;
   bool isinitialized= false;
   int entries;
-
+  bool islastEntry = false;
 public:
   Hists hists;
   int entryi;
@@ -56,6 +56,8 @@ public:
     ProcessBar ProcessBar(entries, 100);
     for (entryi = _entrybegin; entryi < _entrybegin + entries; entryi++)
     {
+      islastEntry = false;
+      if(entryi==_entrybegin + entries-1) islastEntry = true;
       ProcessBar.show2(entryi - _entrybegin, TString::Format("Analyzing entries %d - %d, now %d , sum entries = %d", _entrybegin, _entrybegin + entries, entryi, entry0));
       t->GetEntry(entryi);
       analyze();

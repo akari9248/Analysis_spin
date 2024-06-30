@@ -110,7 +110,6 @@ class Draw_Template{
       vector<TH1D *> hist_out;
       for (int nhist = 0; nhist < hists.size(); nhist++) {
         TH1D *histogram = (TH1D *)hists.at(nhist)->Clone();
-        histogram->Rebin(10);
         int n_bins = histogram->GetNbinsX();
         if(isnormalized) histogram->Scale(1.0/histogram->Integral(1,n_bins));
         

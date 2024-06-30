@@ -41,6 +41,19 @@ public:
         return false;
       }
     }
+    template <typename T>
+    T value(const std::string &key) const {
+        try {
+            const T &stored_value = boost::get<T>(branches.at(key));
+            return stored_value;
+        } catch (const boost::bad_get &bg) {
+            std::cerr << "Type mismatch error: " << bg.what() << std::endl;
+            throw;
+        } catch (const std::out_of_range &oor) {
+            std::cerr << "Key not found error: " << oor.what() << std::endl;
+            throw;
+        }
+    }
     TreeEvent operator+(const TreeEvent &other) const {
       TreeEvent result = *this; // Start with a copy of the current TreeEvent
       for (const auto &kv : other.branches) {
@@ -115,13 +128,20 @@ public:
   void BeginEvent() {
     auto emptyevent = treeEvent_backup;
     treeEvents.push_back(emptyevent);
-    }
+  }
   template <typename T> bool assign(const std::string &key, const T &value) {
     if (treeEvents.empty()) {
-      return false; // 如果 treeEvents 为空，无法进行赋值
+      return false; 
     }
     return treeEvents.back().assign(key, value);
   }
+  template <typename T>
+    T value(const std::string &key) const {
+        if (treeEvents.empty()) {
+            throw std::runtime_error("TreeEvents is empty");
+        }
+        return treeEvents.back().value<T>(key);
+    }
 
   template <typename T> bool push_back(const std::string &key, const T &value) {
     if (treeEvents.empty()) {
