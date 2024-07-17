@@ -78,6 +78,7 @@ public:
     hists.addHist("z1_full", 1000, 0, 1);
     hists.addHist("kt1_full", 1000, 0, 200);
     hists.addHist("kt2_full", 1000, 0, 100);
+
   }
   void analyze() override {
     if(events->PassPileUpRm==0) {
@@ -109,8 +110,8 @@ public:
     
     bool isqq =  score2 > 0.55 && events->kt0>20 && events->kt > 2.0;
     bool isgg =  score1 > 0.5  && events->kt0>20 && events->kt > 2.0;
-    //double Eventweight = events->GeneratorWeight * events->WeightSpinoff;
-    double Eventweight = events->GeneratorWeight ;
+    double Eventweight = events->GeneratorWeight * events->WeightSpinoff;
+    //double Eventweight = events->GeneratorWeight ;
     hists["phi_full"]->Fill(events->Phi,Eventweight);
     hists["Recophi_full"]->Fill(events->RecoPhi, Eventweight);
     hists["theta_full"]->Fill(events->theta, Eventweight);

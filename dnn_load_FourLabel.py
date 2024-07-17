@@ -26,7 +26,10 @@ def main(args):
     suffix = args.suffix
     sample_filename = "kto4"
     entries=args.entries
-    X_data, branch_to_index, index_to_branch,branch_names = dnn.LoadROOTFile(sample_paths=[sample_path0],entries=args.entries,branches_name=["Nparticles_2","Ntracks_2","pTD_2","sigma1_2","sigma2_2","sigma_2","Nparticles_3","Ntracks_3","pTD_3","sigma1_3","sigma2_3","sigma_3","pt_3","eta_3","phi_3","e_3","Nparticles_4","Ntracks_4","pTD_4","sigma1_4","sigma2_4","sigma_4","pt_4","eta_4","phi_4","e_4","z1","z2","DeltaR","kt","Phi","kt0","GeneratorWeight","PassPileUpRm","NextPassedNumber","theta","theta2"])
+    branches_name=["Nparticles_2","Ntracks_2","pTD_2","sigma1_2","sigma2_2","sigma_2","Nparticles_3","Ntracks_3","pTD_3","sigma1_3","sigma2_3","sigma_3","pt_3","eta_3","phi_3","e_3","Nparticles_4","Ntracks_4","pTD_4","sigma1_4","sigma2_4","sigma_4","pt_4","eta_4","phi_4","e_4","z1","z2","DeltaR","kt","Phi","kt0","GeneratorWeight","PassPileUpRm","NextPassedNumber","theta","theta2","WeightSpinoff","pt","pt_1","pt_2"]
+    if "Gen" in sample_path0:
+        branches_name.append("RecoPhi")
+    X_data, branch_to_index, index_to_branch,branch_names = dnn.LoadROOTFile(sample_paths=[sample_path0],entries=args.entries,branches_name=branches_name)
     select_item = [
         ["Nparticles_2","Ntracks_2","pTD_2","sigma1_2","sigma2_2","sigma_2","Nparticles_3","Ntracks_3","pTD_3","sigma1_3","sigma2_3","sigma_3","Nparticles_4","Ntracks_4","pTD_4","sigma1_4","sigma2_4","sigma_4","z1","z2","DeltaR","kt"]
     ]

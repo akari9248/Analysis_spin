@@ -767,7 +767,7 @@ public:
   void SetPalette(Color_t level = kRainBow) {
     gStyle->SetPalette(level);
   }
-  void AddExtraText(vector<TString> text, double x = 777, double y = 777) {
+  void AddExtraText(vector<TString> text,double spacing = 0.06 ,double x = 777, double y = 777) {
     double originx = x;
     double originy = y;
     if (x == y && x == 777) {
@@ -782,7 +782,7 @@ public:
     }
     for (int i = 0; i < text.size(); i++) {
       double posix = 0.0357;
-      double posiy = 0.917 - i * 0.06;
+      double posiy = 0.917 - i * spacing;
       double posix0 =
           originx + (rangexnumber.at(1) - rangexnumber.at(0)) * posix;
       double posiy0 = originy + (rangey.at(1) - rangey.at(0)) * posiy;

@@ -83,10 +83,13 @@ public:
                 }
             }
         }
+        treeEvents.addBranches("NextPassedNumber/D");
         treeEvents.addBranches("PassPileUpRm/I");
         treeEvents.addBranches("GeneratorWeight/D");
         treeEvents.addBranches("TriggerBits/vI");
         treeEvents.addBranches("TriggerPrescales/vD");
+        treeEvents.addBranches("RecoJetMatching/vI");
+        treeEvents.addBranches("GenJetMatching/vI");
     }
     void BranchAlias()
     {
@@ -115,6 +118,13 @@ public:
     {
         BranchAlias();
         treeEvents.BeginEvent();
+        for(int i=0;i<events->RecoJetMatching->size();i++){
+            
+            treeEvents.push_back("RecoJetMatching",events->RecoJetMatching->at(i));
+        }
+        for(int i=0;i<events->GenJetMatching->size();i++){
+            treeEvents.push_back("GenJetMatching",events->GenJetMatching->at(i));
+        }
         treeEvents.assign("NextPassedNumber", events->NextPassedNumber);
         treeEvents.assign("GeneratorWeight", events->GeneratorWeight);
         treeEvents.assign("PassPileUpRm", passpileuprm());
@@ -145,12 +155,14 @@ public:
             {
                 auto daughtersjet = daughtersjets.at(i);
                 auto planes = RecoPlane::JetConstituents(daughtersjet);
+                
                 RecoPlane::SavePlanes(planes, treeEvents, i, prefixs.at(branchindex), "");
                 double jes_scale = Branch.JetPt->at(i) * 1.0 / planes.first.initJet.Pt();
                 treeEvents.push_back(prefixs.at(branchindex) + "jes_scale", jes_scale);
             }
             branchindex++;
         }
+
     }
     int passpileuprm()
     {

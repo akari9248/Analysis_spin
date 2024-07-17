@@ -66,6 +66,11 @@ public :
    Double_t        GeneratorWeight;
    Double_t PassPileUpRm;
    Double_t NextPassedNumber;
+   Double_t WeightSpinoff;
+   Double_t RecoPhi;
+   Double_t        pt;
+   Double_t        pt_1;
+   Double_t        pt_2;
    // List of branches
    TBranch        *b_Nparticles_3;   //!
    TBranch        *b_Ntracks_3;   //!
@@ -111,6 +116,11 @@ public :
    TBranch        *b_GeneratorWeight;
    TBranch        *b_PassPileUpRm;
    TBranch        *b_NextPassedNumber;
+   TBranch        *b_WeightSpinoff;
+   TBranch        *b_RecoPhi;
+   TBranch        *b_pt;
+   TBranch        *b_pt_1;
+   TBranch        *b_pt_2;
    DataInfoML(TTree *tree=0);
    virtual ~DataInfoML();
    virtual Int_t    Cut(Long64_t entry);
@@ -220,6 +230,12 @@ void DataInfoML::Init(TTree *tree)
 
    fChain->SetBranchAddress("GeneratorWeight", &GeneratorWeight, &b_GeneratorWeight);
    fChain->SetBranchAddress("PassPileUpRm", &PassPileUpRm, &b_PassPileUpRm);
+   fChain->SetBranchAddress("WeightSpinoff", &WeightSpinoff, &b_WeightSpinoff);
+   fChain->SetBranchAddress("RecoPhi", &RecoPhi, &b_RecoPhi);
+   fChain->SetBranchAddress("pt", &pt, &b_pt);
+   fChain->SetBranchAddress("pt_1", &pt_1, &b_pt_1);
+   fChain->SetBranchAddress("pt_2", &pt_2, &b_pt_2);
+
    Notify();
 }
 

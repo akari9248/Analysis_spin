@@ -10,6 +10,7 @@
 #include "TH3D.h"
 #include <iostream>
 #include "TKey.h"
+using namespace std;
 class Hists {
 private:
     std::map<std::string, TH1*> hists;
@@ -48,6 +49,14 @@ public:
             uniqueName = baseName + std::to_string(suffix);  
         }
         return uniqueName;  
+    }
+    void list()
+    {
+        for (const auto &pair : hists)
+        {
+            const std::string &histName = pair.first;
+            cout<<histName<<endl;
+        }
     }
     void Add(Hists &histIn,double scale=1)
     {

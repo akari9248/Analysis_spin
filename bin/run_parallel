@@ -70,7 +70,7 @@ run_parallel() {
     local nparts=$3
     local nchunks=$4
     local extra_opts=$5
-    echo nohup ./"$executable" -i "$i" -n "$nparts" -k "$nchunks" $extra_opts > "log/output_${executable}_${i}.log"
+    echo ./"$executable" -i "$i" -n "$nparts" -k "$nchunks" $extra_opts > "log/output_${executable}_${i}.log"
     ./"$executable" -i "$i" -n "$nparts" -k "$nchunks" $extra_opts >> "log/output_${executable}_${i}.log" 2>&1
     #echo ./"$executable" -i "$i" -n "$nparts" -k "$nchunks" $extra_opts
   }

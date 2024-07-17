@@ -36,6 +36,7 @@ public:
     vector<int> j2_range;
     CommonTool::Options options;
     double NextPassedNumber;
+    Hists HistsWeightSpinoff;
     EventsAnalyzer(CommonTool::Options _options) { 
         options=_options;
         inputFolder = options.inputFolder; 
@@ -51,7 +52,21 @@ public:
     }
     void initialize() override
     {
+        HistsWeightSpinoff = Hists("draw/herwig_WeightSpinoff_jinitpt"+std::to_string(jinit_ptlow)+"_"+std::to_string(jinit_pthigh)+ "_j2pt"+std::to_string(j2_ptlow)+"_"+std::to_string(j2_pthigh)+".root");
+        //HistsWeightSpinoff = Hists("draw/pythia_WeightSpinoff_jinitpt"+std::to_string(jinit_ptlow)+"_"+std::to_string(jinit_pthigh)+ "_j2pt"+std::to_string(j2_ptlow)+"_"+std::to_string(j2_pthigh)+".root");
+
         t->Add((TString)inputFolder+"/Chunk*.root/DataInfo");
+        
+        treeEvents.addBranches("Nparticles_1/I");
+        treeEvents.addBranches("Ntracks_1/I");
+        treeEvents.addBranches("pTD_1/D");
+        treeEvents.addBranches("sigma1_1/D");
+        treeEvents.addBranches("sigma2_1/D");
+        treeEvents.addBranches("sigma_1/D");
+        treeEvents.addBranches("pt_1/D");
+        treeEvents.addBranches("eta_1/D");
+        treeEvents.addBranches("phi_1/D");
+        treeEvents.addBranches("e_1/D");
 
         treeEvents.addBranches("PassPileUpRm/I");
         treeEvents.addBranches("Nparticles_2/I");
@@ -94,6 +109,7 @@ public:
         treeEvents.addBranches("kt0/D");
 
         treeEvents.addBranches("Phi/D");
+        treeEvents.addBranches("RecoPhi/D");
         treeEvents.addBranches("type/I");
 
         treeEvents.addBranches("pt/D");
@@ -102,12 +118,15 @@ public:
         treeEvents.addBranches("dphi12_X/D");
         treeEvents.addBranches("theta/D");
         treeEvents.addBranches("theta2/D");
+
+        treeEvents.addBranches("WeightSpinoff/D");
         NextPassedNumber=0;
     }
     void analyze() override
     {
-        int plane_num = events->Genpt3->size();
         
+        int plane_num = events->Genpt3->size();
+        vector<ParticleInfo> jet1s(plane_num);
         vector<ParticleInfo> jet2s(plane_num);
         vector<ParticleInfo> jet3s(plane_num);
         vector<ParticleInfo> jet4s(plane_num);
@@ -115,6 +134,15 @@ public:
         vector<vector<ParticleInfo>> particles2(plane_num);
         vector<vector<ParticleInfo>> particles3(plane_num);
         vector<vector<ParticleInfo>> particles4(plane_num);
+        for (int i = 0; i < plane_num; i++)
+        {
+            ParticleInfo particle(events->Genpt1->at(i),
+                                  events->Geneta1->at(i),
+                                  events->Genphi1->at(i),
+                                  events->Gene1->at(i));
+
+            jet1s.at(i) = particle;
+        }
         for (int i = 0; i < plane_num; i++)
         {
             ParticleInfo particle(events->Genpt2->at(i),
@@ -191,17 +219,21 @@ public:
         int unit_NextPassedNumber = events->NextPassedNumber*1.0/plane_num;
         for (int i = 0; i < plane_num; i++)
         {
+
             NextPassedNumber+= unit_NextPassedNumber;
             double jesscale = events->Genjes_scale->at(i);
             if (!Selection::isWithinRange(events->Genjpt->at(i) * jesscale, jinit_range))
                 continue;
             int isqq = events->Genisqq->at(i);
             int isgg = events->Genisgg->at(i);
+            
             JetObservable JetObservable2(particles2.at(i));
             if (!Selection::isWithinRange(JetObservable2.jet_lorentzvector.Pt() * jesscale, j2_range))
                 continue;
-
+            
             auto width2 = JetObservable2.jetwidth();
+            JetObservable JetObservable1(particles1.at(i));
+            auto width1 = JetObservable1.jetwidth();
             JetObservable JetObservable3(particles3.at(i));
             auto width3 = JetObservable3.jetwidth();
             JetObservable JetObservable4(particles4.at(i));
@@ -217,16 +249,29 @@ public:
             treeEvents.assign("NextPassedNumber", NextPassedNumber);
             NextPassedNumber=0;
             treeEvents.assign("GeneratorWeight", events->GeneratorWeight);
+
+            treeEvents.assign("Nparticles_1", JetObservable1.Nparticles());
+            treeEvents.assign("Ntracks_1", JetObservable1.Ntracks());
+            treeEvents.assign("pTD_1", JetObservable1.pTD());
+            treeEvents.assign("sigma1_1", width1.sigma1);
+            treeEvents.assign("sigma2_1", width1.sigma2);
+            treeEvents.assign("sigma_1", width1.sigma);
+            treeEvents.assign("pt_1", jet1s.at(i).pt*jesscale);
+            treeEvents.assign("eta_1", jet1s.at(i).eta);
+            treeEvents.assign("phi_1", jet1s.at(i).phi);
+            treeEvents.assign("e_1", jet1s.at(i).e*jesscale);
+
+            
             treeEvents.assign("Nparticles_2", JetObservable2.Nparticles());
             treeEvents.assign("Ntracks_2", JetObservable2.Ntracks());
             treeEvents.assign("pTD_2", JetObservable2.pTD());
             treeEvents.assign("sigma1_2", width2.sigma1);
             treeEvents.assign("sigma2_2", width2.sigma2);
             treeEvents.assign("sigma_2", width2.sigma);
-            treeEvents.assign("pt_2", jet2s.at(i).pt);
+            treeEvents.assign("pt_2", jet2s.at(i).pt*jesscale);
             treeEvents.assign("eta_2", jet2s.at(i).eta);
             treeEvents.assign("phi_2", jet2s.at(i).phi);
-            treeEvents.assign("e_2", jet2s.at(i).e);
+            treeEvents.assign("e_2", jet2s.at(i).e*jesscale);
 
             treeEvents.assign("Nparticles_3", JetObservable3.Nparticles());
             treeEvents.assign("Ntracks_3", JetObservable3.Ntracks());
@@ -234,10 +279,10 @@ public:
             treeEvents.assign("sigma1_3", width3.sigma1);
             treeEvents.assign("sigma2_3", width3.sigma2);
             treeEvents.assign("sigma_3", width3.sigma);
-            treeEvents.assign("pt_3", jet3s.at(i).pt);
+            treeEvents.assign("pt_3", jet3s.at(i).pt*jesscale);
             treeEvents.assign("eta_3", jet3s.at(i).eta);
             treeEvents.assign("phi_3", jet3s.at(i).phi);
-            treeEvents.assign("e_3", jet3s.at(i).e);
+            treeEvents.assign("e_3", jet3s.at(i).e*jesscale);
 
             treeEvents.assign("Nparticles_4", JetObservable4.Nparticles());
             treeEvents.assign("Ntracks_4", JetObservable4.Ntracks());
@@ -245,24 +290,37 @@ public:
             treeEvents.assign("sigma1_4", width4.sigma1);
             treeEvents.assign("sigma2_4", width4.sigma2);
             treeEvents.assign("sigma_4", width4.sigma);
-            treeEvents.assign("pt_4", jet4s.at(i).pt);
+            treeEvents.assign("pt_4", jet4s.at(i).pt*jesscale);
             treeEvents.assign("eta_4", jet4s.at(i).eta);
             treeEvents.assign("phi_4", jet4s.at(i).phi);
-            treeEvents.assign("e_4", jet4s.at(i).e);
+            treeEvents.assign("e_4", jet4s.at(i).e*jesscale);
 
-            treeEvents.assign("pt", events->Genjpt->at(i));
+            treeEvents.assign("pt", events->Genjpt->at(i)*jesscale);
             treeEvents.assign("z1", events->Genz1->at(i));
             treeEvents.assign("z2", events->Genz2->at(i));
             treeEvents.assign("DeltaR", events->GendeltaR2->at(i));
-            treeEvents.assign("kt", events->Genkt2->at(i));
-            treeEvents.assign("kt0", events->Genkt1->at(i));
+            treeEvents.assign("kt", events->Genkt2->at(i)*jesscale);
+            treeEvents.assign("kt0", events->Genkt1->at(i)*jesscale);
 
             treeEvents.assign("Phi", events->Genphi->at(i));
+            if(events->GenJetMatching->at(i)<0){
+                treeEvents.assign("RecoPhi", -1.0);
+            }else{
+                treeEvents.assign("RecoPhi", events->Recophi->at(events->GenJetMatching->at(i)));
+            }
             treeEvents.assign("type", type);
             treeEvents.assign("dphi12_X",planetheta.dphi12_X);
             treeEvents.assign("theta",planetheta.theta);
             treeEvents.assign("theta2",planetheta.theta2);
+
+            treeEvents.assign("WeightSpinoff",GetWeightSpinoff(i));
+
+
         }
+    }
+    double GetWeightSpinoff(int i){
+        int bin = HistsWeightSpinoff["WeightSpinoff"]->FindBin(events->Genphi->at(i));
+        return HistsWeightSpinoff["WeightSpinoff"]->GetBinContent(bin);
     }
 };
 

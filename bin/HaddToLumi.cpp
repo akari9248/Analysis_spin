@@ -103,7 +103,13 @@ int main(int argc, char *argv[])
     if(options.printhelp) {print_help(argv);return 0;};
     auto root_files = CommonTool::readFirstColumn(options.root_file);
     vector<string> origin_datasets= CommonTool::readSecondColumnAsString(options.root_file);
-    vector<double> xsections = CommonTool::readSecondColumnAsDouble(options.xsection_file);
+    bool fixed_scale=true;
+    vector<double> xsections;
+    if(!options.xsection_file.empty()){
+        xsections = CommonTool::readSecondColumnAsDouble(options.xsection_file);
+        fixed_scale=false;
+    }
+    
     auto output_file = options.output_file;
     std::string dir_path = output_file.substr(0, output_file.find_last_of('/'));
     if ( output_file.find_last_of('/') != std::string::npos) {
@@ -121,7 +127,12 @@ int main(int argc, char *argv[])
         GetNumberOfEvents(origin_datasets.at(i),hist["MCNumber"]);
         double mc_number = hist["MCNumber"]->GetBinContent(1);
         double generate_number = hist["MCNumber"]->GetBinContent(2);
-        double scale = xsections.at(i)*lumi*1.0/mc_number;
+        double scale = 1;
+        if(!fixed_scale){
+            scale = xsections.at(i)*lumi*1.0/generate_number;
+        }else{
+            xsections.push_back(scale*1.0/lumi*generate_number);
+        }
         scales.push_back(scale);
         hist.Scale(scale);
         hists.push_back(hist);

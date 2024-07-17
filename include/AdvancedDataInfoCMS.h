@@ -177,6 +177,8 @@ public :
    double GeneratorWeight;
    int PassPileUpRm;
    double NextPassedNumber;
+   vector<int>     *RecoJetMatching;
+   vector<int>     *GenJetMatching;
    // List of branches
    TBranch        *b_GeneratorWeight;   //!
    TBranch        *b_NextPassedNumber;   //!
@@ -333,6 +335,8 @@ public :
    TBranch        *b_Recoz1;   //!
    TBranch        *b_Recoz2;   //!
    TBranch        *b_PassPileUpRm;
+   TBranch     *b_RecoJetMatching;
+   TBranch     *b_GenJetMatching;
    AdvancedDataInfoCMS(TTree *tree=0);
    virtual ~AdvancedDataInfoCMS();
    virtual Int_t    Cut(Long64_t entry);
@@ -543,6 +547,8 @@ void AdvancedDataInfoCMS::Init(TTree *tree)
    Recotheta2 = 0;
    Recoz1 = 0;
    Recoz2 = 0;
+   RecoJetMatching=0;
+   GenJetMatching=0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -703,6 +709,8 @@ void AdvancedDataInfoCMS::Init(TTree *tree)
    fChain->SetBranchAddress("Recotheta2", &Recotheta2, &b_Recotheta2);
    fChain->SetBranchAddress("Recoz1", &Recoz1, &b_Recoz1);
    fChain->SetBranchAddress("Recoz2", &Recoz2, &b_Recoz2);
+   fChain->SetBranchAddress("RecoJetMatching", &RecoJetMatching, &b_RecoJetMatching);
+   fChain->SetBranchAddress("GenJetMatching", &GenJetMatching, &b_GenJetMatching);
    Notify();
 }
 

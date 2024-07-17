@@ -36,6 +36,7 @@ public:
     vector<int> j2_range;
     CommonTool::Options options;
     double NextPassedNumber;
+    Hists HistsWeightSpinoff;
     EventsAnalyzer(CommonTool::Options _options) { 
         options=_options;
         inputFolder = options.inputFolder; 
@@ -51,6 +52,9 @@ public:
     }
     void initialize() override
     {
+        //HistsWeightSpinoff = Hists("draw/herwig_WeightSpinoff_jinitpt" + std::to_string(jinit_ptlow) + "_" + std::to_string(jinit_pthigh) + "_j2pt" + std::to_string(j2_ptlow) + "_" + std::to_string(j2_pthigh) + ".root");
+        HistsWeightSpinoff = Hists("draw/pythia_WeightSpinoff_jinitpt"+std::to_string(jinit_ptlow)+"_"+std::to_string(jinit_pthigh)+ "_j2pt"+std::to_string(j2_ptlow)+"_"+std::to_string(j2_pthigh)+".root");
+
         t->Add((TString)inputFolder+"/Chunk*.root/DataInfo");
 
         treeEvents.addBranches("PassPileUpRm/I");
@@ -102,6 +106,8 @@ public:
         treeEvents.addBranches("dphi12_X/D");
         treeEvents.addBranches("theta/D");
         treeEvents.addBranches("theta2/D");
+
+        treeEvents.addBranches("WeightSpinoff/D");
         NextPassedNumber=0;
     }
     void analyze() override
@@ -262,7 +268,15 @@ public:
             treeEvents.assign("dphi12_X",planetheta.dphi12_X);
             treeEvents.assign("theta",planetheta.theta);
             treeEvents.assign("theta2",planetheta.theta2);
+
+            treeEvents.assign("WeightSpinoff",GetWeightSpinoff(i));
         }
+    }
+    double GetWeightSpinoff(int i){
+        int jetid = events->RecoJetMatching->at(i);
+        if(jetid<0) return 0;
+        int bin = HistsWeightSpinoff["WeightSpinoff"]->FindBin(events->Genphi->at(jetid));
+        return HistsWeightSpinoff["WeightSpinoff"]->GetBinContent(bin);
     }
 };
 
