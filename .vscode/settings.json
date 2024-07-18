@@ -101,7 +101,8 @@
         "DataInfoML.C": "cpp",
         "temp.C": "cpp",
         "GetNpointpairinfox.C": "cpp",
-        "CMSJetsAndDaughters.C": "cpp"
+        "CMSJetsAndDaughters.C": "cpp",
+        "DataInfoML copy.C": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled",
     "python.analysis.extraPaths": [

@@ -13,6 +13,8 @@
 #include <iomanip>
 #include <cmath>
 #include "include/common_tool.h"
+#include "include/PlaneObservable.h"
+
 class EventsAnalyzer : public SampleAnalyzer<DataInfoML> {
 public:
   vector<string> spin_strs;
@@ -24,7 +26,7 @@ public:
   }
   void initialize() override
   {
-    t->Add((TString)options.inputFolder + "/Chunk*.root/DataInfo");
+    t->Add((TString)options.inputFolder + "/*.root/DataInfo");
     hists.addHist("MC_number", 2, 0, 2);
 
     hists.addHist("phi_qq" , 100, 0, TMath::Pi());
@@ -33,15 +35,31 @@ public:
     hists.addHist("theta_gg", 100, 0, TMath::Pi());
     hists.addHist("theta2_qq", 100, 0, TMath::Pi());
     hists.addHist("theta2_gg", 100, 0, TMath::Pi());
+
+    hists.addHist("phi3_qq" , 100, 0, TMath::Pi());
+    hists.addHist("phi3_gg", 100, 0, TMath::Pi());
+
+    for(int i=0;i<=5;i++){
+      hists.addHist((string)TString::Format("phi3_type%d",i), 100, 0, TMath::Pi());
+      hists.addHist((string)TString::Format("phi_type%d",i), 100, 0, TMath::Pi());
+    }
   }
   void analyze() override {
     if(events->PassPileUpRm==0) {
       return;
     }
+    PlaneObservable::plane plane1(events->pt_1,events->eta_1,events->phi_1,events->e_1,
+                                  events->pt_2,events->eta_2,events->phi_2,events->e_2);
+    PlaneObservable::plane plane2(events->pt_3,events->eta_3,events->phi_3,events->e_3,
+                                  events->pt_4,events->eta_4,events->phi_4,events->e_4);
+    PlaneObservable::plane plane3(events->pt_5,events->eta_5,events->phi_5,events->e_5,
+                                  events->pt_6,events->eta_6,events->phi_6,events->e_6);
     hists["MC_number"]->Fill(0);
     hists["MC_number"]->Fill(1,events->NextPassedNumber);
     bool isqq =  events->type==2 && events->kt>2;
     bool isgg =  events->type==1 && events->kt>2;
+    hists[(string)TString::Format("phi_type%d",events->type)]->Fill(PlaneObservable::DeltaPhi(plane1,plane2));
+    hists[(string)TString::Format("phi3_type%d",events->type3)]->Fill(PlaneObservable::DeltaPhi(plane1,plane3));
     if(isqq){
       hists["phi_qq"]->Fill(events->Phi);
       hists["theta_qq"]->Fill(events->theta);
@@ -50,6 +68,11 @@ public:
       hists["phi_gg"]->Fill(events->Phi);
       hists["theta_gg"]->Fill(events->theta);
       hists["theta2_gg"]->Fill(events->theta2);
+    }
+    if(events->type3==2&&events->z1>0.4){
+      hists["phi3_qq"]->Fill(events->Phi3);
+    }else if(events->type3==1&&events->z1>0.4){
+      hists["phi3_gg"]->Fill(events->Phi3);
     }
   }
 };

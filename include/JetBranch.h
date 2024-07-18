@@ -42,6 +42,8 @@ public:
     int softer_nparticles;
     vector<ParticleInfo> harder_constituents_info;
     vector<ParticleInfo> softer_constituents_info;
+    int softer_flav;
+    int harder_flav;
     void GetVector(vector<ParticleInfo> particlesinfo) {
       harder_vect = JetBranch::PseudoJetToTLorentzVector(harder);
       softer_vect = JetBranch::PseudoJetToTLorentzVector(softer);
@@ -77,6 +79,14 @@ public:
     JetBranch::PlaneVariables first;
     JetBranch::PlaneVariables second;
     double deltaPhi;
+    double Q=0;
+  };
+  struct threeplanes {
+    JetBranch::PlaneVariables first;
+    JetBranch::PlaneVariables second;
+    JetBranch::PlaneVariables third;
+    double deltaPhi;
+    double deltaPhi2;
     double Q=0;
   };
   static double DeltaPhi(PlaneVariables plane1, PlaneVariables plane2) {
@@ -156,7 +166,6 @@ public:
                             secondaryHarder.constituents(),
                             secondarySofter.constituents()};
           }
-          
           secondplanejet = secondaryHarder;
         }
       }
@@ -174,6 +183,120 @@ public:
     twoplanes_out.second = maxSecondary;
     twoplanes_out.deltaPhi = JetBranch::DeltaPhi(maxPrimary, maxSecondary);
     return twoplanes_out;
+  }
+  static threeplanes findPrimarySecondaryAndThirdaryJets(PseudoJet &j0,double z1cut,double z2cut,double kt1cut,double kt2cut,std::vector<ParticleInfo> particlesinfo,bool issecondsoft=true) {
+    PseudoJet j1, j2, j3, j4,jinit;
+    PlaneVariables maxPrimary = {
+        PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+        0.0,         0.0,         TVector3()};
+    PlaneVariables maxSecondary = {
+        PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+        0.0,         0.0,         TVector3()};
+    PlaneVariables maxThirdary = {
+        PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+        0.0,         0.0,         TVector3()};
+    jinit = j0;    
+    
+    while (j0.has_parents(j1, j2)) {
+      PseudoJet primaryHarder = (j1.modp() > j2.modp()) ? j1 : j2;
+      PseudoJet primarySofter = (j1.modp() > j2.modp()) ? j2 : j1;
+      double primaryTheta = primaryHarder.delta_phi_to(primarySofter);
+      double primaryDeltaR = primaryHarder.delta_R(primarySofter);
+      double primaryZ =
+          primarySofter.modp() / (primarySofter.modp() + primaryHarder.modp());
+      double primaryKt = primarySofter.modp() * primaryDeltaR;
+      // double primaryKt = primarySofter.modp() * sin(primaryTheta);
+      // Update maxPrimary if this kt is larger
+
+      if (primaryKt > maxPrimary.kt && primaryZ>z1cut && primaryKt<kt1cut) {
+        maxPrimary = {primaryHarder,
+                      primarySofter,
+                      PseudoJetToTLorentzVector(primaryHarder),
+                      PseudoJetToTLorentzVector(primarySofter),
+                      primaryTheta,
+                      primaryDeltaR,
+                      primaryZ,
+                      primaryKt,
+                      TVector3(),
+                      primaryHarder.constituents(),
+                      primarySofter.constituents()};
+        maxSecondary = {
+                        PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+                        0.0,         0.0,         TVector3()};
+        maxThirdary = {
+                        PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+                        0.0,         0.0,         TVector3()};
+        PseudoJet secondplanejet = primaryHarder;    
+        PseudoJet thirdplanejet = primaryHarder;      
+        if (issecondsoft) secondplanejet = primarySofter; 
+        while (secondplanejet.has_parents(j3, j4)) {
+          PseudoJet secondaryHarder = (j3.modp() > j4.modp()) ? j3 : j4;
+          PseudoJet secondarySofter = (j3.modp() > j4.modp()) ? j4 : j3;
+          double secondaryTheta = secondaryHarder.delta_phi_to(secondarySofter);
+          double secondaryDeltaR =
+              secondaryHarder.delta_R(secondarySofter);
+          double secondaryZ = secondarySofter.modp() /
+                              (secondarySofter.modp() + secondaryHarder.modp());
+          double secondaryKt = secondarySofter.modp() * secondaryDeltaR;
+          if (secondaryKt > maxSecondary.kt && secondaryZ>z2cut && secondaryKt>kt2cut) {
+            maxSecondary = {secondaryHarder,
+                            secondarySofter,
+                            PseudoJetToTLorentzVector(secondaryHarder),
+                            PseudoJetToTLorentzVector(secondarySofter),
+                            secondaryTheta,
+                            secondaryDeltaR,
+                            secondaryZ,
+                            secondaryKt,
+                            TVector3(),
+                            secondaryHarder.constituents(),
+                            secondarySofter.constituents()};
+          }
+          secondplanejet = secondaryHarder;
+        }
+        while (thirdplanejet.has_parents(j3, j4)) {
+          PseudoJet thirdaryHarder = (j3.modp() > j4.modp()) ? j3 : j4;
+          PseudoJet thirdarySofter = (j3.modp() > j4.modp()) ? j4 : j3;
+          double thirdaryTheta = thirdaryHarder.delta_phi_to(thirdarySofter);
+          double thirdaryDeltaR =
+              thirdaryHarder.delta_R(thirdarySofter);
+          double thirdaryZ = thirdarySofter.modp() /
+                              (thirdarySofter.modp() + thirdaryHarder.modp());
+          double thirdaryKt = thirdarySofter.modp() * thirdaryDeltaR;
+          if (thirdaryKt > maxThirdary.kt && thirdaryZ>z2cut && thirdaryKt>kt2cut) {
+            maxThirdary = {thirdaryHarder,
+                            thirdarySofter,
+                            PseudoJetToTLorentzVector(thirdaryHarder),
+                            PseudoJetToTLorentzVector(thirdarySofter),
+                            thirdaryTheta,
+                            thirdaryDeltaR,
+                            thirdaryZ,
+                            thirdaryKt,
+                            TVector3(),
+                            thirdaryHarder.constituents(),
+                            thirdarySofter.constituents()};
+          }
+          thirdplanejet = thirdaryHarder;
+        }
+      }
+      
+      
+      j0 = primaryHarder; // Move to the next iteration with the harder subjet
+    }
+    
+    /// Add plane vector
+    maxPrimary.GetVector(particlesinfo);
+    maxSecondary.GetVector(particlesinfo);
+    maxThirdary.GetVector(particlesinfo);
+    threeplanes threeplanes_out;
+    maxPrimary.initJet.SetPtEtaPhiE(jinit.pt(),jinit.eta(),jinit.phi(),jinit.e());
+    maxSecondary.initJet.SetPtEtaPhiE(jinit.pt(),jinit.eta(),jinit.phi(),jinit.e());
+    maxThirdary.initJet.SetPtEtaPhiE(jinit.pt(),jinit.eta(),jinit.phi(),jinit.e());
+    threeplanes_out.first = maxPrimary;
+    threeplanes_out.second = maxSecondary;
+    threeplanes_out.third = maxThirdary;
+    threeplanes_out.deltaPhi = JetBranch::DeltaPhi(maxPrimary, maxSecondary);
+    threeplanes_out.deltaPhi2 = JetBranch::DeltaPhi(maxPrimary, maxThirdary);
+    return threeplanes_out;
   }
   static int netflavour(PseudoJet j,vector<ParticleInfo> particlesinfo,double minflavourpt=0) {
     vector<int> pdgids;
@@ -247,6 +370,8 @@ public:
     if (allmatch) {
       src_plane.isqq = dst_plane.isqq;
       src_plane.isgg = dst_plane.isgg;
+      src_plane.softer_flav = dst_plane.softer_flav;
+      src_plane.harder_flav = dst_plane.harder_flav;
     }
     return allmatch;
   }
@@ -290,6 +415,54 @@ public:
       }
     }
     return match_results;
+  }
+  static std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+  matchPlanes(vector<std::vector<JetBranch::threeplanes>> &src_threeplanes,
+              vector<std::vector<JetBranch::threeplanes>> &dst_threeplanes,
+              TString opt = "second",double drcutweight=1) {
+    std::vector<JetBranch::PlaneVariables> src_plane, dst_plane;
+    vector<std::vector<int>> match_results2;
+    vector<std::vector<int>> match_results3;
+    if (opt.EqualTo("second")) {
+      for (size_t i = 0; i < src_threeplanes.size(); i++) {
+        std::vector<int> match_results02;
+        std::vector<int> match_results03;
+        for(size_t j = 0; j < src_threeplanes.at(i).size(); j++){
+          match_results02.push_back(-1);
+          match_results03.push_back(-1);
+          src_threeplanes[i][j].first.isgg=false;
+          src_threeplanes[i][j].first.isqq=false;
+          src_threeplanes[i][j].second.isgg=false;
+          src_threeplanes[i][j].second.isqq=false;
+          src_threeplanes[i][j].third.isgg=false;
+          src_threeplanes[i][j].third.isqq=false;
+
+           src_threeplanes[i][j].first.harder_flav=0;
+          src_threeplanes[i][j].first.softer_flav=0;
+          src_threeplanes[i][j].second.harder_flav=0;
+          src_threeplanes[i][j].second.softer_flav=0;
+          src_threeplanes[i][j].third.harder_flav=0;
+          src_threeplanes[i][j].third.softer_flav=0;
+
+          for(size_t k = 0; k < dst_threeplanes.at(i).size(); k++){
+            matchPlanes(src_threeplanes[i][j].first, dst_threeplanes[i][k].first, drcutweight);
+            if (matchPlanes(src_threeplanes[i][j].second, dst_threeplanes[i][k].second, drcutweight) ||
+                matchPlanes(src_threeplanes[i][j].second, dst_threeplanes[i][k].third, drcutweight))
+            {
+              match_results02[j] = k;
+            }
+            if (matchPlanes(src_threeplanes[i][j].third, dst_threeplanes[i][k].third, drcutweight) ||
+                matchPlanes(src_threeplanes[i][j].third, dst_threeplanes[i][k].second, drcutweight))
+            {
+              match_results03[j] = k;
+            }
+          }
+        }
+        match_results2.push_back(match_results02);
+        match_results3.push_back(match_results03);
+      }
+    }
+    return std::make_pair(match_results2, match_results3);
   }
   static void SetUserIndex(PseudoJet &jet, int &index) {
     if (jet.user_index() != -1) {

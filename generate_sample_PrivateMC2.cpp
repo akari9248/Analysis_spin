@@ -74,7 +74,7 @@ public:
                 "z2", "kt2", "theta2","deltaR2", "eec2",
                 "z3", "kt3", "theta3","deltaR3", "eec3", 
                 "n1x", "n1y","n1z", "n2x", "n2y", "n2z", "n3x", "n3y", "n3z", 
-                "isqq", "isgg", "isqq2", "isgg2", "phi", "phi2", 
+                "isqq", "isgg", "isqq2", "isgg2", "phi", "thirdphi", 
                 "jpt", "jeta","jphi", "je", "jes_scale", 
                 "particle1_pt", "particle1_eta", "particle1_phi", "particle1_e","particle1_charge", "particle1_pid", "particle1_jetid", 
                 "particle2_pt", "particle2_eta","particle2_phi", "particle2_e", "particle2_charge", "particle2_pid", "particle2_jetid",
@@ -89,6 +89,8 @@ public:
                     branch_name == "ntracks5" ||branch_name == "ntracks6" || 
                     branch_name == "nparticles1" || branch_name == "nparticles2" || branch_name == "nparticles3" || branch_name == "nparticles4" || 
                     branch_name == "nparticles5" || branch_name == "nparticles6" || 
+                    branch_name == "flavour1" || branch_name == "flavour2" || branch_name == "flavour3" || branch_name == "flavour4" || 
+                    branch_name == "flavour5" || branch_name == "flavour6" || 
                     branch_name == "particle1_pid" || branch_name == "particle1_jetid" || 
                     branch_name == "particle2_pid" || branch_name == "particle2_jetid" || 
                     branch_name == "particle3_pid" || branch_name == "particle3_jetid" || 
@@ -104,7 +106,8 @@ public:
                 }
             }
         }
-        treeEvents.addBranches("match/vI");
+        treeEvents.addBranches("match2/vI");
+        treeEvents.addBranches("match3/vI");
         treeEvents.addBranches("PassPileUpRm/I");
         treeEvents.addBranches("GeneratorWeight/D");
         BranchAssignment();
@@ -133,9 +136,9 @@ public:
         treeEvents.assign("GeneratorWeight", 1.0);
         treeEvents.assign("PassPileUpRm",1);
         int branchindex = 0;
-        vector<std::vector<JetBranch::twoplanes>> Parton_planes(1,std::vector<JetBranch::twoplanes>());
-        vector<std::vector<JetBranch::twoplanes>> Hadron_planes(1,std::vector<JetBranch::twoplanes>());
-        std::vector<std::vector<std::vector<JetBranch::twoplanes>>> planes_arr = {Parton_planes, Hadron_planes};
+        vector<std::vector<JetBranch::threeplanes>> Parton_planes(1,std::vector<JetBranch::threeplanes>());
+        vector<std::vector<JetBranch::threeplanes>> Hadron_planes(1,std::vector<JetBranch::threeplanes>());
+        std::vector<std::vector<std::vector<JetBranch::threeplanes>>> planes_arr = {Parton_planes, Hadron_planes};
         for (auto &branchvector : Branches)
         {
             std::vector<PseudoJet> particles;
@@ -176,16 +179,14 @@ public:
             }
             for (int i = 0; i < daughtersjets.size(); i++)
             {
-                
                 auto daughtersjet = daughtersjets.at(i);
-                auto planes = RecoPlane::JetConstituents(daughtersjet);
+                auto planes = RecoPlane::JetConstituents_threeplanes(daughtersjet);
                 AssignFlavour(planes);
                 planes_arr.at(branchindex).at(0).push_back(planes);
             }
             branchindex++;
-            
         }
-        auto match = JetBranch::matchPlanes(planes_arr.at(1),planes_arr.at(0),  "second", 0.5);
+        auto match = JetBranch::matchPlanes(planes_arr.at(1),planes_arr.at(0),"second", 0.5);
         branchindex=0;
         for(auto &branchvector : Branches){
             for (int i = 0; i < planes_arr.at(branchindex).at(0).size(); i++)
@@ -197,24 +198,41 @@ public:
             }
             branchindex++;
         }
-        for(auto &match_info:match.at(0)){
-            treeEvents.push_back("match", match_info);
+        for(auto &match_info:match.first.at(0)){
+            treeEvents.push_back("match2", match_info);
+        }
+        for(auto &match_info:match.second.at(0)){
+            treeEvents.push_back("match3", match_info);
         }
     }
-    void AssignFlavour(JetBranch::twoplanes &planes)
+    void AssignFlavour(JetBranch::threeplanes &planes)
     {
         int pdgid11 = JetBranch::GetIFNFlavour(planes.first.harder);
         int pdgid12 = JetBranch::GetIFNFlavour(planes.first.softer);
         int pdgid21 = JetBranch::GetIFNFlavour(planes.second.harder);
         int pdgid22 = JetBranch::GetIFNFlavour(planes.second.softer);
+        int pdgid31 = JetBranch::GetIFNFlavour(planes.third.harder);
+        int pdgid32 = JetBranch::GetIFNFlavour(planes.third.softer);
         
         bool isqq = JetBranch::isqq(pdgid21, pdgid22, pdgid12);
         bool isgg = JetBranch::isgg(pdgid21, pdgid22, pdgid12);
+
+        bool isqq2 = JetBranch::isqq(pdgid31, pdgid32, pdgid11);
+        bool isgg2 = JetBranch::isgg(pdgid31, pdgid32, pdgid11);
 
         planes.first.isqq = JetBranch::isqq(pdgid11, pdgid12);
         planes.first.isgg = JetBranch::isgg(pdgid11, pdgid12);
         planes.second.isqq = JetBranch::isqq(pdgid21, pdgid22);
         planes.second.isgg = JetBranch::isgg(pdgid21, pdgid22);
+        planes.third.isqq = JetBranch::isqq(pdgid31, pdgid32);
+        planes.third.isgg = JetBranch::isgg(pdgid31, pdgid32);
+
+        planes.first.harder_flav= pdgid11;
+        planes.first.softer_flav= pdgid12;
+        planes.second.harder_flav= pdgid21;
+        planes.second.softer_flav= pdgid22;
+        planes.third.harder_flav= pdgid31;
+        planes.third.softer_flav= pdgid32;
     }
 };
 int main(int argc, char *argv[])

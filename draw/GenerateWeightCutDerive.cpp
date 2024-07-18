@@ -9,8 +9,9 @@
 #include <getopt.h>
 #include "TDirectory.h"
 #include "TH2D.h"
-#include "../../EEC_Analysis/include/Smooth_fit.h"
+#include "../include/Smooth_fit.h"
 #include "../../EEC_Analysis/include/Draw_help.h"
+#include "TF1.h"
 void TwoPads(vector<TH1D *> hists,TString filename,TString ExtraText="",vector<TString> legend_name={});
 void GenerateWeightCutDerive(){
 
@@ -24,9 +25,10 @@ void GenerateWeightCutDerive(){
             if(count>=GeneratorWeightCut->GetBinContent(i)*0.9999){
                 double cot= GeneratorWeightCut->GetBinContent(i);
                 GeneratorWeightCut->SetBinContent(i,GeneratorWeight->GetYaxis()->GetBinCenter(j));
-
-                GeneratorWeightCut->SetBinError(i,GeneratorWeightCut->GetBinError(i)/cot*GeneratorWeightCut->GetBinContent(i));
+                GeneratorWeightCut->SetBinError(i,abs(GeneratorWeightCut->GetBinContent(i)-GeneratorWeightCut->GetBinContent(i-1)));
+                //GeneratorWeightCut->SetBinError(i,GeneratorWeightCut->GetBinError(i)/cot*GeneratorWeightCut->GetBinContent(i));
                 if(cot==0) GeneratorWeightCut->SetBinError(i,0);
+                //GeneratorWeightCut->SetBinError(i,0);
                 break;
             }
         }
@@ -34,9 +36,8 @@ void GenerateWeightCutDerive(){
     }
     TFile *f = new TFile("GeneratorWeightcut.root","recreate");
     GeneratorWeightCut->Write();
-    //TH1D *GeneratorWeightCut2 = Relogbin(GeneratorWeightCut, 100,50);
-    TF1 *GeneratorWeightCut_fit=GetSmoothFit(GeneratorWeightCut,100,200,10,true);
-    //GeneratorWeightCut2->Write();
+    TF1 *GeneratorWeightCut_fit=GetSmoothFit(GeneratorWeightCut,30,7000,40,true,2.0);
+    GeneratorWeightCut_fit->SetRange(30,5000);
     GeneratorWeightCut_fit->Write();
     f->Close();
 }

@@ -59,7 +59,7 @@ To add the `bin` directory of the current project to your `PATH` environment var
 echo "export PATH=\"\$PATH:$(pwd)/bin\"" >> ~/.bashrc
 source ~/.bashrc
 ```
-## Adding the `IFN PATH` to Your bin/compile
+Adding the `IFN PATH` to Your bin/compile
 Edit the `bin/compile` script and change line 15 to your own path:
 ```sh
 IFNPLUGIN_PATH=/path/to/IFNPlugin
