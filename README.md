@@ -39,6 +39,16 @@ make
 make install
 ```
 
+## GHSAlgo
+
+GHSAlgo is another FastJet plugin for implementing interleaved flavour neutralisation. Clone it from the following location:
+```bash
+git clone https://github.com/jetflav/GHSAlgo.git
+cd GHSAlgo
+make
+make install
+```
+
 ## Boost Library
 
 The project also requires support from the Boost library:
@@ -59,10 +69,16 @@ To add the `bin` directory of the current project to your `PATH` environment var
 echo "export PATH=\"\$PATH:$(pwd)/bin\"" >> ~/.bashrc
 source ~/.bashrc
 ```
-Adding the `IFN PATH` to Your bin/compile
 Edit the `bin/compile` script and change line 15 to your own path:
+Adding the `IFN PATH` to Your bin/compile
 ```sh
 IFNPLUGIN_PATH=/path/to/IFNPlugin
 For example:
 IFNPLUGIN_PATH=/home/zlin/app/IFNPlugin
+```
+Adding the `GHS PATH` to Your bin/compile
+```sh
+IFNPLUGIN_PATH=/path/to/GHSAlgo
+For example:
+IFNPLUGIN_PATH=/home/zlin/app/GHSAlgo
 ```

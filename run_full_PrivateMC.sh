@@ -40,11 +40,12 @@ outputPredictedFolder=$baseOutputFolder"/ML/predict/"
 # rm $outputFeatureFolder/*.root
 # run_parallel Extract_features_PrivateMC -nchunks $nchunks -nparts $nparts -opt "-I $outputRecoFolder -O ${outputFeatureFolder} --jinit_ptlow $jinit_ptlow  --jinit_pthigh $jinit_pthigh --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --spin 1 --OneGeVCut 1"
 ################### Get train results ##############
-# python dnn_load_FourLabel.py --sample_path0  ${outputFeatureFolder}'/*.root'  --model_path ML/model/fourLabels_j2pt${j2_ptlow}_${j2_pthigh} --entries 1000000000 --suffix $outputPredictedFolder${SampleType}$ptselection
+#python dnn_load_FourLabel.py --sample_path0  ${outputFeatureFolder}'/*.root'  --model_path ML/model/fourLabels_j2pt${j2_ptlow}_${j2_pthigh} --entries 1000000000 --suffix $outputPredictedFolder${SampleType}$ptselection
+python dnn_feature_importance_FourLabel.py --sample_path0  ${outputFeatureFolder}'/*.root'  --model_path ML/model/fourLabels_j2pt${j2_ptlow}_${j2_pthigh} --entries 100000000 --suffix $outputPredictedFolder${SampleType}$ptselection
 ##################  Derive final results ############
 # compile Draw_plots_fourLabel_maxscore.cpp
 # ./Draw_plots_fourLabel_maxscore -I $outputPredictedFolder${SampleType}$ptselection""  -O  "plots/ML_plots/Maxscore/"${SampleType}$ptselection"/"
-compile Draw_plots_fourLabel.cpp
-./Draw_plots_fourLabel -I $outputPredictedFolder${SampleType}$ptselection""  -O  "plots/ML_plots/"${SampleType}$ptselection"/"
+# compile Draw_plots_fourLabel.cpp
+# ./Draw_plots_fourLabel -I $outputPredictedFolder${SampleType}$ptselection""  -O  "plots/ML_plots/"${SampleType}$ptselection"/"
 # compile Draw_plots_type.cpp
 # ./Draw_plots_type -I ${outputFeatureFolder}  -O  "plots/plots/"${SampleType}$ptselection"/"

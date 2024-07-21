@@ -24,9 +24,10 @@ void drawqq_phi(){
 
     // Hists herwigSpinon_hists("../plots/plots/Private_threeplanes_Herwig_spinon_jinitpt800_7000_j2pt130_7000/ML_SpinObservable.root");
     // Hists herwigSpinoff_hists("../plots/plots/Private_threeplanes_Herwig_spinoff_jinitpt800_7000_j2pt130_7000/ML_SpinObservable.root");
+    // Hists herwigSpinon_hists("../plots/plots/Hadronspinon/ML_SpinObservable.root");
+    // Hists herwigSpinoff_hists("../plots/plots/Hadronspinoff/ML_SpinObservable.root");
     Hists herwigSpinon_hists("../plots/plots/Hadronspinon/ML_SpinObservable.root");
     Hists herwigSpinoff_hists("../plots/plots/Hadronspinoff/ML_SpinObservable.root");
-
     TH1D *herwigoff = GetHist(herwigSpinoff_hists,{obs});
     TH1D *herwigon  =  GetHist(herwigSpinon_hists,{obs});
 

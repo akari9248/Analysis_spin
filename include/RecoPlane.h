@@ -6,6 +6,7 @@
 #include "TreeEvents.h"
 #include "common_tool.h"
 #include "fastjet/contrib/IFNPlugin.hh"
+#include "fastjet/contrib/GHSAlgo.hh"
 #include <TChain.h>
 #include <TFile.h>
 #include <TLorentzVector.h>
@@ -99,6 +100,7 @@ public:
                              JetDefinition::max_allowable_R);
     fastjet::contrib::FlavRecombiner flav_recombiner;
     jet_def_CA.set_recombiner(&flav_recombiner);
+
     double alpha = 1.0;
     double omega = 3.0 - alpha;
     fastjet::contrib::FlavRecombiner::FlavSummation flav_summation =
@@ -107,9 +109,54 @@ public:
     JetDefinition IFN_jet_def(ifn_plugin);
     IFN_jet_def.delete_plugin_when_unused();
     ClusterSequence cs_IFN(particles, IFN_jet_def);
+
     vector<PseudoJet> jets_IFN = sorted_by_pt(cs_IFN.inclusive_jets());
+
     PseudoJet j0, j1, j2, j3, j4;
     j0 = jets_IFN[0];
+    
+    double Q = j0.e();
+    auto threeplanes = JetBranch::findPrimarySecondaryAndThirdaryJets(
+        j0, z1cut, z2cut, kt1cut * 2 * Q, kt2cut * 2 * Q, particlesinfo,
+        issecondsoft);
+
+    return threeplanes;
+  }
+  static JetBranch::threeplanes
+  JetConstituents_threeplanesGHS(vector<ParticleInfo> constituents) {
+    double z1cut = 0;
+    double z2cut = 0;
+    double kt1cut = 1;
+    double kt2cut = 0;
+    double issecondsoft = true;
+    vector<JetBranch::twoplanes> twoplanes;
+    std::vector<PseudoJet> particles;
+    std::vector<ParticleInfo> particlesinfo;
+    for (size_t i = 0; i < constituents.size(); ++i) {
+      TLorentzVector p;
+      p.SetPtEtaPhiE(constituents.at(i).pt, constituents.at(i).eta,
+                     constituents.at(i).phi, constituents.at(i).e);
+      PseudoJet particle = PseudoJet(p.Px(), p.Py(), p.Pz(), p.Energy());
+      int pdgid = constituents.at(i).pdgid;
+      ParticleInfo particleInfo(pdgid, constituents.at(i).chargeInt);
+      particlesinfo.push_back(particleInfo);
+      particle.set_user_index(i);
+      particle.set_user_info(new FlavHistory(pdgid));
+      particles.push_back(particle);
+    }
+    JetDefinition jet_def_CA(cambridge_algorithm,
+                             JetDefinition::max_allowable_R);
+    fastjet::contrib::FlavRecombiner flav_recombiner;
+    jet_def_CA.set_recombiner(&flav_recombiner);
+    
+    double GHS_alpha = 1.0; // < flav-kt distance parameter alpha
+    double GHS_omega = 2.0;
+    ClusterSequence cs_CA(particles, jet_def_CA);
+    vector<PseudoJet> jets_CA = sorted_by_pt(cs_CA.inclusive_jets());
+    vector<PseudoJet> GHS_jets  = run_GHS(jets_CA, 0, GHS_alpha, GHS_omega, flav_recombiner);
+
+    PseudoJet j0, j1, j2, j3, j4;
+    j0 = GHS_jets[0];
     
     double Q = j0.e();
     auto threeplanes = JetBranch::findPrimarySecondaryAndThirdaryJets(

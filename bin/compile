@@ -13,13 +13,17 @@ else
 fi
 
 IFNPLUGIN_PATH=/home/zlin/app/IFNPlugin
+GHSPLUGIN_PATH=/home/zlin/app/GHSAlgo
 g++ "$input_file" \
     -I"$HOME/.local/include" \
     -I"$IFNPLUGIN_PATH" \
     -L"$IFNPLUGIN_PATH" \
+    -I"$GHSPLUGIN_PATH" \
+    -L"$GHSPLUGIN_PATH" \
     -L"$HOME/.local/lib" \
     -lRecursiveTools \
     -lIFNPlugin \
+    -lGHSAlgo\
     $(root-config --cflags --ldflags --glibs) \
     $(fastjet-config --cxxflags --libs --plugins) \
     -o "$output_file"
