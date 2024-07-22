@@ -132,6 +132,7 @@ public:
         treeEvents.addBranches("type/I");
         treeEvents.addBranches("type3/I");
         treeEvents.addBranches("match/I");
+         treeEvents.addBranches("match3/I");
 
         treeEvents.addBranches("pt/D");
         treeEvents.addBranches("GeneratorWeight/D");
@@ -140,6 +141,9 @@ public:
         treeEvents.addBranches("dphi12_X/D");
         treeEvents.addBranches("theta/D");
         treeEvents.addBranches("theta2/D");
+        treeEvents.addBranches("dphi12_X3/D");
+        treeEvents.addBranches("theta3/D");
+        treeEvents.addBranches("theta23/D");
         NextPassedNumber=0;
         
     }
@@ -312,6 +316,8 @@ public:
             if(events->kt2_Hadron->at(i)<2 || events->kt3_Hadron->at(i)<2 ) continue;
             SpinObservable spinobservable(particles1.at(i),particles2.at(i),particles3.at(i),particles4.at(i));
             auto planetheta=spinobservable.GetPlaneTheta();
+            SpinObservable spinobservable3(particles1.at(i),particles2.at(i),particles5.at(i),particles6.at(i));
+            auto planetheta3=spinobservable3.GetPlaneTheta();
 
             treeEvents.BeginEvent();
             treeEvents.assign("NextPassedNumber", NextPassedNumber);
@@ -396,10 +402,14 @@ public:
             treeEvents.assign("type",type);
             treeEvents.assign("type3",type3);
             treeEvents.assign("match",events->match->at(i));
-
+            treeEvents.assign("match3",events->match3->at(i));
             treeEvents.assign("dphi12_X",planetheta.dphi12_X);
             treeEvents.assign("theta",planetheta.theta);
             treeEvents.assign("theta2",planetheta.theta2);
+
+            treeEvents.assign("dphi12_X3",planetheta3.dphi12_X);
+            treeEvents.assign("theta3",planetheta3.theta);
+            treeEvents.assign("theta23",planetheta3.theta2);
         }
     }
     int determineType(int flavour1, int flavour2) {
@@ -428,7 +438,7 @@ public:
         if (flavour2 == 21 && flavour1 == 0) {
             return 5;
         }
-        return 0; // 默认类型
+        return 0; 
     }
 };
 // void Draw_plots_mini2(){

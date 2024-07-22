@@ -14,7 +14,7 @@ nparts=100
 
 # inputFolder="/storage/xiaoxue/code/git_file/QCDAnalysis/OfflineExamples/data/herwig/Decay_1_spinon_450_forai/"
 # SampleType="Private_Herwig_spinon"
-spin="spinoff"
+spin="spinon"
 inputFolder="/storage/xiaoxue/code/git_file/QCDAnalysis/OfflineExamples/data/herwig/Decay_1_"$spin"_450_forai/"
 SampleType="Private_Herwig_"$spin
 

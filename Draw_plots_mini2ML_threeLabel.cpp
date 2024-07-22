@@ -23,7 +23,7 @@ public:
     options=_options;
   }
   void initialize() override {
-    t->Add((TString)options.inputFolder+"/Chunk*.root/DNNTrainTree");
+    t->Add((TString)options.inputFolder+"/*.root/DNNTrainTree");
     hists.addHist("MC_number", 2, 0, 2);
     cut_strs={"","_z2cut01","_z2cut12","_z2cut23","_z2cut34","_z2cut45","_z1cut01","_z1cut12","_z1cut23","_z1cut34","_z1cut45","_ktcut01","_ktcut12","_ktcut25","_ktcut5"};
     for(auto cut_str:cut_strs){
@@ -85,9 +85,9 @@ public:
     count=0;
   }
   void analyze() override {
-    if(events->PassPileUpRm==0) {
-      return;
-    }
+    // if(events->PassPileUpRm==0) {
+    //   return;
+    // }
     hists["MC_number"]->Fill(0);
     hists["MC_number"]->Fill(1,events->NextPassedNumber);
     double likelihoods[4] = {events->score0, events->score1, events->score2, events->score3};
@@ -106,14 +106,16 @@ public:
     double score0 = posteriors[0];
     double score1 = posteriors[1];
     double score2 = posteriors[2];
-
+    
     double score2_weight[4] = {1,20,1,200};
     score2 = events->score2*score2_weight[2]*5/(events->score0*score2_weight[0]+events->score1*score2_weight[1]+events->score2*score2_weight[2]+events->score3*score2_weight[3]);
     double score1_weight[4] = {1,1,1,1};
     score1 = events->score1*score1_weight[1]*50/(events->score0*score1_weight[0]+events->score1*score1_weight[1]+events->score2*score1_weight[2]+events->score3*score1_weight[3]);
     
+    
     bool isqq =  score2 > 0.55 && events->kt0>20 ;
     bool isgg =  score1 > 0.5 && events->kt0>20 ;
+    //if(isqq) cout<<score2<<endl;
 
     bool ktcut01 = events->kt > 0.0 && events->kt < 1.0;
     bool ktcut12 = events->kt > 1.0 && events->kt < 2.0;
@@ -131,6 +133,8 @@ public:
     bool z2cut23 = events->z2 > 0.2 && events->z2 < 0.3;
     bool z2cut34 = events->z2 > 0.3 && events->z2 < 0.4;
     bool z2cut45 = events->z2 > 0.4 && events->z2 < 0.5;
+
+
     // bool isgg =  events->score1>= 0.9  ;   
     // bool isqq =  events->score2>= 0.1   ;   
     // bool isgg =  events->score0>= 0.95 ;   
@@ -143,7 +147,8 @@ public:
 
 
     bool isrest = !(isqq || isgg);
-    int spin=1;
+    int spin=events->spin;
+    //cout<<spin<<endl;
     double phi = events->Phi;
     int i0=0;
     for (auto cut_str : cut_strs) {

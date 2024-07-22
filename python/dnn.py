@@ -386,13 +386,25 @@ def convert_to_one_hot_fourlabel(labels,match):
     one_hot_labels = np.zeros((labels.shape[0], 4))
     for i, label in enumerate(labels):
         if np.array_equal(label, [0]) and (match[i] >=0):
-            one_hot_labels[i, 0] = 1  # 类别0
+            one_hot_labels[i, 0] = 1  
         elif np.array_equal(label, [1]):
-            one_hot_labels[i, 1] = 1  # 类别1
+            one_hot_labels[i, 1] = 1  
         elif np.array_equal(label, [2]):
-            one_hot_labels[i, 2] = 1  # 类别2
+            one_hot_labels[i, 2] = 1  
         elif np.array_equal(label, [0]) and (match[i] < 0):
-            one_hot_labels[i, 3] = 1  # 类别1
+            one_hot_labels[i, 3] = 1  
+    return one_hot_labels
+def convert_to_one_hot_fourlabel2(labels,match):
+    one_hot_labels = np.zeros((labels.shape[0], 4))
+    for i, label in enumerate(labels):
+        if np.array_equal(label, [3]) :
+            one_hot_labels[i, 0] = 1  
+        elif np.array_equal(label, [1]):
+            one_hot_labels[i, 1] = 1  
+        elif np.array_equal(label, [2]) or np.array_equal(label, [4]):
+            one_hot_labels[i, 2] = 1  
+        elif np.array_equal(label, [0]) and (match[i] >= 0):
+            one_hot_labels[i, 3] = 1  
     return one_hot_labels
 def convert_to_binary(labels):
     binary_labels = np.zeros(labels.shape[0])
@@ -419,7 +431,7 @@ def train_and_save_conv1dmodel(X_train, Y_train, X_val, Y_val, input_length, num
     model.compile(optimizer=adam_optimizer, loss='binary_crossentropy', metrics=['accuracy'])
     history = model.fit(
         X_train, Y_train,
-        epochs=200,
+        epochs=50,
         batch_size=16,  
         validation_data=(X_val, Y_val)
     )  
@@ -651,7 +663,7 @@ def train_and_save_model_ThreeLabel(X_train, Y_train, X_val, Y_val,hidden_units=
     # roc_auc_callback.validation_data = (X_val, Y_val)
     history = model.fit(
         X_train, Y_train,
-        epochs=200,
+        epochs=50,
         batch_size=16,
         validation_data=(X_val, Y_val),
         #callbacks=[roc_auc_callback]
@@ -669,7 +681,7 @@ def train_and_save_model_MultiLabel(X_train, Y_train, X_val, Y_val,hidden_units=
     # roc_auc_callback.validation_data = (X_val, Y_val)
     history = model.fit(
         X_train, Y_train,
-        epochs=200,
+        epochs=50,
         batch_size=256,
         validation_data=(X_val, Y_val),
         #callbacks=[roc_auc_callback]

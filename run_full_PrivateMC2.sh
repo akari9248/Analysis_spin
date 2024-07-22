@@ -32,13 +32,13 @@ outputFeatureFolder=$baseOutputFolder"/RecoPlanesFeatures/"$SampleType$ptselecti
 outputTrainFolder=$baseOutputFolder"/RecoPlanesFeaturesTrain/"$SampleType$ptselection""
 outputPredictedFolder=$baseOutputFolder"/ML/predict/"
 ############ Reco Planes #######################
-compile generate_sample_PrivateMC2.cpp
-rm $outputRecoFolder/*.root
-run_parallel generate_sample_PrivateMC2 -nchunks $nchunks -nparts $nparts -opt "-I $inputFolder -O $outputRecoFolder"
+# compile generate_sample_PrivateMC2.cpp
+# rm $outputRecoFolder/*.root
+# run_parallel generate_sample_PrivateMC2 -nchunks $nchunks -nparts $nparts -opt "-I $inputFolder -O $outputRecoFolder"
 ############ Extract features #######################
-# compile Extract_features_PrivateMC2.cpp
-# rm $outputFeatureFolder/*.root
-# run_parallel Extract_features_PrivateMC2 -nchunks $nchunks -nparts $nparts -opt "-I $outputRecoFolder -O ${outputFeatureFolder} --jinit_ptlow $jinit_ptlow  --jinit_pthigh $jinit_pthigh --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --spin 1 --OneGeVCut 1"
+compile Extract_features_PrivateMC2.cpp
+rm $outputFeatureFolder/*.root
+run_parallel Extract_features_PrivateMC2 -nchunks $nchunks -nparts $nparts -opt "-I $outputRecoFolder -O ${outputFeatureFolder} --jinit_ptlow $jinit_ptlow  --jinit_pthigh $jinit_pthigh --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --spin 1 --OneGeVCut 1"
 ################### Get train results ##############
 #python dnn_load_FourLabel.py --sample_path0  ${outputFeatureFolder}'/*.root'  --model_path ML/model/fourLabels_j2pt${j2_ptlow}_${j2_pthigh} --entries 1000000000 --suffix $outputPredictedFolder${SampleType}$ptselection
 ##################  Derive final results ############

@@ -98,6 +98,7 @@ public :
    vector<double>  *kt3_Hadron;
    vector<double>  *kt3_Parton;
    vector<int>     *match;
+   vector<int>     *match3;
    vector<double>  *n1x_Hadron;
    vector<double>  *n1x_Parton;
    vector<double>  *n1y_Hadron;
@@ -342,6 +343,7 @@ public :
    TBranch        *b_kt3_Hadron;   //!
    TBranch        *b_kt3_Parton;   //!
    TBranch        *b_match;   //!
+   TBranch        *b_match3;   //!
    TBranch        *b_n1x_Hadron;   //!
    TBranch        *b_n1x_Parton;   //!
    TBranch        *b_n1y_Hadron;   //!
@@ -641,6 +643,7 @@ void AdvancedDataInfo::Init(TTree *tree)
    kt3_Hadron = 0;
    kt3_Parton = 0;
    match = 0;
+   match3 = 0;
    n1x_Hadron = 0;
    n1x_Parton = 0;
    n1y_Hadron = 0;
@@ -887,7 +890,8 @@ void AdvancedDataInfo::Init(TTree *tree)
    fChain->SetBranchAddress("kt2_Parton", &kt2_Parton, &b_kt2_Parton);
    fChain->SetBranchAddress("kt3_Hadron", &kt3_Hadron, &b_kt3_Hadron);
    fChain->SetBranchAddress("kt3_Parton", &kt3_Parton, &b_kt3_Parton);
-   fChain->SetBranchAddress("match", &match, &b_match);
+   fChain->SetBranchAddress("match2", &match, &b_match);
+   fChain->SetBranchAddress("match3", &match3, &b_match3);
    fChain->SetBranchAddress("n1x_Hadron", &n1x_Hadron, &b_n1x_Hadron);
    fChain->SetBranchAddress("n1x_Parton", &n1x_Parton, &b_n1x_Parton);
    fChain->SetBranchAddress("n1y_Hadron", &n1y_Hadron, &b_n1y_Hadron);

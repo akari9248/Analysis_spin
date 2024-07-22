@@ -111,6 +111,7 @@ public :
    Int_t           validate1;
    Int_t           validate2;
    Int_t           validate3;
+   Int_t           spin;
    Double_t WeightSpinoff;
    Double_t RecoPhi;
    // List of branches
@@ -205,7 +206,7 @@ public :
    TBranch        *b_validate3;   //!
    TBranch        *b_WeightSpinoff;
    TBranch        *b_RecoPhi;
-
+   TBranch        *b_spin;
    DataInfoML(TTree *tree=0);
    virtual ~DataInfoML();
    virtual Int_t    Cut(Long64_t entry);
@@ -361,6 +362,7 @@ void DataInfoML::Init(TTree *tree)
 
    fChain->SetBranchAddress("WeightSpinoff", &WeightSpinoff, &b_WeightSpinoff);
    fChain->SetBranchAddress("RecoPhi", &RecoPhi, &b_RecoPhi);
+   fChain->SetBranchAddress("spin", &spin, &b_spin);
    Notify();
 }
 
