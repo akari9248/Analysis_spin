@@ -76,6 +76,10 @@ public:
     std::vector<std::vector<EventsAnalyzer::JetAndDaughters>>  levelsjetsdaughters;  
     std::vector<std::vector<std::vector<JetBranch::threeplanes>>> planes_arr;
     bool SaveParticles = false;
+    //todo: Add particle selection (1. Particle one GeV cut, 2. Particle Energy scale )
+    //todo: Add Jet selection (for systematic JES and JER )
+    //todo: Add Eventselection (CMSMC pileup remove and overweighted event removal)
+    //todo: Save more eventsweight for systematic
     EventsAnalyzer(CommonTool::Options _options)
     {
         options = _options;
