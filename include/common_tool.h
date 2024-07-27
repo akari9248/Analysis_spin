@@ -138,6 +138,7 @@ public:
     }
     struct Options
     {
+        string executablefile="main.o";
         int chunki = 0;
         int nparts = 1;    // Default value for nparts
         int nchunks = 100; // Default value for nchunks
@@ -156,7 +157,7 @@ public:
         std::string xsection_file;
         std::string root_file;
         std::string output_file;
-
+        std::string SampleType;
         bool printhelp=false;
     };
 
@@ -164,7 +165,7 @@ public:
     {
         Options options;
         int opt;
-
+        options.executablefile=(std::string)argv[0];
         struct option long_options[] = {
             {"jinit_ptlow", required_argument, 0, 0},
             {"jinit_pthigh", required_argument, 0, 0},
@@ -178,6 +179,7 @@ public:
             {"xsection_file", required_argument, 0, 0},
             {"root_file", required_argument, 0, 0},
             {"output_file", required_argument, 0, 0},
+            {"SampleType", required_argument, 0, 0},
             {0, 0, 0, 0}};
 
         int long_index = 0;
@@ -252,6 +254,10 @@ public:
                 {
                     options.output_file = optarg;
                 }
+                else if (strcmp(long_options[long_index].name, "SampleType") == 0)
+                {
+                    options.SampleType = optarg;
+                }
                 break;
             default:
                 options.printhelp = true;
@@ -280,7 +286,7 @@ public:
         std::cerr << "Usage: " << argv[0] << " [-i inputInt] [-I inputFolder] [-O outputFolder] "
                       << "[-n nparts] [-k nchunks] [--jinit_ptlow val] [--jinit_pthigh val] "
                       << "[--j0_ptlow val] [--j0_pthigh val] [--j2_ptlow val] [--j2_pthigh val] "
-                      << "[--spin val] [--OneGeVCut val] [--j2_pthigh val]" << std::endl;
+                      << "[--spin val] [--OneGeVCut val] [--j2_pthigh val] [--SampleType SampleType]" << std::endl;
     }
     // Process and save data according to the options
     template <typename Analyzer>
@@ -299,6 +305,25 @@ public:
             SaveData::writeTreeEventsToRoot(
                 analyzer.treeEvents,
                 options.outputFolder + "/Chunk" + std::to_string(options.chunki) + "_Part" + std::to_string(part) + ".root", true);
+        }
+    }
+    template <typename Analyzer>
+    static void processAndSaveDataWithMetaInfo(const Options &options, Analyzer &analyzer)
+    {
+        if (options.chunki >= options.nchunks)
+        {
+            return;
+        }
+        for (int part = 0; part < options.nparts; part++)
+        {
+            double begin = (options.chunki * options.nparts + part) * 1.0 / (options.nchunks * options.nparts);
+            double events_frac = 1.0 / (options.nchunks * options.nparts);
+            analyzer.treeEvents.clear();
+            analyzer.run_frac(events_frac, begin);
+            SaveData::writeTreeEventsToRoot(
+                analyzer.treeEvents,
+                options.outputFolder + "/Chunk" + std::to_string(options.chunki) + "_Part" + std::to_string(part) + ".root", true);
+            analyzer.metadata.SaveToRootFile(options.outputFolder + "/Chunk" + std::to_string(options.chunki) + "_Part" + std::to_string(part) + ".root");
         }
     }
 };

@@ -44,6 +44,7 @@ class ParticleInfo : public PseudoJet::UserInfoBase{
   ParticleInfo(int pdgid_,int charge_,double pt_,double eta_,double phi_,double e_){
     pdgid = pdgid_;
     chargeInt = charge_;
+    charge = charge_;
     pt = pt_;
     eta = eta_;
     phi = phi_;

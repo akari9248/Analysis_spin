@@ -8,17 +8,27 @@
 #include "../include/Draw_Template.h"
 #include <getopt.h>
 #include "TDirectory.h"
+#include "TObjString.h"
+#include "../include/MetaDataManager.h"
 void TwoPads(vector<TH1D *> hists,TString filename,TString ExtraText="",vector<TString> legend_name={});
 void draw_pt(){
-    TChain * tchain = new TChain();
+    MetaDataManager manager;
 
-    tchain->Add("/extdisk/zlin/Machine_learning/RecoPlanes/CMS_herwig_Pt-15to7000UL18/Chunk*.root/DataInfo");
-    Hists hists;
-    hists.addHist("JetPt",1500,0,1500);
-    hists.addHist("Jet2Pt",1500,0,1500);
+    MetaData* md1 = manager.CreateMetaData("Sample12");
+    md1->AddParameter("Param1", "Value1");
+    md1->AddParameter("Param2", "Value2");
 
-    tchain->Draw("Genjpt>>JetPt");
-    tchain->Draw("Genpt2>>Jet2Pt","(Genjpt>=150)*(Genjpt<250)");
+    MetaData* md2 = manager.CreateMetaData("Sample22");
+    md2->AddParameter("ParamA", "A=2");
+    md2->AddParameter("ParamB", "ValueB");
 
-    hists.Write("output_200_250.root");
+    manager.SaveToRootFile("example_with_metadata.root");
+
+    MetaDataManager newManager;
+    newManager.LoadFromRootFile("example_with_metadata.root");
+
+    std::cout << newManager.GetMetaDataAsString() << std::endl;
+
+    return 0;
 }
+

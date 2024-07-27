@@ -34,11 +34,11 @@ def custom_scoring(estimator, X, y, dst=0):
     return auc_score
 def custom_scoring_weighted(estimator, X, y):
     y_pred_proba = estimator.predict(X)
-    weights = [1, 20, 1, 200]
+    weights = [1, 1, 1, 1]
     class_0_proba = y_pred_proba[:, 0]
     class_1_proba = y_pred_proba[:, 1]
     class_2_proba = y_pred_proba[:, 2]
-    class_3_proba = y_pred_proba[:, 3]
+    #class_3_proba = y_pred_proba[:, 3]
 
     if y.ndim > 1:
         y = np.argmax(y, axis=1)
@@ -47,8 +47,8 @@ def custom_scoring_weighted(estimator, X, y):
     binary_pred_proba = (class_2_proba * weights[2]) / (
         class_0_proba * weights[0] +
         class_1_proba * weights[1] +
-        class_2_proba * weights[2] +
-        class_3_proba * weights[3]
+        class_2_proba * weights[2] 
+        #+class_3_proba * weights[3]
     )
     auc_score = roc_auc_score(binary_true, binary_pred_proba)    
     return auc_score
@@ -147,7 +147,7 @@ def main(args):
     select_index = [branch_to_index[name] for name in match_index]
     match_data = X_data[:, select_index]
     match_data = match_data[:, 0]
-    Y_data = dnn.convert_to_one_hot_fourlabel(Y_data, match_data)
+    Y_data = dnn.convert_to_one_hot_threeLabel(Y_data, match_data)
     
     all_importance_dfs = []
 
@@ -195,16 +195,16 @@ def main(args):
             plt.title(f'Permutation Feature Importance (dst={dst})')
             plt.gca().invert_yaxis()
             folder_name = "ML/importance/"
-            plt.savefig(os.path.join(folder_name, f'feature_importance_{dst}.pdf'), format='pdf')
+            plt.savefig(os.path.join(folder_name, f'feature_importance_{dst}_threelabel.pdf'), format='pdf')
             plt.show()
-            feature_importances.to_csv(os.path.join(folder_name, f'feature_importance_{dst}.csv'), index=False)
+            feature_importances.to_csv(os.path.join(folder_name, f'feature_importance_{dst}_threelabel.csv'), index=False)
             
             # 保存每个 dst 的特征重要性 DataFrame
             all_importance_dfs.append(feature_importances)
         
         # 计算并绘制特征重要性相关性矩阵
-        compute_and_plot_importance_correlation(all_importance_dfs, os.path.join(folder_name, 'importance_correlation_matrix.pdf'), 
-                                                os.path.join(folder_name, 'importance_correlation_matrix.root'))
+        compute_and_plot_importance_correlation(all_importance_dfs, os.path.join(folder_name, 'importance_correlation_matrix_threelabel.pdf'), 
+                                                os.path.join(folder_name, 'importance_correlation_matrix_threelabel.root'))
         
         if select_opt != -1:
             break

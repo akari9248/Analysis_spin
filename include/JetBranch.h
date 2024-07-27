@@ -81,15 +81,43 @@ public:
     double deltaPhi;
     double Q=0;
   };
-  struct threeplanes {
+  struct pseudothreeplanes {
+    JetBranch::PlaneVariables first;
+    JetBranch::PlaneVariables second;
+    JetBranch::PlaneVariables third;
+    double deltaPhi=-10;
+    double deltaPhi2=-10;
+    double Q = 0;
+    bool ismatched = false;
+    pseudothreeplanes() = default;
+    pseudothreeplanes(const JetBranch::PlaneVariables& f, const JetBranch::PlaneVariables& s, const JetBranch::PlaneVariables& t,
+                      double dPhi, double dPhi2, double q,bool _ismatched )
+        : first(f), second(s), third(t), deltaPhi(dPhi), deltaPhi2(dPhi2), Q(q) ,ismatched(_ismatched){}
+};
+
+struct threeplanes {
     JetBranch::PlaneVariables first;
     JetBranch::PlaneVariables second;
     JetBranch::PlaneVariables third;
     double deltaPhi;
     double deltaPhi2;
-    double Q=0;
-  };
+    double Q = 0;
+    pseudothreeplanes matchedthreeplanes;
+    bool ismatched = false;
+    threeplanes() = default;
+    pseudothreeplanes Getpseudothreeplanes() const {
+      double t_deltaPhi = deltaPhi ;
+      double t_deltaPhi2 = deltaPhi2 ;
+      if (second.softer_nparticles == 0 || second.harder_nparticles == 0)
+        t_deltaPhi = -10;
+      if (third.softer_nparticles == 0 || third.harder_nparticles == 0)
+        t_deltaPhi2 = -10;
+      return pseudothreeplanes(first, second, third, t_deltaPhi, t_deltaPhi2, Q,ismatched);
+    }
+};
   static double DeltaPhi(PlaneVariables plane1, PlaneVariables plane2) {
+    if(plane1.harder_nparticles==0||plane1.softer_nparticles==0||
+       plane2.harder_nparticles==0||plane2.softer_nparticles==0) return -10;
     TVector3 n1 = plane1.n;
     TVector3 n2 = plane2.n;
     n1 = n1.Unit();
@@ -364,9 +392,11 @@ public:
                                        dst_plane.softer_vect};
   
     double drcut = src[0].DeltaR(src[1])*drcutweight;
+    // match_result[src] = dst
     auto match_result = Matching::matchJet(src, dst, drcut);
     bool allmatch = std::all_of(match_result.begin(), match_result.end(),
                                 [](int i) { return i > -1; });
+    
     if (allmatch) {
       src_plane.isqq = dst_plane.isqq;
       src_plane.isgg = dst_plane.isgg;
@@ -418,6 +448,54 @@ public:
   }
   static std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
   matchPlanes(vector<std::vector<JetBranch::threeplanes>> &src_threeplanes,
+              vector<std::vector<JetBranch::threeplanes>> &dst_threeplanes,
+              TString opt = "second",double drcutweight=1) {
+    std::vector<JetBranch::PlaneVariables> src_plane, dst_plane;
+    vector<std::vector<int>> match_results2;
+    vector<std::vector<int>> match_results3;
+    if (opt.EqualTo("second")) {
+      for (size_t i = 0; i < src_threeplanes.size(); i++) {
+        std::vector<int> match_results02;
+        std::vector<int> match_results03;
+        for(size_t j = 0; j < src_threeplanes.at(i).size(); j++){
+          match_results02.push_back(-1);
+          match_results03.push_back(-1);
+          src_threeplanes[i][j].first.isgg=false;
+          src_threeplanes[i][j].first.isqq=false;
+          src_threeplanes[i][j].second.isgg=false;
+          src_threeplanes[i][j].second.isqq=false;
+          src_threeplanes[i][j].third.isgg=false;
+          src_threeplanes[i][j].third.isqq=false;
+
+           src_threeplanes[i][j].first.harder_flav=0;
+          src_threeplanes[i][j].first.softer_flav=0;
+          src_threeplanes[i][j].second.harder_flav=0;
+          src_threeplanes[i][j].second.softer_flav=0;
+          src_threeplanes[i][j].third.harder_flav=0;
+          src_threeplanes[i][j].third.softer_flav=0;
+
+          for(size_t k = 0; k < dst_threeplanes.at(i).size(); k++){
+            matchPlanes(src_threeplanes[i][j].first, dst_threeplanes[i][k].first, drcutweight);
+            if (matchPlanes(src_threeplanes[i][j].second, dst_threeplanes[i][k].second, drcutweight) ||
+                matchPlanes(src_threeplanes[i][j].second, dst_threeplanes[i][k].third, drcutweight))
+            {
+              match_results02[j] = k;
+            }
+            if (matchPlanes(src_threeplanes[i][j].third, dst_threeplanes[i][k].third, drcutweight) ||
+                matchPlanes(src_threeplanes[i][j].third, dst_threeplanes[i][k].second, drcutweight))
+            {
+              match_results03[j] = k;
+            }
+          }
+        }
+        match_results2.push_back(match_results02);
+        match_results3.push_back(match_results03);
+      }
+    }
+    return std::make_pair(match_results2, match_results3);
+  }
+  static std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+  matchPlanesLeadingJet(vector<std::vector<JetBranch::threeplanes>> &src_threeplanes,
               vector<std::vector<JetBranch::threeplanes>> &dst_threeplanes,
               TString opt = "second",double drcutweight=1) {
     std::vector<JetBranch::PlaneVariables> src_plane, dst_plane;

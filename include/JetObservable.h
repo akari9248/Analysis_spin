@@ -86,4 +86,40 @@ public:
     double sigma = sqrt(sigma1 * sigma1 + sigma2 * sigma2);
     return Jetwidth(sigma1, sigma2, sigma);
   }
+  static int determineType(int flavour1, int flavour2)
+  {
+    if (flavour2 == 21 && flavour1 == 21)
+    {
+      return 1;
+    }
+    if (flavour1 != 0 && flavour1 != 21 && flavour2 != 0 && flavour2 != 21)
+    {
+      return 2;
+    }
+    if (flavour1 != 0 && flavour1 != 21 && flavour2 == 21)
+    {
+      return 3;
+    }
+    if (flavour2 != 0 && flavour2 != 21 && flavour1 == 21)
+    {
+      return 3;
+    }
+    if (flavour1 != 0 && flavour1 != 21 && flavour2 == 0)
+    {
+      return 4;
+    }
+    if (flavour2 != 0 && flavour2 != 21 && flavour1 == 0)
+    {
+      return 4;
+    }
+    if (flavour1 == 21 && flavour2 == 0)
+    {
+      return 5;
+    }
+    if (flavour2 == 21 && flavour1 == 0)
+    {
+      return 5;
+    }
+    return 0;
+  }
 };

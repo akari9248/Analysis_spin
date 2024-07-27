@@ -23,6 +23,8 @@
 #include <tuple>
 #include <variant>
 #include <vector>
+#include "JetObservable.h"
+#include "SpinObservable.h"
 using namespace fastjet;
 using namespace std;
 using namespace fastjet::contrib;
@@ -297,7 +299,32 @@ public:
     }
   }
   static void SavePlanes(JetBranch::threeplanes threeplanes, TreeEvents &treeEvents,
-                         int jetindex, string prefix = "", string suffix = "") {
+                         int jetindex, string prefix = "", string suffix = "",bool SaveParticles = true) {
+
+    JetObservable JetObservable1(threeplanes.first.harder_constituents_info);
+    JetObservable JetObservable2(threeplanes.first.softer_constituents_info);
+    JetObservable JetObservable3(threeplanes.second.harder_constituents_info);
+    JetObservable JetObservable4(threeplanes.second.softer_constituents_info);
+    JetObservable JetObservable5(threeplanes.third.harder_constituents_info);
+    JetObservable JetObservable6(threeplanes.third.softer_constituents_info);
+    auto width1 = JetObservable1.jetwidth();
+    auto width2 = JetObservable2.jetwidth();
+    auto width3 = JetObservable3.jetwidth();
+    auto width4 = JetObservable4.jetwidth();
+    auto width5 = JetObservable5.jetwidth();
+    auto width6 = JetObservable6.jetwidth();
+
+    SpinObservable spinobservable2(threeplanes.first.harder_constituents_info,
+                                   threeplanes.first.softer_constituents_info,
+                                   threeplanes.second.harder_constituents_info,
+                                   threeplanes.second.softer_constituents_info);
+    auto planetheta2=spinobservable2.GetPlaneTheta();
+    SpinObservable spinobservable3(threeplanes.first.harder_constituents_info,
+                                   threeplanes.first.softer_constituents_info,
+                                   threeplanes.third.harder_constituents_info,
+                                   threeplanes.third.softer_constituents_info);
+    auto planetheta3=spinobservable3.GetPlaneTheta();
+
     treeEvents.push_back(prefix + "pt1" + suffix, threeplanes.first.harder.pt());
     treeEvents.push_back(prefix + "eta1" + suffix,
                          threeplanes.first.harder.eta());
@@ -309,7 +336,12 @@ public:
     treeEvents.push_back(prefix + "nparticles1" + suffix,
                          threeplanes.first.harder_nparticles);
     treeEvents.push_back(prefix + "flavour1" + suffix,
-                         threeplanes.first.harder_flav);                     
+                         threeplanes.first.harder_flav);
+    treeEvents.push_back(prefix + "pTD1" + suffix, JetObservable1.pTD());
+    treeEvents.push_back(prefix + "sigma1" + suffix, width1.sigma);
+    treeEvents.push_back(prefix + "sigma11" + suffix, width1.sigma1);
+    treeEvents.push_back(prefix + "sigma21" + suffix, width1.sigma2);
+
     treeEvents.push_back(prefix + "pt2" + suffix, threeplanes.first.softer.pt());
     treeEvents.push_back(prefix + "eta2" + suffix,
                          threeplanes.first.softer.eta());
@@ -322,6 +354,10 @@ public:
                          threeplanes.first.softer_nparticles);
     treeEvents.push_back(prefix + "flavour2" + suffix,
                          threeplanes.first.softer_flav);  
+    treeEvents.push_back(prefix + "pTD2" + suffix, JetObservable2.pTD());
+    treeEvents.push_back(prefix + "sigma2" + suffix, width2.sigma);
+    treeEvents.push_back(prefix + "sigma12" + suffix, width2.sigma1);
+    treeEvents.push_back(prefix + "sigma22" + suffix, width2.sigma2);            
 
     treeEvents.push_back(prefix + "pt3" + suffix, threeplanes.second.harder.pt());
     treeEvents.push_back(prefix + "eta3" + suffix,
@@ -335,6 +371,10 @@ public:
                          threeplanes.second.harder_nparticles);
     treeEvents.push_back(prefix + "flavour3" + suffix,
                          threeplanes.second.harder_flav);
+    treeEvents.push_back(prefix + "pTD3" + suffix, JetObservable3.pTD());
+    treeEvents.push_back(prefix + "sigma3" + suffix, width3.sigma);
+    treeEvents.push_back(prefix + "sigma13" + suffix, width3.sigma1);
+    treeEvents.push_back(prefix + "sigma23" + suffix, width3.sigma2);
 
     treeEvents.push_back(prefix + "pt4" + suffix, threeplanes.second.softer.pt());
     treeEvents.push_back(prefix + "eta4" + suffix,
@@ -348,6 +388,10 @@ public:
                          threeplanes.second.softer_nparticles);
     treeEvents.push_back(prefix + "flavour4" + suffix,
                          threeplanes.second.softer_flav);  
+    treeEvents.push_back(prefix + "pTD4" + suffix, JetObservable4.pTD());
+    treeEvents.push_back(prefix + "sigma4" + suffix, width4.sigma);
+    treeEvents.push_back(prefix + "sigma14" + suffix, width4.sigma1);
+    treeEvents.push_back(prefix + "sigma24" + suffix, width4.sigma2);
 
     treeEvents.push_back(prefix + "pt5" + suffix, threeplanes.third.harder.pt());
     treeEvents.push_back(prefix + "eta5" + suffix,
@@ -361,7 +405,10 @@ public:
                          threeplanes.third.harder_nparticles);
     treeEvents.push_back(prefix + "flavour5" + suffix,
                          threeplanes.third.harder_flav);
-
+    treeEvents.push_back(prefix + "pTD5" + suffix, JetObservable5.pTD());
+    treeEvents.push_back(prefix + "sigma5" + suffix, width5.sigma);
+    treeEvents.push_back(prefix + "sigma15" + suffix, width5.sigma1);
+    treeEvents.push_back(prefix + "sigma25" + suffix, width5.sigma2);
 
     treeEvents.push_back(prefix + "pt6" + suffix, threeplanes.third.softer.pt());
     treeEvents.push_back(prefix + "eta6" + suffix,
@@ -375,16 +422,19 @@ public:
                          threeplanes.third.softer_nparticles);
     treeEvents.push_back(prefix + "flavour6" + suffix,
                          threeplanes.third.softer_flav); 
-
+    treeEvents.push_back(prefix + "pTD6" + suffix, JetObservable6.pTD());
+    treeEvents.push_back(prefix + "sigma6" + suffix, width6.sigma);
+    treeEvents.push_back(prefix + "sigma16" + suffix, width6.sigma1);
+    treeEvents.push_back(prefix + "sigma26" + suffix, width6.sigma2);
 
     treeEvents.push_back(prefix + "z1" + suffix, threeplanes.first.z);
     treeEvents.push_back(prefix + "kt1" + suffix, threeplanes.first.kt);
     treeEvents.push_back(prefix + "theta1" + suffix, threeplanes.first.theta);
     treeEvents.push_back(prefix + "deltaR1" + suffix, threeplanes.first.deltaR);
-    treeEvents.push_back(
-        prefix + "eec1" + suffix,
+    treeEvents.push_back( prefix + "eec1" + suffix,
         (threeplanes.first.harder.e() * threeplanes.first.softer.e()) * 1.0 /
             threeplanes.Q / threeplanes.Q);
+    treeEvents.push_back(prefix + "type1" + suffix, JetObservable::determineType(threeplanes.first.softer_flav,threeplanes.first.harder_flav));
 
     treeEvents.push_back(prefix + "z2" + suffix, threeplanes.second.z);
     treeEvents.push_back(prefix + "kt2" + suffix, threeplanes.second.kt);
@@ -394,6 +444,7 @@ public:
         prefix + "eec2" + suffix,
         (threeplanes.second.harder.e() * threeplanes.second.softer.e()) * 1.0 /
             threeplanes.Q / threeplanes.Q);
+    treeEvents.push_back(prefix + "type2" + suffix, JetObservable::determineType(threeplanes.second.softer_flav,threeplanes.second.harder_flav));
 
     treeEvents.push_back(prefix + "z3" + suffix, threeplanes.third.z);
     treeEvents.push_back(prefix + "kt3" + suffix, threeplanes.third.kt);
@@ -403,6 +454,7 @@ public:
         prefix + "eec3" + suffix,
         (threeplanes.third.harder.e() * threeplanes.third.softer.e()) * 1.0 /
             threeplanes.Q / threeplanes.Q);
+    treeEvents.push_back(prefix + "type3" + suffix, JetObservable::determineType(threeplanes.third.softer_flav,threeplanes.third.harder_flav));
 
     treeEvents.push_back(prefix + "n1x" + suffix, threeplanes.first.n.x());
     treeEvents.push_back(prefix + "n1y" + suffix, threeplanes.first.n.y());
@@ -414,16 +466,14 @@ public:
     treeEvents.push_back(prefix + "n3y" + suffix, threeplanes.third.n.y());
     treeEvents.push_back(prefix + "n3z" + suffix, threeplanes.third.n.z());
 
-    treeEvents.push_back(prefix + "isqq" + suffix,
-                         static_cast<int>(threeplanes.second.isqq));
-    treeEvents.push_back(prefix + "isgg" + suffix,
-                         static_cast<int>(threeplanes.second.isgg));
-    treeEvents.push_back(prefix + "phi" + suffix, threeplanes.deltaPhi);
-    treeEvents.push_back(prefix + "isqq2" + suffix,
-                         static_cast<int>(threeplanes.third.isqq));
-    treeEvents.push_back(prefix + "isgg2" + suffix,
-                         static_cast<int>(threeplanes.third.isgg));
-    treeEvents.push_back(prefix + "thirdphi" + suffix, threeplanes.deltaPhi2);
+    treeEvents.push_back(prefix + "dPhi12_X2" + suffix, planetheta2.dphi12_X);
+    treeEvents.push_back(prefix + "Theta2" + suffix, planetheta2.theta);
+    treeEvents.push_back(prefix + "Theta22" + suffix, planetheta2.theta2);
+    treeEvents.push_back(prefix + "dPhi12_X3" + suffix, planetheta3.dphi12_X);
+    treeEvents.push_back(prefix + "Theta3" + suffix, planetheta3.theta);
+    treeEvents.push_back(prefix + "Theta23" + suffix, planetheta3.theta2);
+    treeEvents.push_back(prefix + "Phi2" + suffix, threeplanes.deltaPhi);
+    treeEvents.push_back(prefix + "Phi3" + suffix, threeplanes.deltaPhi2);
 
     treeEvents.push_back(prefix + "jpt" + suffix, threeplanes.first.initJet.Pt());
     treeEvents.push_back(prefix + "jeta" + suffix,
@@ -432,79 +482,88 @@ public:
                          threeplanes.first.initJet.Phi());
     treeEvents.push_back(prefix + "je" + suffix, threeplanes.first.initJet.E());
 
-    for (int ii = 0; ii < threeplanes.first.harder_constituents_info.size();
-         ii++) {
-      auto particle = threeplanes.first.harder_constituents_info.at(ii);
-      treeEvents.push_back(prefix + "particle1_pt" + suffix, particle.pt);
-      treeEvents.push_back(prefix + "particle1_eta" + suffix, particle.eta);
-      treeEvents.push_back(prefix + "particle1_phi" + suffix, particle.phi);
-      treeEvents.push_back(prefix + "particle1_e" + suffix, particle.e);
-      treeEvents.push_back(prefix + "particle1_charge" + suffix,
-                           particle.charge);
-      treeEvents.push_back(prefix + "particle1_pid" + suffix, particle.pdgid);
-      treeEvents.push_back(prefix + "particle1_jetid" + suffix, jetindex);
-    }
-    for (int ii = 0; ii < threeplanes.first.softer_constituents_info.size();
-         ii++) {
-      auto particle = threeplanes.first.softer_constituents_info.at(ii);
-      treeEvents.push_back(prefix + "particle2_pt" + suffix, particle.pt);
-      treeEvents.push_back(prefix + "particle2_eta" + suffix, particle.eta);
-      treeEvents.push_back(prefix + "particle2_phi" + suffix, particle.phi);
-      treeEvents.push_back(prefix + "particle2_e" + suffix, particle.e);
-      treeEvents.push_back(prefix + "particle2_charge" + suffix,
-                           particle.charge);
-      treeEvents.push_back(prefix + "particle2_pid" + suffix, particle.pdgid);
-      treeEvents.push_back(prefix + "particle2_jetid" + suffix, jetindex);
-    }
+    if (SaveParticles)
+    {
+      for (int ii = 0; ii < threeplanes.first.harder_constituents_info.size();
+           ii++)
+      {
+        auto particle = threeplanes.first.harder_constituents_info.at(ii);
+        treeEvents.push_back(prefix + "particle1_pt" + suffix, particle.pt);
+        treeEvents.push_back(prefix + "particle1_eta" + suffix, particle.eta);
+        treeEvents.push_back(prefix + "particle1_phi" + suffix, particle.phi);
+        treeEvents.push_back(prefix + "particle1_e" + suffix, particle.e);
+        treeEvents.push_back(prefix + "particle1_charge" + suffix,
+                             particle.charge);
+        treeEvents.push_back(prefix + "particle1_pid" + suffix, particle.pdgid);
+        treeEvents.push_back(prefix + "particle1_jetid" + suffix, jetindex);
+      }
+      for (int ii = 0; ii < threeplanes.first.softer_constituents_info.size();
+           ii++)
+      {
+        auto particle = threeplanes.first.softer_constituents_info.at(ii);
+        treeEvents.push_back(prefix + "particle2_pt" + suffix, particle.pt);
+        treeEvents.push_back(prefix + "particle2_eta" + suffix, particle.eta);
+        treeEvents.push_back(prefix + "particle2_phi" + suffix, particle.phi);
+        treeEvents.push_back(prefix + "particle2_e" + suffix, particle.e);
+        treeEvents.push_back(prefix + "particle2_charge" + suffix,
+                             particle.charge);
+        treeEvents.push_back(prefix + "particle2_pid" + suffix, particle.pdgid);
+        treeEvents.push_back(prefix + "particle2_jetid" + suffix, jetindex);
+      }
 
-    for (int ii = 0; ii < threeplanes.second.harder_constituents_info.size();
-         ii++) {
-      auto particle = threeplanes.second.harder_constituents_info.at(ii);
-      treeEvents.push_back(prefix + "particle3_pt" + suffix, particle.pt);
-      treeEvents.push_back(prefix + "particle3_eta" + suffix, particle.eta);
-      treeEvents.push_back(prefix + "particle3_phi" + suffix, particle.phi);
-      treeEvents.push_back(prefix + "particle3_e" + suffix, particle.e);
-      treeEvents.push_back(prefix + "particle3_charge" + suffix,
-                           particle.charge);
-      treeEvents.push_back(prefix + "particle3_pid" + suffix, particle.pdgid);
-      treeEvents.push_back(prefix + "particle3_jetid" + suffix, jetindex);
-    }
-    for (int ii = 0; ii < threeplanes.second.softer_constituents_info.size();
-         ii++) {
-      auto particle = threeplanes.second.softer_constituents_info.at(ii);
-      treeEvents.push_back(prefix + "particle4_pt" + suffix, particle.pt);
-      treeEvents.push_back(prefix + "particle4_eta" + suffix, particle.eta);
-      treeEvents.push_back(prefix + "particle4_phi" + suffix, particle.phi);
-      treeEvents.push_back(prefix + "particle4_e" + suffix, particle.e);
-      treeEvents.push_back(prefix + "particle4_charge" + suffix,
-                           particle.charge);
-      treeEvents.push_back(prefix + "particle4_pid" + suffix, particle.pdgid);
-      treeEvents.push_back(prefix + "particle4_jetid" + suffix, jetindex);
-    }
+      for (int ii = 0; ii < threeplanes.second.harder_constituents_info.size();
+           ii++)
+      {
+        auto particle = threeplanes.second.harder_constituents_info.at(ii);
+        treeEvents.push_back(prefix + "particle3_pt" + suffix, particle.pt);
+        treeEvents.push_back(prefix + "particle3_eta" + suffix, particle.eta);
+        treeEvents.push_back(prefix + "particle3_phi" + suffix, particle.phi);
+        treeEvents.push_back(prefix + "particle3_e" + suffix, particle.e);
+        treeEvents.push_back(prefix + "particle3_charge" + suffix,
+                             particle.charge);
+        treeEvents.push_back(prefix + "particle3_pid" + suffix, particle.pdgid);
+        treeEvents.push_back(prefix + "particle3_jetid" + suffix, jetindex);
+      }
+      for (int ii = 0; ii < threeplanes.second.softer_constituents_info.size();
+           ii++)
+      {
+        auto particle = threeplanes.second.softer_constituents_info.at(ii);
+        treeEvents.push_back(prefix + "particle4_pt" + suffix, particle.pt);
+        treeEvents.push_back(prefix + "particle4_eta" + suffix, particle.eta);
+        treeEvents.push_back(prefix + "particle4_phi" + suffix, particle.phi);
+        treeEvents.push_back(prefix + "particle4_e" + suffix, particle.e);
+        treeEvents.push_back(prefix + "particle4_charge" + suffix,
+                             particle.charge);
+        treeEvents.push_back(prefix + "particle4_pid" + suffix, particle.pdgid);
+        treeEvents.push_back(prefix + "particle4_jetid" + suffix, jetindex);
+      }
 
-    for (int ii = 0; ii < threeplanes.third.harder_constituents_info.size();
-         ii++) {
-      auto particle = threeplanes.third.harder_constituents_info.at(ii);
-      treeEvents.push_back(prefix + "particle5_pt" + suffix, particle.pt);
-      treeEvents.push_back(prefix + "particle5_eta" + suffix, particle.eta);
-      treeEvents.push_back(prefix + "particle5_phi" + suffix, particle.phi);
-      treeEvents.push_back(prefix + "particle5_e" + suffix, particle.e);
-      treeEvents.push_back(prefix + "particle5_charge" + suffix,
-                           particle.charge);
-      treeEvents.push_back(prefix + "particle5_pid" + suffix, particle.pdgid);
-      treeEvents.push_back(prefix + "particle5_jetid" + suffix, jetindex);
-    }
-    for (int ii = 0; ii < threeplanes.third.softer_constituents_info.size();
-         ii++) {
-      auto particle = threeplanes.third.softer_constituents_info.at(ii);
-      treeEvents.push_back(prefix + "particle6_pt" + suffix, particle.pt);
-      treeEvents.push_back(prefix + "particle6_eta" + suffix, particle.eta);
-      treeEvents.push_back(prefix + "particle6_phi" + suffix, particle.phi);
-      treeEvents.push_back(prefix + "particle6_e" + suffix, particle.e);
-      treeEvents.push_back(prefix + "particle6_charge" + suffix,
-                           particle.charge);
-      treeEvents.push_back(prefix + "particle6_pid" + suffix, particle.pdgid);
-      treeEvents.push_back(prefix + "particle6_jetid" + suffix, jetindex);
+      for (int ii = 0; ii < threeplanes.third.harder_constituents_info.size();
+           ii++)
+      {
+        auto particle = threeplanes.third.harder_constituents_info.at(ii);
+        treeEvents.push_back(prefix + "particle5_pt" + suffix, particle.pt);
+        treeEvents.push_back(prefix + "particle5_eta" + suffix, particle.eta);
+        treeEvents.push_back(prefix + "particle5_phi" + suffix, particle.phi);
+        treeEvents.push_back(prefix + "particle5_e" + suffix, particle.e);
+        treeEvents.push_back(prefix + "particle5_charge" + suffix,
+                             particle.charge);
+        treeEvents.push_back(prefix + "particle5_pid" + suffix, particle.pdgid);
+        treeEvents.push_back(prefix + "particle5_jetid" + suffix, jetindex);
+      }
+      for (int ii = 0; ii < threeplanes.third.softer_constituents_info.size();
+           ii++)
+      {
+        auto particle = threeplanes.third.softer_constituents_info.at(ii);
+        treeEvents.push_back(prefix + "particle6_pt" + suffix, particle.pt);
+        treeEvents.push_back(prefix + "particle6_eta" + suffix, particle.eta);
+        treeEvents.push_back(prefix + "particle6_phi" + suffix, particle.phi);
+        treeEvents.push_back(prefix + "particle6_e" + suffix, particle.e);
+        treeEvents.push_back(prefix + "particle6_charge" + suffix,
+                             particle.charge);
+        treeEvents.push_back(prefix + "particle6_pid" + suffix, particle.pdgid);
+        treeEvents.push_back(prefix + "particle6_jetid" + suffix, jetindex);
+      }
     }
   }
 };

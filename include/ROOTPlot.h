@@ -1,3 +1,4 @@
+#pragma once
 #include "TCanvas.h"
 #include "TColor.h"
 #include "TGraph.h"
@@ -15,7 +16,6 @@
 #include "TGaxis.h"
 #include "TGraphAsymmErrors.h"
 using namespace std;
-
 Style_t recommeded_font = 43;
 Float_t recommeded_fontsize = 38;
 class ROOTPlot {

@@ -57,7 +57,7 @@ public :
    Double_t        kt;
    Double_t        kt0;
    Double_t        kt3;
-   Int_t           match;
+   double           match;
    Double_t        pTD_1;
    Double_t        pTD_2;
    Double_t        pTD_3;
@@ -97,7 +97,7 @@ public :
    Double_t        sigma_6;
    Double_t        theta;
    Double_t        theta2;
-   Int_t           type;
+   double           type;
    Int_t           type3;
    Double_t        z1;
    Double_t        z2;
@@ -111,7 +111,7 @@ public :
    Int_t           validate1;
    Int_t           validate2;
    Int_t           validate3;
-   Int_t           spin;
+   Double_t           spin;
    Double_t WeightSpinoff;
    Double_t RecoPhi;
    // List of branches

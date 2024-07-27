@@ -39,7 +39,8 @@ def main(args):
     select_index = [branch_to_index[name] for name in match_index]
     match_data = X_data[:, select_index]
     match_data=match_data[:,0]
-    Y_data = dnn.convert_to_one_hot_fourlabel2(Y_data,match_data)
+    #Y_data = dnn.convert_to_one_hot_threeLabel(Y_data,match_data)
+    Y_data = dnn.convert_to_one_hot_threeLabel(Y_data,match_data)
 
     #opt 1 full 2: veto kt 3: veto kt deltaR  3: veto kt theta
     for i in range(len(select_item)):
@@ -74,12 +75,12 @@ def main(args):
         learning_rate=0.001
         l2_reg=0
         model = dnn.train_and_save_model_MultiLabel(X_train=X_data3_train,X_val=X_data3_val,Y_train=Y_data1_train,Y_val=Y_data1_val,hidden_units=hidden_units,learning_rate=learning_rate,l2_reg=l2_reg)
-        folder_name = "ML/train_out/"+suffix
+        folder_name = "ML/train_out/"+suffix+"threelabel"
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
-        model.save("ML/model/fourlabel_type6"+suffix)
+        model.save("ML/model/"+suffix+"threelabel")
         ##########################  Saving root file ############################################################################################
-        root_filename = folder_name+"/train_out"
+        root_filename = folder_name+"/"
         train_val_index = dnn.modify_array_advanced(indices_type,select_index_train,select_index_val)
         Xdata_full = np.concatenate((X_data,X_data_supp),axis=0)
         print(train_val_index.shape,X_data.shape)

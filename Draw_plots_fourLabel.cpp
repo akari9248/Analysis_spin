@@ -24,7 +24,7 @@ public:
   }
   void initialize() override
   {
-    t->Add((TString)options.inputFolder + "/Chunk*.root/DNNTrainTree");
+    t->Add((TString)options.inputFolder + "/*.root/DNNTrainTree");
     hists.addHist("MC_number", 2, 0, 2);
 
     hists.addHist("phi_qq" , 100, 0, TMath::Pi());

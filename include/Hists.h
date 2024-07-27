@@ -89,6 +89,12 @@ public:
 
         file.Close(); 
     }
+    void Write(TFile *file) {
+        file->cd();
+        for (auto& pair : hists) {
+            pair.second->Write(pair.second->GetTitle());  
+        }
+    }
     void Load(TString filename) {
       // 打开ROOT文件
       TFile *file = TFile::Open(filename);

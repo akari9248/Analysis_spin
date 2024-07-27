@@ -406,6 +406,16 @@ def convert_to_one_hot_fourlabel2(labels,match):
         elif np.array_equal(label, [0]) and (match[i] >= 0):
             one_hot_labels[i, 3] = 1  
     return one_hot_labels
+def convert_to_one_hot_threeLabel(labels,match):
+    one_hot_labels = np.zeros((labels.shape[0], 3))
+    for i, label in enumerate(labels):
+        if np.array_equal(label, [3]) :
+            one_hot_labels[i, 0] = 1  
+        elif np.array_equal(label, [1]):
+            one_hot_labels[i, 1] = 1  
+        elif np.array_equal(label, [2]) or np.array_equal(label, [4]):
+            one_hot_labels[i, 2] = 1  
+    return one_hot_labels
 def convert_to_binary(labels):
     binary_labels = np.zeros(labels.shape[0])
     for i, label in enumerate(labels):

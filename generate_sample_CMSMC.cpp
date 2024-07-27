@@ -119,7 +119,6 @@ public:
         BranchAlias();
         treeEvents.BeginEvent();
         for(int i=0;i<events->RecoJetMatching->size();i++){
-            
             treeEvents.push_back("RecoJetMatching",events->RecoJetMatching->at(i));
         }
         for(int i=0;i<events->GenJetMatching->size();i++){

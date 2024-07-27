@@ -7,18 +7,38 @@
 #include "SaveData.h"
 class Selection {
 public:
+    using Condition = std::function<bool()>;
+    std::string name;
+    std::vector<std::function<bool()>> conditions;
+
+    Selection(const std::string& _name) : name(_name) {}
+    void AddCondition(const std::function<bool()>& condition) {
+        conditions.push_back(condition);
+    }
+    Selection() {}
+
+    bool Evaluate() const {
+        bool result = true;
+        for (const auto& condition : conditions) {
+            result = result&&condition();
+        }
+        return result;
+    }
+    std::string GetName() const {
+        return name;
+    }
+    template <typename Func, typename... Args>
+    static Condition make_condition(Func&& func, Args&&... args) {
+        return [=]() { return func(args...); };
+    }
     template <typename T, typename U>
     static bool isWithinRange(const T& value, const std::vector<U>& range) {
         if (range.size() != 2) {
             throw std::invalid_argument("Range vector must have exactly 2 elements.");
         }
-        
-        // 如果右边界为 -1，则只检查左边界
         if (range[1] == static_cast<U>(-1)) {
             return value >= range[0];
         }
-
-        // 否则检查完整的范围
         return value >= range[0] && value <= range[1];
     }
 };

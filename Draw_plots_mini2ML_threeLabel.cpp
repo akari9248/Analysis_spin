@@ -13,6 +13,8 @@
 #include <iomanip>
 #include <cmath>
 #include "include/common_tool.h"
+#include "include/Draw_Template.h"
+#include "include/chiscan.h"
 class EventsAnalyzer : public SampleAnalyzer<DataInfoML> {
 public:
   vector<string> spin_strs;
@@ -27,60 +29,60 @@ public:
     hists.addHist("MC_number", 2, 0, 2);
     cut_strs={"","_z2cut01","_z2cut12","_z2cut23","_z2cut34","_z2cut45","_z1cut01","_z1cut12","_z1cut23","_z1cut34","_z1cut45","_ktcut01","_ktcut12","_ktcut25","_ktcut5"};
     for(auto cut_str:cut_strs){
-      hists.addHist("phi_qq_spinon"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_gg_spinon"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_rest_spinon"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_unmatched_spinon"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_full_spinon"+cut_str, 100, 0, TMath::Pi());
+      hists.addHist("phi_qq_spinon"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_gg_spinon"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_rest_spinon"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_unmatched_spinon"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_full_spinon"+cut_str, 10 , 0, TMath::Pi());
 
-      hists.addHist("phi_qq_qq_spinon"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_qq_gg_spinon"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_qq_rest_spinon"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_qq_unmatched_spinon"+cut_str, 100, 0, TMath::Pi());
+      hists.addHist("phi_qq_qq_spinon"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_qq_gg_spinon"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_qq_rest_spinon"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_qq_unmatched_spinon"+cut_str, 10 , 0, TMath::Pi());
 
-      hists.addHist("phi_gg_qq_spinon"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_gg_gg_spinon"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_gg_rest_spinon"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_gg_unmatched_spinon"+cut_str, 100, 0, TMath::Pi());
+      hists.addHist("phi_gg_qq_spinon"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_gg_gg_spinon"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_gg_rest_spinon"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_gg_unmatched_spinon"+cut_str, 10 , 0, TMath::Pi());
 
-      hists.addHist("phi_qq_spinoff"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_gg_spinoff"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_rest_spinoff"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_unmatched_spinoff"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_full_spinoff"+cut_str, 100, 0, TMath::Pi());
+      hists.addHist("phi_qq_spinoff"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_gg_spinoff"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_rest_spinoff"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_unmatched_spinoff"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_full_spinoff"+cut_str, 10 , 0, TMath::Pi());
 
-      hists.addHist("phi_qq_qq_spinoff"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_qq_gg_spinoff"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_qq_rest_spinoff"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_qq_unmatched_spinoff"+cut_str, 100, 0, TMath::Pi());
+      hists.addHist("phi_qq_qq_spinoff"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_qq_gg_spinoff"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_qq_rest_spinoff"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_qq_unmatched_spinoff"+cut_str, 10 , 0, TMath::Pi());
 
-      hists.addHist("phi_gg_qq_spinoff"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_gg_gg_spinoff"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_gg_rest_spinoff"+cut_str, 100, 0, TMath::Pi());
-      hists.addHist("phi_gg_unmatched_spinoff"+cut_str, 100, 0, TMath::Pi());
+      hists.addHist("phi_gg_qq_spinoff"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_gg_gg_spinoff"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_gg_rest_spinoff"+cut_str, 10 , 0, TMath::Pi());
+      hists.addHist("phi_gg_unmatched_spinoff"+cut_str, 10 , 0, TMath::Pi());
     }
 
     spin_strs={"","_spinon","_spinoff"};
     for(auto spin_str:spin_strs){
-      hists.addHist("score0_qq"+spin_str, 100, 0, 1);
-      hists.addHist("score0_gg"+spin_str, 100, 0, 1);
-      hists.addHist("score0_rest"+spin_str, 100, 0, 1);
-      hists.addHist("score0_unmatched"+spin_str, 100, 0, 1);
+      hists.addHist("score0_qq"+spin_str, 10 , 0, 1);
+      hists.addHist("score0_gg"+spin_str, 10 , 0, 1);
+      hists.addHist("score0_rest"+spin_str, 10 , 0, 1);
+      hists.addHist("score0_unmatched"+spin_str, 10 , 0, 1);
 
-      hists.addHist("score1_qq"+spin_str, 100, 0, 1);
-      hists.addHist("score1_gg"+spin_str, 100, 0, 1);
-      hists.addHist("score1_rest"+spin_str, 100, 0, 1);
-      hists.addHist("score1_unmatched"+spin_str, 100, 0, 1);
+      hists.addHist("score1_qq"+spin_str, 10 , 0, 1);
+      hists.addHist("score1_gg"+spin_str, 10 , 0, 1);
+      hists.addHist("score1_rest"+spin_str, 10 , 0, 1);
+      hists.addHist("score1_unmatched"+spin_str, 10 , 0, 1);
 
-      hists.addHist("score2_qq"+spin_str, 100, 0, 1);
-      hists.addHist("score2_gg"+spin_str, 100, 0, 1);
-      hists.addHist("score2_rest"+spin_str, 100, 0, 1);
-      hists.addHist("score2_unmatched"+spin_str, 100, 0, 1);
+      hists.addHist("score2_qq"+spin_str, 10 , 0, 1);
+      hists.addHist("score2_gg"+spin_str, 10 , 0, 1);
+      hists.addHist("score2_rest"+spin_str, 10 , 0, 1);
+      hists.addHist("score2_unmatched"+spin_str, 10 , 0, 1);
 
-      hists.addHist("score3_qq"+spin_str, 100, 0, 1);
-      hists.addHist("score3_gg"+spin_str, 100, 0, 1);
-      hists.addHist("score3_rest"+spin_str, 100, 0, 1);
-      hists.addHist("score3_unmatched"+spin_str, 100, 0, 1);
+      hists.addHist("score3_qq"+spin_str, 10 , 0, 1);
+      hists.addHist("score3_gg"+spin_str, 10 , 0, 1);
+      hists.addHist("score3_rest"+spin_str, 10 , 0, 1);
+      hists.addHist("score3_unmatched"+spin_str, 10 , 0, 1);
     }
     count=0;
   }
@@ -107,14 +109,17 @@ public:
     double score1 = posteriors[1];
     double score2 = posteriors[2];
     
-    double score2_weight[4] = {1,20,1,200};
-    score2 = events->score2*score2_weight[2]*5/(events->score0*score2_weight[0]+events->score1*score2_weight[1]+events->score2*score2_weight[2]+events->score3*score2_weight[3]);
-    double score1_weight[4] = {1,1,1,1};
-    score1 = events->score1*score1_weight[1]*50/(events->score0*score1_weight[0]+events->score1*score1_weight[1]+events->score2*score1_weight[2]+events->score3*score1_weight[3]);
+    double score2_weight[4] = {1,10,1,0};
+    score2 = events->score2*score2_weight[2]/(events->score0*score2_weight[0]+events->score1*score2_weight[1]+events->score2*score2_weight[2]+events->score3*score2_weight[3]);
+    double score1_weight[4] = {1,1,10,0};
+    score1 = events->score1*score1_weight[1]/(events->score0*score1_weight[0]+events->score1*score1_weight[1]+events->score2*score1_weight[2]+events->score3*score1_weight[3]);
     
-    
-    bool isqq =  score2 > 0.55 && events->kt0>20 ;
-    bool isgg =  score1 > 0.5 && events->kt0>20 ;
+    // bool isqq =  events->score2*score2_weight[2]/(events->score1*score2_weight[1]+events->score2*score2_weight[2]) > 0.2 && events->kt0>20 ;
+    // bool isgg =  events->score1*score1_weight[1]/(events->score1*score1_weight[1]+events->score2*score1_weight[2]) > 0.001 && events->kt0>20 ;
+
+    bool isqq =  score2 > 0.5 && events->kt0>20 ;
+    bool isgg =  score1 > 0.3 && events->kt0>20 ;
+    if(!isqq&&!isgg) return;
     //if(isqq) cout<<score2<<endl;
 
     bool ktcut01 = events->kt > 0.0 && events->kt < 1.0;
@@ -141,7 +146,7 @@ public:
     // bool isqq =  events->score0>= 0.96  ;   
     // bool isgg = score1>= 0.7 && events->validate!=0;  
 
-    // bool isqq = events->type == 2 && events->kt>4;  
+    // bool isqq = events->type == 2 || events->type == 4 && events->kt>4;  
     // bool isgg = events->type == 1; 
     
 
@@ -172,28 +177,27 @@ public:
       if(cut_str=="_ktcut5"&&!ktcut5) weight=0;
       if (spin == 1) {
         if (isqq) {
-           
           hists["phi_qq_spinon"+cut_str]->Fill(phi,weight);
-          if (events->type == 0 && events->match >= 0)
+          if (events->type == 3 && events->match >= 0)
             hists["phi_qq_rest_spinon"+cut_str]->Fill(phi,weight);
-          if (events->type == 0 && events->match < 0)
+          if (events->type == 0 && events->match >= 0)
             hists["phi_qq_unmatched_spinon"+cut_str]->Fill(phi,weight);
           if (events->type == 1)
             hists["phi_qq_gg_spinon"+cut_str]->Fill(phi,weight);
-          if (events->type == 2)
+          if (events->type == 2 || events->type == 4)
             hists["phi_qq_qq_spinon"+cut_str]->Fill(phi,weight);
         } else if (isgg) {
           hists["phi_gg_spinon"+cut_str]->Fill(phi,weight);
-          if (events->type == 0 && events->match >= 0)
+          if (events->type == 3 && events->match >= 0)
             hists["phi_gg_rest_spinon"+cut_str]->Fill(phi,weight);
-          if (events->type == 0 && events->match < 0)
+          if (events->type == 0 && events->match >= 0)
             hists["phi_gg_unmatched_spinon"+cut_str]->Fill(phi,weight);
           if (events->type == 1)
             hists["phi_gg_gg_spinon"+cut_str]->Fill(phi,weight);
-          if (events->type == 2)
+          if (events->type == 2 || events->type == 4)
             hists["phi_gg_qq_spinon"+cut_str]->Fill(phi,weight);
         } else if (isrest) {
-          if (events->match >= 0)
+          if (events->match >= 0&& events->type == 3)
             hists["phi_rest_spinon"+cut_str]->Fill(phi,weight);
           else
             hists["phi_unmatched_spinon"+cut_str]->Fill(phi,weight);
@@ -202,26 +206,26 @@ public:
       } else if (spin == 0) {
         if (isqq) {
           hists["phi_qq_spinoff"+cut_str]->Fill(phi,weight);
-          if (events->type == 0 && events->match >= 0)
+          if (events->type == 3 && events->match >= 0)
             hists["phi_qq_rest_spinoff"+cut_str]->Fill(phi,weight);
-          if (events->type == 0 && events->match < 0)
+          if (events->type == 0 && events->match >= 0)
             hists["phi_qq_unmatched_spinoff"+cut_str]->Fill(phi,weight);
           if (events->type == 1)
             hists["phi_qq_gg_spinoff"+cut_str]->Fill(phi,weight);
-          if (events->type == 2)
+          if (events->type == 2 || events->type == 4)
             hists["phi_qq_qq_spinoff"+cut_str]->Fill(phi,weight);
         } else if (isgg) {
           hists["phi_gg_spinoff"+cut_str]->Fill(phi,weight);
-          if (events->type == 0 && events->match >= 0)
+          if (events->type == 3 && events->match >= 0)
             hists["phi_gg_rest_spinoff"+cut_str]->Fill(phi,weight);
-          if (events->type == 0 && events->match < 0)
+          if (events->type == 0 && events->match >= 0)
             hists["phi_gg_unmatched_spinoff"+cut_str]->Fill(phi,weight);
           if (events->type == 1)
             hists["phi_gg_gg_spinoff"+cut_str]->Fill(phi,weight);
-          if (events->type == 2)
+          if (events->type == 2 || events->type == 4)
             hists["phi_gg_qq_spinoff"+cut_str]->Fill(phi,weight);
         } else if (isrest) {
-          if (events->match >= 0)
+          if (events->match >= 0 && events->type == 3)
             hists["phi_rest_spinoff"+cut_str]->Fill(phi,weight);
           else
             hists["phi_unmatched_spinoff"+cut_str]->Fill(phi,weight);
@@ -231,10 +235,10 @@ public:
     }
     for(auto spin_str:spin_strs){
       bool isspin = true;
-      bool isqq = events->type == 2;
+      bool isqq = events->type == 2 || events->type == 4;
       bool isgg = events->type == 1;
-      bool isrest = events->type ==0 && events->match>=0;
-      bool isunmatched = events->type ==0 && events->match<0;
+      bool isrest = events->type == 3 && events->match>=0;
+      bool isunmatched = events->type ==0 && events->match>=0;
       double score0 = events->score0;
       double score3 = events->score3;
       if(spin_str=="_spinon") isspin=spin==1;
@@ -262,6 +266,27 @@ public:
     
   }
 };
+void SymmetryTwoPads(vector<TH1D *> hists,TString filename,TString ExtraText="",vector<TString> legend_name={}){
+      chiscan::chiscan chi2(hists[0],chiscan::chiscan::GetStandarCov(hists[0]),hists[1],{});
+      
+      auto hists_sym = Draw_Template::SymmetryHists(hists,true);
+      ROOTPlot plot1(hists_sym);
+      plot1.Load.TwoPads();
+      plot1.SetXbinRange(1,hists_sym.at(0)->GetNbinsX());
+      plot1.SetLegend(0.15, 0.35, 0.32, 0.7);
+      if(legend_name.size()==0)
+        plot1.SetLegendName(Draw_Template::GetTitles(hists));
+      else
+        plot1.SetLegendName(legend_name);
+      plot1.ratios_Xtitle = "#varphi";
+      plot1.AddExtraText({ExtraText,TString::Format("#chi^{2} = %.2f",chi2.calchi2())});
+      plot1.Draw();
+      // plot1.Write(TString::Format("output/Unweighted%d.png", i));
+      plot1.Write(
+          filename);
+      // plot1.Write(
+      //     "zlin://mnt/c/Users/win10/machine_learning/plots2/"+filename);
+}
 // void Draw_plots_mini2(){
 int main(int argc, char *argv[])
 {
@@ -286,8 +311,9 @@ int main(int argc, char *argv[])
       hist_spinon->SetTitle("spin on");
       hist_spinoff->SetTitle("spin off");
       vector<TH1D *> hists_draw = {hist_spinoff, hist_spinon};
-      Draw_Template::SymmetryTwoPads(hists_draw, folder + "ML" + type + "_phi_onoff" + cut_str + ".pdf",
+      SymmetryTwoPads(hists_draw, folder + "ML" + type + "_phi_onoff" + cut_str + ".pdf",
                                      "plane type: " + type);
+      
     }
   }
   vector<string> spins = {"", "_spinon", "_spinoff"};

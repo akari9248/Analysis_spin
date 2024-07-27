@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ROOTPlot.h"
 
 class Draw_Template{

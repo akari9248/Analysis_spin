@@ -78,11 +78,11 @@ public:
     TVector3 tmp2;
     int i =rand();
     if (i % 2 == 0)
-      t22_X.Vect().Cross(t21_X.Vect()); // p2
+      tmp2 =  t22_X.Vect().Cross(t21_X.Vect()); // p2
     else
-      t21_X.Vect().Cross(t22_X.Vect()); // p2
+      tmp2 = t21_X.Vect().Cross(t22_X.Vect()); // p2
     planetheta.dphi12_X = acos(tmp1.Dot(tmp2) / tmp1.Mag() / tmp2.Mag());
-
+    
     // theta*
     if (i % 2 == 0)
       planetheta.theta = acos(t1_pX.Vect().Dot(X.Vect()) / t1_pX.Vect().Mag() / X.Vect().Mag());
