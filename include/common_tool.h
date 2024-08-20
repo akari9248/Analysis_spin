@@ -304,7 +304,7 @@ public:
             analyzer.run_frac(events_frac, begin);
             SaveData::writeTreeEventsToRoot(
                 analyzer.treeEvents,
-                options.outputFolder + "/Chunk" + std::to_string(options.chunki) + "_Part" + std::to_string(part) + ".root", true);
+                options.outputFolder + "/Chunk" + std::to_string(options.chunki) + "_Part" + std::to_string(part) + ".root", false);
         }
     }
     template <typename Analyzer>
@@ -322,7 +322,7 @@ public:
             analyzer.run_frac(events_frac, begin);
             SaveData::writeTreeEventsToRoot(
                 analyzer.treeEvents,
-                options.outputFolder + "/Chunk" + std::to_string(options.chunki) + "_Part" + std::to_string(part) + ".root", true);
+                options.outputFolder + "/Chunk" + std::to_string(options.chunki) + "_Part" + std::to_string(part) + ".root", false);
             analyzer.metadata.SaveToRootFile(options.outputFolder + "/Chunk" + std::to_string(options.chunki) + "_Part" + std::to_string(part) + ".root");
         }
     }

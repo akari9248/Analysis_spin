@@ -70,6 +70,7 @@ public:
     Selection EventSelection;
     Selection JetSelection;
     Selection PlaneSelection;
+    Selection ParticleSelection;
     string SampleType="PrivateMC";
     vector<PrefixAndSuffix> level;
     std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match;
@@ -86,6 +87,7 @@ public:
         md = metadata.CreateMetaData(options.executablefile);
         EventSelection = Selection("EventSelection");
         JetSelection = Selection("JetSelection");
+        ParticleSelection = Selection("ParticleSelection");
         PlaneSelection = Selection("PlaneSelection");
         md->AddParameter("IO Paramter", "Input Folder = " + options.inputFolder);
         md->AddParameter("IO Paramter", "Output Folder = " + options.outputFolder);
@@ -96,6 +98,7 @@ public:
         InitAnalyzeBranch();
         InitEventSelection();
         InitJetSelection();
+        InitParticleSelection();
         InitPlaneSelection();
         InitOutputBranch();
     }
@@ -105,6 +108,7 @@ public:
         DeriveLevelsJetsDaughters();
         if (!EventSelection.Evaluate()) return;
         JetSelection.Evaluate();
+        ParticleSelection.Evaluate();
         RecoSplitPlanes();
         PlaneSelection.Evaluate();
         MatchPlanes();
@@ -130,6 +134,9 @@ public:
             {
                 auto jetdaughters = jetsdaughters.at(i).daughters;
                 auto planes = RecoPlane::JetConstituents_threeplanes(jetdaughters);
+                planes.first.initJet=jetsdaughters.at(i).jet;
+                planes.second.initJet=jetsdaughters.at(i).jet;
+                planes.third.initJet=jetsdaughters.at(i).jet;
                 AssignFlavour(planes);
                 planes_arr.at(level).at(0).push_back(planes);
             }
@@ -137,9 +144,10 @@ public:
         AssignMatchedThreePlanes();
     }
     void AssignMatchedThreePlanes(){
-        if(SampleType == "CMSMC"||SampleType == "CMSMCGen"){
+        if(SampleType == "CMSMCGen"){
             for(int level=0;level<planes_arr.size();level++)
             {
+                cout<<level<<" "<<planes_arr.size()-1<<endl;
                 for (int i = 0; i < planes_arr.at(level).at(0).size(); i++)
                 {
                     int matchindex = Branches.at(level).JetMatching->at(i);
@@ -273,29 +281,6 @@ public:
             }
             prefixs = {""};
             suffixs = {"_Parton", "_Hadron"};
-            AddSelection(
-            EventSelection, "DiJet Selection",
-            [this]
-            {
-                vector<TLorentzVector> jets;
-                for(auto &jetdaughters:levelsjetsdaughters.at(1)) {
-                    jets.push_back(jetdaughters.jet);
-                }
-                double pTCut = 30;
-                double etaCut = 2.1;
-                if (jets.size() < 2) return false;
-                if (jets.at(0).Pt() < pTCut || abs(jets.at(0).Eta()) > etaCut) return false;
-                if (jets.at(1).Pt() < pTCut || abs(jets.at(1).Eta()) > etaCut) return false;
-                // the two leading jets must lie in opposite hemisphere
-                auto dphi = jets.at(0).Phi() - jets.at(1).Phi();
-                if ( dphi > M_PI ) dphi -= 2.0*M_PI;
-                if ( dphi <= -M_PI ) dphi += 2.0*M_PI;
-                auto dpt = jets.at(0).Pt() - jets.at(1).Pt();
-                auto spt = jets.at(0).Pt() + jets.at(1).Pt();
-                
-                if (abs(dphi) > 2 && abs(dpt)/spt < 0.3) return true;
-                return false;
-            });
         }
         if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen")
         {
@@ -303,32 +288,14 @@ public:
            if(SampleType == "CMSMC"){
                prefixs = {"Gen","Reco"};
                suffixs = {""};
-               AddSelection(
-                   EventSelection, "Gen&&Reco DiJet Selection",
-                   [this]
-                   {
-                       return this->events->GenPassDijet && this->events->RecoPassDijet;
-                   });
            }
            if(SampleType == "CMSMCGen"){
                prefixs = {"Gen","Reco"};
                suffixs = {""};
-               AddSelection(
-                   EventSelection, "Gen DiJet Selection",
-                   [this]
-                   {
-                       return this->events->GenPassDijet;
-                   });
            }
            if((SampleType == "CMSData")){
                prefixs = {"Reco"};
                suffixs = {""};
-               AddSelection(
-                   EventSelection, "Reco DiJet Selection",
-                   [this]
-                   {
-                       return this->events->RecoPassDijet;
-                   });
            }
         }
         for (auto prefix : prefixs)
@@ -400,8 +367,6 @@ public:
         if(SampleType == "CMSMCGen"){
             treeEvents.addBranches("MatchedRecoPhi/vD");
         }
-        
-
     
     }
     void InitAnalyzeBranch()
@@ -437,12 +402,56 @@ public:
     }
     void InitEventSelection()
     {
-        // AddSelection(
-        //     EventSelection, "Leading Particle Pt > 30 GeV",
-        //     [this]
-        //     {
-        //         return this->Branches[1].Pt->at(0) > 20 && this->Branches[1].Pt->at(0) < 30;
-        //     });
+        if (SampleType == "PrivateMC")
+        {
+            AddSelection(
+            EventSelection, "DiJet Selection",
+            [this]
+            {
+                vector<TLorentzVector> jets;
+                for(auto &jetdaughters:levelsjetsdaughters.at(1)) {
+                    jets.push_back(jetdaughters.jet);
+                }
+                double pTCut = 30;
+                double etaCut = 2.1;
+                if (jets.size() < 2) return false;
+                if (jets.at(0).Pt() < pTCut || abs(jets.at(0).Eta()) > etaCut) return false;
+                if (jets.at(1).Pt() < pTCut || abs(jets.at(1).Eta()) > etaCut) return false;
+                // the two leading jets must lie in opposite hemisphere
+                auto dphi = jets.at(0).Phi() - jets.at(1).Phi();
+                if ( dphi > M_PI ) dphi -= 2.0*M_PI;
+                if ( dphi <= -M_PI ) dphi += 2.0*M_PI;
+                auto dpt = jets.at(0).Pt() - jets.at(1).Pt();
+                auto spt = jets.at(0).Pt() + jets.at(1).Pt();
+                
+                if (abs(dphi) > 2 && abs(dpt)/spt < 0.3) return true;
+                return false;
+            });
+        }
+        if(SampleType == "CMSMC"){
+            AddSelection(
+                   EventSelection, "Gen&&Reco DiJet Selection",
+                   [this]
+                   {
+                       return this->events->GenPassDijet && this->events->RecoPassDijet;
+                   });
+        }
+        if(SampleType == "CMSMCGen"){
+            AddSelection(
+                   EventSelection, "Gen DiJet Selection",
+                   [this]
+                   {
+                       return this->events->GenPassDijet;
+                   });
+        }
+        if((SampleType == "CMSData")){
+            AddSelection(
+                   EventSelection, "Reco DiJet Selection",
+                   [this]
+                   {
+                       return this->events->RecoPassDijet;
+                   });
+        }
     }
     void InitJetSelection(){
         if(SampleType=="CMSMCGen") return;
@@ -471,9 +480,29 @@ public:
                     jetsdaughters.erase(
                         std::remove_if(jetsdaughters.begin(), jetsdaughters.end(),
                                     [](const JetAndDaughters &jd) {
-                                        return abs(jd.jet.Eta()) >2.1;
+                                        return abs(jd.jet.Eta()) >=2.1;
                                     }),
                         jetsdaughters.end());
+                }
+                return true;
+            });
+    }
+    void InitParticleSelection(){
+        AddSelection(
+            ParticleSelection, "Particle Pt >= 1 GeV",
+            [this]
+            {
+                for (auto &jetsdaughters : this->levelsjetsdaughters)
+                {
+                    for(auto &jd:jetsdaughters){
+                        jd.daughters.erase(
+                        std::remove_if(jd.daughters.begin(), jd.daughters.end(),
+                                       [this](const ParticleInfo &dau)
+                                       {
+                                           return dau.pt < 1 ;
+                                       }),
+                        jd.daughters.end());
+                    }
                 }
                 return true;
             });
@@ -525,6 +554,32 @@ public:
                                            {
                                                return threeplanes.matchedthreeplanes.first.initJet.Pt() < this->options.jinit_ptlow || 
                                                       threeplanes.matchedthreeplanes.first.initJet.Pt() > this->options.jinit_pthigh;
+                                           }),
+                            planes_arr.at(i).at(0).end());
+                    }
+                }
+                return true;
+            });
+            AddSelection(
+            PlaneSelection, "Gen Jet Eta = [ -2.1 , 2.1]",
+            [this]
+            {
+                for (int i=0;i<level.size();i++) 
+                {
+                    auto planes = &planes_arr.at(i);
+                    if(level.at(i).prefix == "Gen") {
+                        planes_arr.at(i).at(0).erase(
+                            std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
+                                           [this](const JetBranch::threeplanes &threeplanes)
+                                           {
+                                               return abs(threeplanes.first.initJet.Eta()) >= 2.1;                                           }),
+                            planes_arr.at(i).at(0).end());
+                    }else{
+                        planes_arr.at(i).at(0).erase(
+                            std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
+                                           [this](const JetBranch::threeplanes &threeplanes)
+                                           {
+                                                return abs(threeplanes.matchedthreeplanes.first.initJet.Eta()) >= 2.1;
                                            }),
                             planes_arr.at(i).at(0).end());
                     }

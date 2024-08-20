@@ -1,13 +1,20 @@
 #!/bin/bash
 
+# inputFolders=(
+#     "/storage/shuangyuan/code/analysis_spin/dataset/QCD_Pt_470to600_pythia8-RunIISummer20UL16"
+#     "/storage/shuangyuan/code/analysis_spin/dataset/QCD_Pt_600to800_pythia8-RunIISummer20UL16"
+#     "/storage/shuangyuan/code/analysis_spin/dataset/QCD_Pt_800to1000_pythia8-RunIISummer20UL16"
+# )
+# sampleTypes=(
+#     "CMS_pythia_Pt470to600"
+#     "CMS_pythia_Pt600to800"
+#     "CMS_pythia_Pt800to1000"
+# )
+
 inputFolders=(
-    "/storage/shuangyuan/code/analysis_spin/dataset/QCD_Pt_470to600_pythia8-RunIISummer20UL16"
-    "/storage/shuangyuan/code/analysis_spin/dataset/QCD_Pt_600to800_pythia8-RunIISummer20UL16"
     "/storage/shuangyuan/code/analysis_spin/dataset/QCD_Pt_800to1000_pythia8-RunIISummer20UL16"
 )
 sampleTypes=(
-    "CMS_pythia_Pt470to600"
-    "CMS_pythia_Pt600to800"
     "CMS_pythia_Pt800to1000"
 )
 # inputFolders=(
@@ -67,13 +74,13 @@ baseOutputFolder="/extdisk/zlin/Machine_learning"
 nchunks=100
 nparts=10
 
-jinit_ptlow=450
-jinit_pthigh=600
+jinit_ptlow=600
+jinit_pthigh=7000
 
 # j2_ptlow=160
 # j2_pthigh=200
-j2_ptlow=80
-j2_pthigh=120
+j2_ptlow=0
+j2_pthigh=7000
 
 ptselection="_jinitpt${jinit_ptlow}_${jinit_pthigh}_j2pt${j2_ptlow}_${j2_pthigh}"
 
@@ -92,10 +99,10 @@ for ((i=0; i<${#inputFolders[@]}; i++)); do
     
     ########### Extract features #######################
     ## Reco #####
-    # compile Extract_features_stdCMSReco.cpp
-    # rm ${outputFeatureFolder}Reco/*.root
-    # run_parallel Extract_features_stdCMSReco -nchunks $nchunks -nparts $nparts -opt "-I $outputRecoFolder -O ${outputFeatureFolder}Reco --jinit_ptlow $jinit_ptlow  --jinit_pthigh $jinit_pthigh --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh"
-    # ### Gen #####
+    compile Extract_features_stdCMSReco.cpp
+    rm ${outputFeatureFolder}Reco/*.root
+    run_parallel Extract_features_stdCMSReco -nchunks $nchunks -nparts $nparts -opt "-I $outputRecoFolder -O ${outputFeatureFolder}Reco --jinit_ptlow $jinit_ptlow  --jinit_pthigh $jinit_pthigh --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh"
+    ### Gen #####
     # compile Extract_features_stdCMSGen.cpp
     # rm ${outputFeatureFolder}Gen/*.root
     # run_parallel Extract_features_stdCMSGen -nchunks $nchunks -nparts $nparts -opt "-I $outputRecoFolder -O ${outputFeatureFolder}Gen --jinit_ptlow $jinit_ptlow  --jinit_pthigh $jinit_pthigh --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh"
@@ -108,11 +115,11 @@ for ((i=0; i<${#inputFolders[@]}; i++)); do
     # compile Draw_plots_fourLabel_maxscore.cpp
     # ./Draw_plots_fourLabel_maxscore -I $outputPredictedFolder${SampleType}$ptselection"Gen"  -O  "plots/ML_plots/Maxscore/"${SampleType}$ptselection"Gen/"
     # ./Draw_plots_fourLabel_maxscore -I $outputPredictedFolder${SampleType}$ptselection"Reco" -O  "plots/ML_plots/Maxscore/"${SampleType}$ptselection"Reco/"
-    compile Draw_plots_fourLabeSpinoff.cpp
-    ./Draw_plots_fourLabeSpinoff -I $outputPredictedFolder${SampleType}$ptselection"Gen"  -O  "plots/ML_plots/"${SampleType}$ptselection"GenReweightSpinoff/"
-    # ./Draw_plots_fourLabel -I $outputPredictedFolder${SampleType}$ptselection"Reco" -O  "plots/ML_plots/"${SampleType}$ptselection"RecoReweightSpinoff/"
+    # compile Draw_plots_fourLabeSpinoff.cpp
+    # ./Draw_plots_fourLabeSpinoff -I $outputPredictedFolder${SampleType}$ptselection"Gen"  -O  "plots/ML_plots/"${SampleType}$ptselection"GenReweightSpinoff/"
+    # # ./Draw_plots_fourLabel -I $outputPredictedFolder${SampleType}$ptselection"Reco" -O  "plots/ML_plots/"${SampleType}$ptselection"RecoReweightSpinoff/"
 
-    compile Draw_plots_fourLabel.cpp
-    ./Draw_plots_fourLabel -I $outputPredictedFolder${SampleType}$ptselection"Gen"  -O  "plots/ML_plots/"${SampleType}$ptselection"Gen/"
-    # ./Draw_plots_fourLabel -I $outputPredictedFolder${SampleType}$ptselection"Reco" -O  "plots/ML_plots/"${SampleType}$ptselection"Reco/"
+    # compile Draw_plots_fourLabel.cpp
+    # ./Draw_plots_fourLabel -I $outputPredictedFolder${SampleType}$ptselection"Gen"  -O  "plots/ML_plots/"${SampleType}$ptselection"Gen/"
+    # # ./Draw_plots_fourLabel -I $outputPredictedFolder${SampleType}$ptselection"Reco" -O  "plots/ML_plots/"${SampleType}$ptselection"Reco/"
 done

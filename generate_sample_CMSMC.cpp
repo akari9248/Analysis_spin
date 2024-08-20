@@ -35,6 +35,9 @@ public:
         std::vector<int> *PdgId = new std::vector<int>;
         std::vector<int> *Charge = new std::vector<int>;
         std::vector<double> *JetPt = new std::vector<double>;
+        std::vector<double> *JetEta = new std::vector<double>;
+        std::vector<double> *JetPhi = new std::vector<double>;
+        std::vector<double> *JetE = new std::vector<double>;
         std::vector<int> *JetId = new std::vector<int>;
     };
     TreeEvents treeEvents;
@@ -102,6 +105,9 @@ public:
         GenBranches.Phi = events->GenDaughterPhi;
         GenBranches.Energy = events->GenDaughterEnergy;
         GenBranches.JetPt = events->GenJetPt;
+        GenBranches.JetEta = events->GenJetEta;
+        GenBranches.JetPhi = events->GenJetPhi;
+        GenBranches.JetE = events->GenJetEnergy;
         GenBranches.JetId = events->GenDaughterJetId;
 
         RecoBranches.Charge = events->RecoDaughterCharge;
@@ -111,6 +117,9 @@ public:
         RecoBranches.Phi = events->RecoDaughterPhi;
         RecoBranches.Energy = events->RecoDaughterEnergy;
         RecoBranches.JetPt = events->RecoJetPt;
+        RecoBranches.JetEta = events->RecoJetEta;
+        RecoBranches.JetPhi = events->RecoJetPhi;
+        RecoBranches.JetE = events->RecoJetEnergy;
         RecoBranches.JetId = events->RecoDaughterJetId;
         Branches = {GenBranches, RecoBranches};
     }
@@ -133,6 +142,7 @@ public:
             treeEvents.push_back("TriggerPrescales",events->TriggerPrescales->at(i));
         }
         int branchindex = 0;
+        
         for (auto &Branch : Branches)
         {
             int jetnum = Branch.JetPt->size();
@@ -141,6 +151,7 @@ public:
             for (int i = 0; i < daughternum; i++)
             {
                 int jetid = Branch.JetId->at(i);
+                if(Branch.Pt->at(i)<=1) continue;
                 daughtersjets.at(jetid).push_back(ParticleInfo(Branch.PdgId->at(i),
                                                                Branch.Charge->at(i),
                                                                Branch.Pt->at(i),
@@ -154,14 +165,15 @@ public:
             {
                 auto daughtersjet = daughtersjets.at(i);
                 auto planes = RecoPlane::JetConstituents(daughtersjet);
-                
+                planes.first.initJet.SetPtEtaPhiE( Branch.JetPt->at(i) * 1.0,Branch.JetEta->at(i) * 1.0,
+                Branch.JetPhi->at(i) * 1.0,Branch.JetE->at(i) * 1.0);
                 RecoPlane::SavePlanes(planes, treeEvents, i, prefixs.at(branchindex), "");
                 double jes_scale = Branch.JetPt->at(i) * 1.0 / planes.first.initJet.Pt();
                 treeEvents.push_back(prefixs.at(branchindex) + "jes_scale", jes_scale);
             }
             branchindex++;
         }
-
+        
     }
     int passpileuprm()
     {

@@ -199,13 +199,13 @@ public:
         {
             NextPassedNumber+= unit_NextPassedNumber;
             double jesscale = events->Recojes_scale->at(i);
-            if (!Selection::isWithinRange(events->Recojpt->at(i) * jesscale, jinit_range))
-                continue;
+            if(abs(events->Recojpt->at(i))<=600) continue;
+            if(abs(events->Recojeta->at(i))>=2.1) continue;
             int isqq = events->Recoisqq->at(i);
             int isgg = events->Recoisgg->at(i);
             JetObservable JetObservable2(particles2.at(i));
-            if (!Selection::isWithinRange(JetObservable2.jet_lorentzvector.Pt() * jesscale, j2_range))
-                continue;
+            // if (!Selection::isWithinRange(JetObservable2.jet_lorentzvector.Pt() * jesscale, j2_range))
+            //     continue;
 
             auto width2 = JetObservable2.jetwidth();
             JetObservable JetObservable3(particles3.at(i));

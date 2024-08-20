@@ -111,9 +111,7 @@ public:
     JetDefinition IFN_jet_def(ifn_plugin);
     IFN_jet_def.delete_plugin_when_unused();
     ClusterSequence cs_IFN(particles, IFN_jet_def);
-
     vector<PseudoJet> jets_IFN = sorted_by_pt(cs_IFN.inclusive_jets());
-
     PseudoJet j0, j1, j2, j3, j4;
     j0 = jets_IFN[0];
     

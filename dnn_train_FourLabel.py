@@ -18,6 +18,10 @@ from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 import dnn
+def add_suffix(strings, suffix):
+    return [s + suffix for s in strings]
+def add_suffix_2d(strings_2d, suffix):
+    return [[s + suffix for s in row] for row in strings_2d]
 def main(args):
     sample_path0 = args.sample_path0
     sample_path1 = args.sample_path1
@@ -25,14 +29,18 @@ def main(args):
     suffix = args.suffix
     sample_filename = "kto4"
     entries=args.entries
-    X_data, branch_to_index, index_to_branch,branch_names = dnn.LoadROOTFile(sample_paths=[sample_path0],entries=args.entries,branches_name=["Nparticles_2","Ntracks_2","pTD_2","sigma1_2","sigma2_2","sigma_2","Nparticles_3","Ntracks_3","pTD_3","sigma1_3","sigma2_3","sigma_3","pt_3","eta_3","phi_3","e_3","Nparticles_4","Ntracks_4","pTD_4","sigma1_4","sigma2_4","sigma_4","pt_4","eta_4","phi_4","e_4","z1","z2","DeltaR","kt","Phi","type","match"])
-    X_data_supp, *_ = dnn.LoadROOTFile(sample_paths=[sample_path1],entries=args.entries,branches_name=["Nparticles_2","Ntracks_2","pTD_2","sigma1_2","sigma2_2","sigma_2","Nparticles_3","Ntracks_3","pTD_3","sigma1_3","sigma2_3","sigma_3","pt_3","eta_3","phi_3","e_3","Nparticles_4","Ntracks_4","pTD_4","sigma1_4","sigma2_4","sigma_4","pt_4","eta_4","phi_4","e_4","z1","z2","DeltaR","kt","Phi","type","match"])
+    X_data, branch_to_index, index_to_branch,branch_names = dnn.LoadROOTFile(sample_paths=[sample_path0],entries=args.entries)
+    X_data_supp, *_ = dnn.LoadROOTFile(sample_paths=[sample_path1],entries=args.entries)
    
-    match_index=["match"]
-    Y_data_index=["type"]
+    match_index=["match2"]
+    level_suffix="_Hadron"
+    Y_data_index=["type2"]
     select_item = [
-        ["Nparticles_2","Ntracks_2","pTD_2","sigma1_2","sigma2_2","sigma_2","Nparticles_3","Ntracks_3","pTD_3","sigma1_3","sigma2_3","sigma_3","Nparticles_4","Ntracks_4","pTD_4","sigma1_4","sigma2_4","sigma_4","z1","z2","DeltaR","kt"]
+        ["nparticles2","ntracks2","pTD2","sigma12","sigma22","sigma2","nparticles3","ntracks3","pTD3","sigma13","sigma23","sigma3","nparticles4","ntracks4","pTD4","sigma14","sigma24","sigma4","z1","z2","DeltaR","kt"]
     ]
+    
+    Y_data_index = add_suffix(Y_data_index,level_suffix)
+    select_item = add_suffix_2d(select_item,level_suffix)
     select_index = [branch_to_index[name] for name in Y_data_index]
     Y_data = X_data[:, select_index]
     select_index = [branch_to_index[name] for name in match_index]

@@ -1,6 +1,6 @@
 
 #pragma once
-
+#include <iostream>
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
@@ -197,7 +197,10 @@ Long64_t CMSJetsAndDaughters::LoadTree(Long64_t entry)
 }
 void SetBranchAddressSafe(TTree *tree, const char *branchName, void *address, TBranch **branch)
 {
-   if (tree->GetBranch(branchName))
+   if(tree->GetEntries()==0){
+      tree->SetBranchAddress(branchName, address, branch);
+   }   
+   if (tree->FindBranch(branchName))
    {
       tree->SetBranchAddress(branchName, address, branch);
    }

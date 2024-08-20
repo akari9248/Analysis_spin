@@ -53,7 +53,7 @@ public:
     {
       entries = _entries;
     }
-    ProcessBar ProcessBar(entries, 100);
+    ProcessBar ProcessBar(entries, 10);
     for (entryi = _entrybegin; entryi < _entrybegin + entries; entryi++)
     {
       islastEntry = false;
@@ -87,7 +87,7 @@ public:
     std::vector<int> selected_indices(indices.begin(), indices.begin() + _entries);
     std::sort(selected_indices.begin(), selected_indices.end());
 
-    ProcessBar ProcessBar(_entries, 100);
+    ProcessBar ProcessBar(_entries, 10);
     for (int i = 0; i < _entries; i++)
     {
       int sorted_index = selected_indices[i];

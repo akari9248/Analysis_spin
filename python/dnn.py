@@ -21,7 +21,7 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score
 from tqdm import tqdm
 import joblib
-
+import awkward as ak
 def handleXdata(X_data1):
     return X_data1
     ntracks2_pt = X_data1[:, 3] / X_data1[:, 7]
@@ -111,7 +111,6 @@ def balance_data_multiLabel(Y_data, seed=None):
     for i in range(Y_data.shape[1]):
         indices = np.where((Y_data[:, i] == 1))[0]
         indices_per_class.append(indices)
-        print(len(indices),i)
     
     min_count = min(len(indices) for indices in indices_per_class)
     
@@ -126,14 +125,41 @@ def balance_data_multiLabel(Y_data, seed=None):
     return balanced_mask
 def modify_array_advanced(data, zero_indices, one_indices):
     modified_array = np.where(data == 0, -1, data)
-
     non_zero_indices = np.where(data != 0)[0]
-    
     modified_array[non_zero_indices[zero_indices]] = 0
     modified_array[non_zero_indices[one_indices]] = 1
     
     return modified_array
-# 构建一个简单的序列模型
+def ShapeAlign(arr_src, arr_dst):
+    aligned = []
+    if arr_src.ndim == 1:
+        index = 0
+        for obj in arr_dst:
+            length = len(obj)
+            aligned.append(arr_src[index:index + length])
+            index += length
+    
+    elif arr_src.ndim == 2:
+        for row in arr_src:
+            index = 0
+            aligned_row = []
+            for obj in arr_dst:
+                length = np.shape(obj)[0]
+                aligned_row.append(row[index:index + length])
+                index += length
+            aligned.append(aligned_row)
+    
+    print("ShapeAlign")
+    return aligned
+
+def CreateAlignedShapeArr(arr_dst,value=-1):
+    result = []
+    for obj in arr_dst:
+        if len(obj) > 0:
+            result.append([value] * len(obj))
+        else:
+            result.append([])
+    return result
 def custom_train_test_split_indices(n_samples, test_size=0.2, random_state=None):
     if random_state is not None:
         np.random.seed(random_state)
@@ -287,83 +313,76 @@ def LoadData(sample_path, entries):
     column_names = data.columns.tolist()
 
     return data, column_names
-def LoadROOTFile(sample_paths, entries,branches_name=[],select_opt=""):
+def LoadROOTFile(sample_paths, entries, branches_name=[], select_opt=""):
     tree = ROOT.TChain()
     for sample_path in sample_paths:
-        tree.Add(sample_path+"/DataInfo")
+        tree.Add(sample_path + "/DataInfo")
     nentries = min(tree.GetEntries(), entries)
     if entries == -1:
-        nentries=tree.GetEntries()
+        nentries = tree.GetEntries()
     branches = {}
     branch_buffers = {}
-    branch_names=[]
+    branch_names = []
+    branch_types = []
     # Set up branch reading
+    if len(branches_name) == 0:
+        for branch in tree.GetListOfBranches():
+            branch_name = branch.GetName()
+            branches_name.append(branch_name)
     for branch_name0 in branches_name:
         for branch in tree.GetListOfBranches():
             branch_name = branch.GetName()
-            if branch_name0!=branch_name:
+            if branch_name0 != branch_name:
                 continue
             branch_names.append(branch_name)
             leaf = branch.GetLeaf(branch_name)
             leaf_type = leaf.GetTypeName()
-            if 'Double' in leaf_type:
+            branch_types.append(leaf_type)
+            if leaf_type.startswith('vector<double>'):
+                branch_buffers[branch_name] = ROOT.std.vector('double')()
+            elif leaf_type.startswith('vector<float>'):
+                branch_buffers[branch_name] = ROOT.std.vector('float')()
+            elif leaf_type.startswith('vector<int>'):
+                branch_buffers[branch_name] = ROOT.std.vector('int')()
+            elif 'Double' in leaf_type:
                 branch_buffers[branch_name] = array('d', [0])
             elif 'Float' in leaf_type:
                 branch_buffers[branch_name] = array('f', [0])
             elif 'Int' in leaf_type:
                 branch_buffers[branch_name] = array('i', [0])
             else:
-                continue  # Add other types as necessary
-            tree.SetBranchAddress(branch_name, branch_buffers[branch_name])
-            branches[branch_name] = []
-    if len(branches_name)==0:
-        for branch in tree.GetListOfBranches():
-            branch_name = branch.GetName()
-            branch_names.append(branch_name)
-            leaf = branch.GetLeaf(branch_name)
-            leaf_type = leaf.GetTypeName()
-            if 'Double' in leaf_type:
-                branch_buffers[branch_name] = array('d', [0])
-            elif 'Float' in leaf_type:
-                branch_buffers[branch_name] = array('f', [0])
-            elif 'Int' in leaf_type:
-                branch_buffers[branch_name] = array('i', [0])
-            else:
-                continue  # Add other types as necessary
-            
+                print(f"Unsupported type for branch {branch_name}: {leaf_type}")
+                continue
             tree.SetBranchAddress(branch_name, branch_buffers[branch_name])
             branches[branch_name] = []
 
     # Read data and fill arrays
-    if select_opt!="":
-        variable_name,number=split_and_format(select_opt)
-    entries=0
+    if select_opt != "":
+        variable_name, number = split_and_format(select_opt)
+    entries = 0
     for i in tqdm(range(nentries)):
         tree.GetEntry(i)
-        if select_opt!="":
-            if branch_buffers[variable_name][0]<=number:
-                continue
         for name, buffer in branch_buffers.items():
-                branches[name].append(buffer[0])
-        entries=entries+1
+            branches[name].append(list(buffer))
 
-    # Convert to numpy array
     feature_names = list(branches.keys())
-    if len(branches_name)==0:
-        feature_names = branches_name
-    print(len(feature_names))
+    if len(feature_names) == 0:
+        feature_names = branch_names
     num_features = len(feature_names)
-    data_array = np.zeros((entries, num_features), dtype=float)
-    
+    data_array = []
     for i, name in enumerate(feature_names):
-        data_array[:, i] = branches[name]
+        data_array.append(branches[name])
 
+    data_array = list(map(list, zip(*data_array)))
+    num_rows = len(data_array)
+    num_cols = len(data_array[0]) if data_array else 0
+    print(f"Shape: ({num_rows}, {num_cols})")
+    
     # Create mappings
     branch_to_index = {name: i for i, name in enumerate(feature_names)}
     index_to_branch = {i: name for i, name in enumerate(feature_names)}
-    # print(data_array)
 
-    return data_array, branch_to_index, index_to_branch ,branch_names
+    return data_array, branch_to_index, index_to_branch, branch_names,branch_types
 def split_and_format(expression):
     # 假设表达式格式为 "变量名>数字"
     parts = expression.split('>')  # 使用 > 符号进行分割
@@ -743,24 +762,48 @@ def save_threeclass_predictions_to_root(X_data,train_val_index,full_predictions,
         chunk_data_dict = {k: v[start:end] for k, v in data_dict.items()}
         with uproot.recreate(chunk_filename) as f:
             f['DNNTrainTree'] = chunk_data_dict
-def save_multiclass_predictions_to_root(X_data,train_val_index,full_predictions,root_filename,branch_name):
-    data_dict = {name: X_data[:, i] for i, name in enumerate(branch_name)}
-
-    n_classes = full_predictions.shape[1]
-
-    for i in range(n_classes):
-        data_dict[f'score{i}'] = full_predictions[:, i]
-    data_dict['validate'] = train_val_index
+def save_multiclass_predictions_to_root(X_data, root_filename, branch_names, branch_types):
+    
+    # Create a dictionary for the data
+    data_dict = {name: [row[i] for row in X_data] for i, name in enumerate(branch_names)}
+    # Determine number of entries
     n_entries = len(next(iter(data_dict.values())))
     max_entries_per_chunk = 1000000
     n_chunks = n_entries // max_entries_per_chunk + (n_entries % max_entries_per_chunk > 0)
+
     for i in range(n_chunks):
         start = i * max_entries_per_chunk
         end = min((i + 1) * max_entries_per_chunk, n_entries)
         chunk_filename = f"{root_filename}Chunk{i}.root"
         chunk_data_dict = {k: v[start:end] for k, v in data_dict.items()}
-        with uproot.recreate(chunk_filename) as f:
-            f['DNNTrainTree'] = chunk_data_dict
+
+        file = ROOT.TFile(chunk_filename, "recreate")
+        tree = ROOT.TTree("DNNTrainTree", "DNN Train Tree")
+
+        branches = {}
+        for name,type in zip(branch_names,branch_types):
+            if  type == 'vector<double>' :
+                branches[name] = ROOT.std.vector('double')()
+                tree.Branch(name, branches[name])
+            elif type == 'vector<int>' :
+                branches[name] = ROOT.std.vector('double')()
+                tree.Branch(name, branches[name])
+
+
+        for i in tqdm(range(len(chunk_data_dict[branch_names[0]]))):
+            for (name, data),type in zip(chunk_data_dict.items(),branch_types):
+                branches[name].clear()
+                if type == 'vector<double>' :
+                    for value in data[i]:
+                        branches[name].push_back(float(value))
+                elif type == 'vector<int>' :
+                    for value in data[i]:
+                        branches[name].push_back(int(value))
+            tree.Fill()
+
+        file.Write()
+        file.Close()
+            
 # def save_predictions_to_root(X_data, train_val_index, full_predictions, root_filename, branch_name):
 #     # 生成随机排列的索引
 #     n_entries = X_data.shape[0]
@@ -915,3 +958,27 @@ def plot_roc_curve_threeLabel(Y_val, y_scores, filename):
     
     plt.close()
     return roc_auc
+def select_and_convert(X_data, select_index):
+    Y_data = [[row[i] for i in select_index] for row in X_data]
+    flattened_data = []
+    for row in Y_data:
+        concatenated = np.array(row).T
+        flattened_data.extend(concatenated)
+    flattened_data = np.array(flattened_data)
+    print(flattened_data.shape)
+    return flattened_data
+def extract_shape(X_data, select_index):
+    Y_data = X_data[select_index[0]]
+    return Y_data
+    
+def add_str(strings,prefix, suffix):
+    return [prefix+ s + suffix for s in strings]
+def Extract_flat_features(data,branch_to_index,features_name,prefix="",suffix="",return_shape = False):
+    features_name = add_str(features_name,prefix,suffix)
+    select_index_feature = [branch_to_index[name] for name in features_name]
+    if(return_shape):
+        data_shape = [row[select_index_feature[0]] for row in data]
+        return select_and_convert(data,select_index_feature),data_shape
+    else:
+        return select_and_convert(data,select_index_feature),[]
+    
