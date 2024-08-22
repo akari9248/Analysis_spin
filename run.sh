@@ -19,9 +19,12 @@ nparts=100
 baseOutputFolder="/extdisk/zlin/Machine_learning"
 jinit_ptlow=600
 jinit_pthigh=7000
+j2_ptlow=130
+j2_pthigh=7000
 for spin in "spinon" "spinoff"; do
-    inputFolder="/storage/xiaoxue/code/git_file/QCDAnalysis/OfflineExamples/data/herwig/Decay_0_${spin}600_Inf_forai/"
-    SampleType="Private_Herwig${spin}"
+    inputFolder="/storage/xiaoxue/code/git_file/QCDAnalysis/OfflineExamples/data/herwig/Decay_0_${spin}_600_Inf_forai/"
+    #inputFolder="/extdisk/zlin/Machine_learning/test_datasets/Decay_0_${spin}_600_Inf_forai/"
+    SampleType="Private_Herwig_${spin}"
 
     ptselection="jinitpt${jinit_ptlow}${jinit_pthigh}j2pt${j2_ptlow}${j2_pthigh}"
     outputRecoFolder="${baseOutputFolder}/RecoPlanes/${SampleType}"
@@ -30,7 +33,7 @@ for spin in "spinon" "spinoff"; do
 
     compile generate_sample.cpp
     rm "${outputRecoFolder}"/*.root
-    run_parallel generate_sample -nchunks $nchunks -nparts $nparts -opt "-I ${inputFolder} -O ${outputRecoFolder} --jinit_ptlow ${jinit_ptlow} --jinit_pthigh ${jinit_pthigh} --SampleType PrivateMC"
+    run_parallel generate_sample -nchunks $nchunks -nparts $nparts -opt "-I ${inputFolder} -O ${outputRecoFolder} --jinit_ptlow ${jinit_ptlow} --jinit_pthigh ${jinit_pthigh} --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --SampleType PrivateMC"
 done
 ############ Extract features #######################
 # compile Extract_features_PrivateMC.cpp

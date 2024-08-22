@@ -20,7 +20,7 @@ public:
       for (int i = 1; i<= order-1; ++i) { 
          sum += p[i] * fT[i]; 
       }
-      return sum; 
+      return exp(sum); 
    }
 
 private: 

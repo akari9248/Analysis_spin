@@ -216,7 +216,6 @@ def build_ThreeLabel_classification_model(input_dim, hidden_units, l2_reg=0.0, d
 def build_multiLabel_classification_model(input_dim,output_dim, hidden_units, l2_reg=0.0, dropout_rate=0):
     model = tf.keras.Sequential()
     hidden_layers = len(hidden_units)
-    # 添加输入层（输入维度）
     model.add(layers.InputLayer(input_shape=(input_dim,)))
 
     for i in range(hidden_layers):
@@ -313,22 +312,72 @@ def LoadData(sample_path, entries):
     column_names = data.columns.tolist()
 
     return data, column_names
-def LoadROOTFile(sample_paths, entries, branches_name=[], select_opt=""):
+
+from multiprocessing import Pool, Manager
+import time
+def read_entries(args):
+    tree, branch_buffers, start, end, q, batch_size = args
+    branches_name=branch_buffers.keys()
+    for branch_name0 in branches_name:
+        for branch in tree.GetListOfBranches():
+            branch_name = branch.GetName()
+            if branch_name0 != branch_name:
+                continue
+            leaf = branch.GetLeaf(branch_name)
+            leaf_type = leaf.GetTypeName()
+            if leaf_type.startswith('vector<double>'):
+                branch_buffers[branch_name] = ROOT.std.vector('double')()
+            elif leaf_type.startswith('vector<float>'):
+                branch_buffers[branch_name] = ROOT.std.vector('float')()
+            elif leaf_type.startswith('vector<int>'):
+                branch_buffers[branch_name] = ROOT.std.vector('int')()
+            elif 'Double' in leaf_type:
+                branch_buffers[branch_name] = array('d', [0.0])
+            elif 'Float' in leaf_type:
+                branch_buffers[branch_name] = array('f', [0.0])
+            elif 'Int' in leaf_type:
+                branch_buffers[branch_name] = array('i', [0])
+            else:
+                print(f"Unsupported type for branch {branch_name}: {leaf_type}")
+                continue
+            tree.SetBranchAddress(branch_name, branch_buffers[branch_name])
+    branches = {name: [] for name in branch_buffers.keys()}
+    count = 0 
+    for i in range(start, end):
+        tree.GetEntry(i)
+        for name, buffer in branch_buffers.items():
+            branches[name].append(list(buffer))
+        count += 1
+        if count % batch_size == 0:  
+            q.put(batch_size)
+    if count % batch_size != 0:
+        q.put(count % batch_size)
+    return branches
+def LoadTree(sample_paths):
     tree = ROOT.TChain()
     for sample_path in sample_paths:
         tree.Add(sample_path + "/DataInfo")
-    nentries = min(tree.GetEntries(), entries)
-    if entries == -1:
-        nentries = tree.GetEntries()
+    return tree,tree.GetEntries()
+def LoadROOTFile(sample_paths, entries, branches_name=[], select_opt="", num_processes=40,batch_size=1000,entry_begin=0):
+    tree = ROOT.TChain()
+    for sample_path in sample_paths:
+        tree.Add(sample_path + "/DataInfo")
+        
+    nentries = tree.GetEntries()
+    full_entries = nentries
+    nentries = min(nentries-entry_begin, entries)
+    
     branches = {}
     branch_buffers = {}
     branch_names = []
     branch_types = []
+    
     # Set up branch reading
     if len(branches_name) == 0:
         for branch in tree.GetListOfBranches():
             branch_name = branch.GetName()
             branches_name.append(branch_name)
+    
     for branch_name0 in branches_name:
         for branch in tree.GetListOfBranches():
             branch_name = branch.GetName()
@@ -345,9 +394,9 @@ def LoadROOTFile(sample_paths, entries, branches_name=[], select_opt=""):
             elif leaf_type.startswith('vector<int>'):
                 branch_buffers[branch_name] = ROOT.std.vector('int')()
             elif 'Double' in leaf_type:
-                branch_buffers[branch_name] = array('d', [0])
+                branch_buffers[branch_name] = array('d', [0.0])
             elif 'Float' in leaf_type:
-                branch_buffers[branch_name] = array('f', [0])
+                branch_buffers[branch_name] = array('f', [0.0])
             elif 'Int' in leaf_type:
                 branch_buffers[branch_name] = array('i', [0])
             else:
@@ -356,38 +405,50 @@ def LoadROOTFile(sample_paths, entries, branches_name=[], select_opt=""):
             tree.SetBranchAddress(branch_name, branch_buffers[branch_name])
             branches[branch_name] = []
 
-    # Read data and fill arrays
-    if select_opt != "":
-        variable_name, number = split_and_format(select_opt)
-    entries = 0
-    for i in tqdm(range(nentries)):
-        tree.GetEntry(i)
-        for name, buffer in branch_buffers.items():
-            branches[name].append(list(buffer))
+    # Split the entries into chunks for each process
+    chunk_size = nentries // num_processes
+    manager = Manager()
+    q = manager.Queue()  # Queue for progress bar updates
 
-    feature_names = list(branches.keys())
-    if len(feature_names) == 0:
-        feature_names = branch_names
-    num_features = len(feature_names)
-    data_array = []
-    for i, name in enumerate(feature_names):
-        data_array.append(branches[name])
+    # Prepare arguments for each process
+    args = []
+    for i in range(num_processes):
+        start = i * chunk_size + entry_begin
+        end = (i + 1) * chunk_size + entry_begin if i < num_processes - 1 else nentries+ entry_begin
+        args.append((tree, branch_buffers, start, end, q, batch_size))
 
-    data_array = list(map(list, zip(*data_array)))
+    # Start processes with a pool and monitor progress
+    with Pool(processes=num_processes) as pool:
+        result_async = pool.map_async(read_entries, args)
+        pbar = tqdm(total=nentries, desc=f"Overall Progress full entries{full_entries}, entry begin = {entry_begin} => entry end = {nentries+ entry_begin}")
+        while not result_async.ready() or not q.empty():
+            while not q.empty():
+                pbar.update(q.get())
+            time.sleep(0.1)
+        results = result_async.get()
+        pbar.close()
+    combined_branches = {name: [] for name in branch_buffers.keys()}
+    for result in results:
+        for name, data in result.items():
+            combined_branches[name].extend(data)
+
+    # Convert to numpy array
+    feature_names = list(combined_branches.keys())
+    data_array = list(map(list, zip(*[combined_branches[name] for name in feature_names])))
+
     num_rows = len(data_array)
-    num_cols = len(data_array[0]) if data_array else 0
+    num_cols = len(data_array[0]) if num_rows > 0 else 0
     print(f"Shape: ({num_rows}, {num_cols})")
     
     # Create mappings
     branch_to_index = {name: i for i, name in enumerate(feature_names)}
     index_to_branch = {i: name for i, name in enumerate(feature_names)}
 
-    return data_array, branch_to_index, index_to_branch, branch_names,branch_types
+    return data_array, branch_to_index, index_to_branch, branch_names, branch_types
 def split_and_format(expression):
-    # 假设表达式格式为 "变量名>数字"
-    parts = expression.split('>')  # 使用 > 符号进行分割
-    variable_name = parts[0].strip()  # 获取变量名并去除两边可能的空格
-    number = parts[1].strip()  # 获取数字并去除两边可能的空格
+    parts = expression.split('>')  
+    variable_name = parts[0].strip()
+    number = parts[1].strip() 
     number=float(number)
     return variable_name,number
 
@@ -395,11 +456,11 @@ def convert_to_one_hot(labels):
     one_hot_labels = np.zeros((labels.shape[0], 3))
     for i, label in enumerate(labels):
         if np.array_equal(label, [0]):
-            one_hot_labels[i, 0] = 1  # 类别0
+            one_hot_labels[i, 0] = 1  
         elif np.array_equal(label, [1]):
-            one_hot_labels[i, 1] = 1  # 类别1
+            one_hot_labels[i, 1] = 1  
         elif np.array_equal(label, [2]):
-            one_hot_labels[i, 2] = 1  # 类别2
+            one_hot_labels[i, 2] = 1 
     return one_hot_labels
 def convert_to_one_hot_fourlabel(labels,match):
     one_hot_labels = np.zeros((labels.shape[0], 4))
@@ -439,9 +500,9 @@ def convert_to_binary(labels):
     binary_labels = np.zeros(labels.shape[0])
     for i, label in enumerate(labels):
         if np.array_equal(label, [1, 0]):
-            binary_labels[i] = 0  # 类别0
+            binary_labels[i] = 0  
         elif np.array_equal(label, [0, 1]):
-            binary_labels[i] = 1  # 类别1
+            binary_labels[i] = 1 
         else:
             binary_labels[i] = -1
     return binary_labels
@@ -698,13 +759,14 @@ def train_and_save_model_ThreeLabel(X_train, Y_train, X_val, Y_val,hidden_units=
         #callbacks=[roc_auc_callback]
     )  
     return model
-def train_and_save_model_MultiLabel(X_train, Y_train, X_val, Y_val,hidden_units=[16],learning_rate=0.0001,l2_reg=0):
+def train_and_save_model_MultiLabel(X_train, Y_train, X_val, Y_val,hidden_units=[16],learning_rate=0.0001,l2_reg=0,model = tf.keras.Sequential()):
     #hidden_units=math.ceil((X_train.shape[1]+1)/2)
     #hidden_units=math.ceil((X_train.shape[1]+1)*2.0/3)
     #model = build_binary_classification_model(X_train.shape[1], hidden_layers=2, hidden_units=16)
-    model = build_multiLabel_classification_model(X_train.shape[1],Y_train.shape[1], hidden_units=hidden_units,l2_reg=l2_reg)
-    adam_optimizer = Adam(learning_rate=learning_rate)
-    model.compile(optimizer=adam_optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
+    if isinstance(model, tf.keras.Sequential) and len(model.layers) == 0:
+        model = build_multiLabel_classification_model(X_train.shape[1],Y_train.shape[1], hidden_units=hidden_units,l2_reg=l2_reg)
+        adam_optimizer = Adam(learning_rate=learning_rate)
+        model.compile(optimizer=adam_optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
     # roc_auc_callback = RocAucCallback()
     # roc_auc_callback.training_data = (X_train, Y_train)
     # roc_auc_callback.validation_data = (X_val, Y_val)
@@ -763,7 +825,6 @@ def save_threeclass_predictions_to_root(X_data,train_val_index,full_predictions,
         with uproot.recreate(chunk_filename) as f:
             f['DNNTrainTree'] = chunk_data_dict
 def save_multiclass_predictions_to_root(X_data, root_filename, branch_names, branch_types):
-    
     # Create a dictionary for the data
     data_dict = {name: [row[i] for row in X_data] for i, name in enumerate(branch_names)}
     # Determine number of entries
@@ -774,7 +835,7 @@ def save_multiclass_predictions_to_root(X_data, root_filename, branch_names, bra
     for i in range(n_chunks):
         start = i * max_entries_per_chunk
         end = min((i + 1) * max_entries_per_chunk, n_entries)
-        chunk_filename = f"{root_filename}Chunk{i}.root"
+        chunk_filename = f"{root_filename}_Part{i}.root"
         chunk_data_dict = {k: v[start:end] for k, v in data_dict.items()}
 
         file = ROOT.TFile(chunk_filename, "recreate")
@@ -788,17 +849,27 @@ def save_multiclass_predictions_to_root(X_data, root_filename, branch_names, bra
             elif type == 'vector<int>' :
                 branches[name] = ROOT.std.vector('double')()
                 tree.Branch(name, branches[name])
-
+            elif type == 'Double_t':
+                branches[name] = array('d', [0.0])
+                tree.Branch(name, branches[name], f"{name}/D")
+            elif type == 'Int_t':
+                branches[name] = array('i', [0])
+                tree.Branch(name, branches[name], f"{name}/I")
 
         for i in tqdm(range(len(chunk_data_dict[branch_names[0]]))):
             for (name, data),type in zip(chunk_data_dict.items(),branch_types):
-                branches[name].clear()
                 if type == 'vector<double>' :
+                    branches[name].clear()
                     for value in data[i]:
                         branches[name].push_back(float(value))
                 elif type == 'vector<int>' :
+                    branches[name].clear()
                     for value in data[i]:
                         branches[name].push_back(int(value))
+                elif type == 'Double_t':
+                    branches[name][0] = data[i][0]
+                elif type == 'Int_t':
+                    branches[name][0] = data[i][0]
             tree.Fill()
 
         file.Write()

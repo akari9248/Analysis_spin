@@ -105,9 +105,11 @@ public:
       TKey *key;
       TIter nextkey(file->GetListOfKeys());
       while ((key = (TKey *)nextkey())) {
-        auto hist = (TH1 *)key->ReadObj();
-        hists[hist->GetTitle()] = (TH1*)hist->Clone();
-        hists[hist->GetTitle()]->SetDirectory(0); // 防止随文件关闭而被删除
+        auto obj = key->ReadObj();
+        if (auto hist = dynamic_cast<TH1*>(obj)) {
+            hists[hist->GetTitle()] = (TH1*)hist->Clone();
+            hists[hist->GetTitle()]->SetDirectory(0);
+        }
       }
       file->Close();
       delete file;
