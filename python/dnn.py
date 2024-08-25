@@ -123,6 +123,10 @@ def balance_data_multiLabel(Y_data, seed=None):
     balanced_mask[balanced_indices] = True
     
     return balanced_mask
+def Selection(X_data,balanced_mask0):
+    balanced_mask = X_data[:, 0] > 2
+    combined_mask = balanced_mask0 & balanced_mask
+    return combined_mask
 def modify_array_advanced(data, zero_indices, one_indices):
     modified_array = np.where(data == 0, -1, data)
     non_zero_indices = np.where(data != 0)[0]
@@ -149,7 +153,6 @@ def ShapeAlign(arr_src, arr_dst):
                 index += length
             aligned.append(aligned_row)
     
-    print("ShapeAlign")
     return aligned
 
 def CreateAlignedShapeArr(arr_dst,value=-1):
@@ -420,7 +423,7 @@ def LoadROOTFile(sample_paths, entries, branches_name=[], select_opt="", num_pro
     # Start processes with a pool and monitor progress
     with Pool(processes=num_processes) as pool:
         result_async = pool.map_async(read_entries, args)
-        pbar = tqdm(total=nentries, desc=f"Overall Progress full entries{full_entries}, entry begin = {entry_begin} => entry end = {nentries+ entry_begin}")
+        pbar = tqdm(total=nentries, desc=f"Overall Progress, full entries : {full_entries}, target entries : {nentries+ entry_begin}, entry: {entry_begin} => {nentries+ entry_begin}")
         while not result_async.ready() or not q.empty():
             while not q.empty():
                 pbar.update(q.get())
@@ -847,7 +850,7 @@ def save_multiclass_predictions_to_root(X_data, root_filename, branch_names, bra
                 branches[name] = ROOT.std.vector('double')()
                 tree.Branch(name, branches[name])
             elif type == 'vector<int>' :
-                branches[name] = ROOT.std.vector('double')()
+                branches[name] = ROOT.std.vector('int')()
                 tree.Branch(name, branches[name])
             elif type == 'Double_t':
                 branches[name] = array('d', [0.0])

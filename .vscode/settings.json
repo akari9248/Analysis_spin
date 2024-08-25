@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.py": "python",
+        "MetaDataManager,h": "cpp",
         "array": "cpp",
         "string_view": "cpp",
         "ostream": "cpp",
@@ -105,7 +106,9 @@
         "DataInfoML copy.C": "cpp",
         "metadatamanager,h": "c",
         "tstring.h": "c",
-        "tobjstring.h": "c"
+        "tobjstring.h": "c",
+        "DNNTrainTree.C": "cpp",
+        "Scan_stat_theory_hadronnu.C": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled",
     "python.analysis.extraPaths": [

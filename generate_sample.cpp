@@ -78,9 +78,8 @@ public:
     std::vector<std::vector<std::vector<JetBranch::threeplanes>>> planes_arr;
     bool SaveParticles = false;
     Hists weightcut;
-    //todo: Add particle selection (1. Particle one GeV cut, 2. Particle Energy scale )
+    //todo: Add particle selection (1. Particle Energy scale )
     //todo: Add Jet selection (for systematic JES and JER )
-    //todo: Add Eventselection (CMSMC pileup remove and overweighted event removal)
     //todo: Save more eventsweight for systematic
     EventsAnalyzer(CommonTool::Options _options)
     {
@@ -149,7 +148,6 @@ public:
         if(SampleType == "CMSMCGen"){
             for(int level=0;level<planes_arr.size();level++)
             {
-                cout<<level<<" "<<planes_arr.size()-1<<endl;
                 for (int i = 0; i < planes_arr.at(level).at(0).size(); i++)
                 {
                     int matchindex = Branches.at(level).JetMatching->at(i);
@@ -273,7 +271,7 @@ public:
     void InitSampleType(){
         SampleType = options.SampleType;
         if(SampleType.empty()) {
-            cerr<<"Sample type shoule be specified. e.g. PrivateMC, CMSMC , CMSData"<<endl;
+            cerr<<"Sample type shoule be specified. e.g. PrivateMC, CMSMC , CMSMCGen, CMSData"<<endl;
             std::exit(EXIT_FAILURE);
         }
         md->AddParameter("Sample Type", SampleType);
@@ -447,14 +445,16 @@ public:
                    [this]
                    {
                        double genht = 0;
-                        for (int iparton = 0; iparton < this->events->GenPartonPt->size(); iparton++)
-                            genht += this->events->GenPartonPt->at(iparton);
-                        if (this->events->GenJetPt->size() > 0) {
-                            if ((!this->events->RecoPassDijet && !this->events->GenPassDijet) || this->events->PileupMaxPtHat / genht > 1 ||
-                                this->events->GenJetPt->at(0) / genht > 1){
-                                    return false;
-                                }
-                        }
+                       for (int iparton = 0; iparton < this->events->GenPartonPt->size(); iparton++)
+                           genht += this->events->GenPartonPt->at(iparton);
+                       if (this->Branches.at(1).JetPt->size() > 0)
+                       {
+                           if ( this->events->PileupMaxPtHat / genht > 1 ||
+                               this->Branches.at(1).JetPt->at(0) / genht > 1)
+                           {
+                               return false;
+                           }
+                       }
                         return true;
                    });
         }
@@ -470,14 +470,17 @@ public:
                    [this]
                    {
                        double genht = 0;
-                        for (int iparton = 0; iparton < this->events->GenPartonPt->size(); iparton++)
-                            genht += this->events->GenPartonPt->at(iparton);
-                        if (this->events->GenJetPt->size() > 0) {
-                            if ((!this->events->RecoPassDijet && !this->events->GenPassDijet) || this->events->PileupMaxPtHat / genht > 1 ||
-                                this->events->GenJetPt->at(0) / genht > 1){
-                                    return false;
-                                }
-                        }
+                       for (int iparton = 0; iparton < this->events->GenPartonPt->size(); iparton++)
+                           genht += this->events->GenPartonPt->at(iparton);
+                       if (this->Branches.at(1).JetPt->size() > 0)
+                       {
+                           if ( this->events->PileupMaxPtHat / genht > 1 ||
+                               this->Branches.at(1).JetPt->at(0) / genht > 1)
+                           {
+                               return false;
+                           }
+                       }
+                       
                         return true;
                    });
         }
@@ -580,8 +583,27 @@ public:
                     }
                     return true;
                 });
+            // AddSelection(
+            //     PlaneSelection, "Plane2 and Plane3 Exist",
+            //     [this]
+            //     {
+            //         for (auto &planes : this->planes_arr)
+            //         {
+            //             planes.at(0).erase(
+            //                 std::remove_if(planes.at(0).begin(), planes.at(0).end(),
+            //                                [](const JetBranch::threeplanes &threeplanes)
+            //                                {
+            //                                    return threeplanes.second.harder_nparticles == 0 ||
+            //                                           threeplanes.second.softer_nparticles == 0 ||
+            //                                           threeplanes.third.harder_nparticles == 0 ||
+            //                                           threeplanes.third.softer_nparticles == 0;
+            //                                }),
+            //                 planes.at(0).end());
+            //         }
+            //         return true;
+            //     });
             AddSelection(
-                PlaneSelection, "Plane2 and Plane3 Exist",
+                PlaneSelection, "Plane2 Exist",
                 [this]
                 {
                     for (auto &planes : this->planes_arr)
@@ -591,9 +613,7 @@ public:
                                            [](const JetBranch::threeplanes &threeplanes)
                                            {
                                                return threeplanes.second.harder_nparticles == 0 ||
-                                                      threeplanes.second.softer_nparticles == 0 ||
-                                                      threeplanes.third.harder_nparticles == 0 ||
-                                                      threeplanes.third.softer_nparticles == 0;
+                                                      threeplanes.second.softer_nparticles == 0 ;
                                            }),
                             planes.at(0).end());
                     }
