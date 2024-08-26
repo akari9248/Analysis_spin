@@ -21,12 +21,12 @@ public:
   vector<string> cut_strs;
   int count;
   CommonTool::Options options;
-  vector<>
   EventsAnalyzer(CommonTool::Options _options){
     options=_options;
   }
   void initialize() override {
     t->Add((TString)options.inputFolder+"/Chunk*.root/DNNTrainTree");
+    events = new DNNTrainTree(t);
     for(int i=0;i<=5;i++){
       hists.addHist((string)TString::Format("phi_type%d",i), 10 , 0, TMath::Pi());
       hists.addHist((string)TString::Format("dphiX_type%d",i), 10 , 0, TMath::Pi());
@@ -36,17 +36,17 @@ public:
     hists.addHist("score2", 100 , 0, 1);
   }
   void analyze() override {
-    for(int i=0;i<events->type2_Hadron->size();i++){
-      hists[(string)TString::Format("phi_type%d",events->type2_Hadron->at(i))]->Fill(events->Phi2_Hadron->at(i));
-      hists[(string)TString::Format("dphiX_type%d",events->type2_Hadron->at(i))]->Fill(events->dPhi12_X2_Hadron->at(i));
+    for(int i=0;i<events->Gentype2->size();i++){
+      hists[(string)TString::Format("phi_type%d",events->Gentype2->at(i))]->Fill(events->GenPhi2->at(i));
+      hists[(string)TString::Format("dphiX_type%d",events->Gentype2->at(i))]->Fill(events->GendPhi12_X2->at(i));
       double score2_weight[4] = {1,20,1,200};
-      double score2 =events->score2_Hadron->at(i)*score2_weight[2]*5/(events->score0_Hadron->at(i)*score2_weight[0]+events->score1_Hadron->at(i)*score2_weight[1]+events->score2_Hadron->at(i)*score2_weight[2]+events->score3_Hadron->at(i)*score2_weight[3]);
+      double score2 =events->Genscore2->at(i)*score2_weight[2]*5/(events->Genscore0->at(i)*score2_weight[0]+events->Genscore1->at(i)*score2_weight[1]+events->Genscore2->at(i)*score2_weight[2]+events->Genscore3->at(i)*score2_weight[3]);
 
       if(score2>0.35){
-        hists["phi_typeqq"]->Fill(events->Phi2_Hadron->at(i));
-        hists["dphiX_typeqq"]->Fill(events->dPhi12_X2_Hadron->at(i));
+        hists["phi_typeqq"]->Fill(events->GenPhi2->at(i),events->GeneratorWeight);
+        hists["dphiX_typeqq"]->Fill(events->GendPhi12_X2->at(i),events->GeneratorWeight);
       }
-      hists["score2"]->Fill(events->score2_Hadron->at(i));
+      hists["score2"]->Fill(events->Genscore2->at(i));
     }
   }
 };
@@ -75,36 +75,37 @@ void SymmetryTwoPads(vector<TH1D *> hists,TString filename,TString ExtraText="",
 int main(int argc, char *argv[])
 {
   CommonTool::Options options;
-  options.inputFolder = "/home/zlin/Machine_learning/ML/Datasets/Prediction/Private_Herwig_spinon_FourLabel_unmatched";
-  EventsAnalyzer spinon_sample(options);
-  options.inputFolder = "/home/zlin/Machine_learning/ML/Datasets/Prediction/Private_Herwig_spinoff_FourLabel_unmatched";
-  EventsAnalyzer spinoff_sample(options);
-  spinon_sample.run_frac(1);
-  spinoff_sample.run_frac(1);
+  options.inputFolder = "/home/zlin/Machine_learning/ML/Datasets/Prediction/CMS_herwig_Pt-15to7000jinitpt6007000j2pt1307000_FourLabel_unmatched";
+  EventsAnalyzer CMSMC(options);
+  CMSMC.run_frac(1);
   // spinon_sample.run(100000000);
   // spinoff_sample.run(100000000);
-  spinon_sample.finalize("draw/spinon.root");
-  spinoff_sample.finalize("draw/spinoff.root");
-
+  CMSMC.finalize("draw/cmsmc.root");
+  Hists spinon("draw/spinon.root");
+  Hists spinoff("draw/spinoff.root");
   vector<string> types = {"type0", "type1", "type2", "type3", "type4", "type5","typeqq"};
 
   for (auto &type : types)
   {
-    TH1D *hist_spinon = (TH1D *)spinon_sample.hists["phi_" + type];
-    TH1D *hist_spinoff = (TH1D *)spinoff_sample.hists["phi_" + type];
+    TH1D *hist_cmsmc = (TH1D *)CMSMC.hists["phi_" + type];
+    TH1D *hist_spinon = (TH1D *)spinon["phi_" + type];
+    TH1D *hist_spinoff = (TH1D *)spinoff["phi_" + type];
+    hist_cmsmc->SetTitle("CMS Herwig");
     hist_spinon->SetTitle("spin on");
     hist_spinoff->SetTitle("spin off");
-    vector<TH1D *> hists_draw = {hist_spinoff, hist_spinon};
+    vector<TH1D *> hists_draw = {hist_spinoff, hist_spinon,hist_cmsmc};
     SymmetryTwoPads(hists_draw,"draw/"+type+ ".pdf",
                     "plane type: " + type);
   }
   for (auto &type : types)
   {
-    TH1D *hist_spinon = (TH1D *)spinon_sample.hists["dphiX_" + type];
-    TH1D *hist_spinoff = (TH1D *)spinoff_sample.hists["dphiX_" + type];
+    TH1D *hist_cmsmc = (TH1D *)CMSMC.hists["dphiX_" + type];
+    TH1D *hist_spinon = (TH1D *)spinon["dphiX_" + type];
+    TH1D *hist_spinoff = (TH1D *)spinoff["dphiX_" + type];
+    hist_cmsmc->SetTitle("CMS Herwig");
     hist_spinon->SetTitle("spin on");
     hist_spinoff->SetTitle("spin off");
-    vector<TH1D *> hists_draw = {hist_spinoff, hist_spinon};
+    vector<TH1D *> hists_draw = {hist_spinoff, hist_spinon,hist_cmsmc};
     SymmetryTwoPads(hists_draw,"draw/"+type+ "dphiX.pdf",
                     "plane type: " + type);
   }

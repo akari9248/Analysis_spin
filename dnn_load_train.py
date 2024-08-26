@@ -159,8 +159,8 @@ if __name__ == "__main__":
 
     parser.add_argument('--mode', type=str, default="Prediction", help='Mode of operation: "Train" for model training, "Prediction" for model prediction.')
     parser.add_argument('--model_path', type=str, default="", help='Path to the model for prediction (required if mode is "Prediction").')
-    parser.add_argument('--entries', type=int, default=-1, help='Number of entries for training.')
-    parser.add_argument('--suffix', type=str, default="", help='Suffix for the folder where the model and root file are saved.')
+    parser.add_argument('--entries', type=int, default=-1, help='Number of entries for training or prediction.')
+    parser.add_argument('--suffix', type=str, default="", help='Suffix for the name of saved model and roc curve.')
     
     args = parser.parse_args()
     args.train_val_index_full =[]
