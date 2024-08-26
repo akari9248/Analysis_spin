@@ -34,11 +34,47 @@ j2_pthigh=7000
 #     run_parallel generate_sample -nchunks $nchunks -nparts $nparts -opt "-I ${inputFolder} -O ${outputRecoFolder} --jinit_ptlow ${jinit_ptlow} --jinit_pthigh ${jinit_pthigh} --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --SampleType PrivateMC"
 # done
 
+# inputFolders=(
+#     "/storage/shuangyuan/code/analysis_spin/dataset/QCD_Pt-15to7000_Flat_herwig7_RunIISummer20UL18"
+# )
+# sampleTypes=(
+#     "CMS_herwig_Pt-15to7000"
+# )
+# for ((i=0; i<${#inputFolders[@]}; i++)); do
+#     inputFolder=${inputFolders[$i]}
+#     SampleType=${sampleTypes[$i]}
+    
+#     ptselection="jinitpt${jinit_ptlow}${jinit_pthigh}j2pt${j2_ptlow}${j2_pthigh}"
+#     outputRecoFolder="${baseOutputFolder}/RecoPlanes/${SampleType}"${ptselection}
+#     outputTrainFolder="${baseOutputFolder}/RecoPlanesTrain/${SampleType}${ptselection}"
+#     outputPredictedFolder="${baseOutputFolder}/ML/predict/"
+#     compile generate_sample.cpp
+#     rm "${outputRecoFolder}"/*.root
+#     run_parallel generate_sample -nchunks $nchunks -nparts $nparts -opt "-I ${inputFolder} -O ${outputRecoFolder} --jinit_ptlow ${jinit_ptlow} --jinit_pthigh ${jinit_pthigh} --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --SampleType CMSMCGen"
+
+# done
+
 inputFolders=(
-    "/storage/shuangyuan/code/analysis_spin/dataset/QCD_Pt-15to7000_Flat_herwig7_RunIISummer20UL18"
+    /home/public/Datasets/newdata/JetHT_Run2016B-ver1_HIPM_UL2016
+    /home/public/Datasets/newdata/JetHT_Run2016B-ver2_HIPM_UL2016
+    /home/public/Datasets/newdata/JetHT_Run2016C_HIPM_UL2016
+    /home/public/Datasets/newdata/JetHT_Run2016D_HIPM_UL2016
+    /home/public/Datasets/newdata/JetHT_Run2016E_HIPM_UL2016
+    /home/public/Datasets/newdata/JetHT_Run2016F_HIPM_UL2016
+    /home/public/Datasets/newdata/JetHT_Run2016F_UL2016
+    /home/public/Datasets/newdata/JetHT_Run2016G_UL2016
+    /home/public/Datasets/newdata/JetHT_Run2016H_UL2016
 )
 sampleTypes=(
-    "CMS_herwig_Pt-15to7000"
+    JetHT_Run2016B-ver1_HIPM_UL2016
+    JetHT_Run2016B-ver2_HIPM_UL2016
+    JetHT_Run2016C_HIPM_UL2016
+    JetHT_Run2016D_HIPM_UL2016
+    JetHT_Run2016E_HIPM_UL2016
+    JetHT_Run2016F_HIPM_UL2016
+    JetHT_Run2016F_UL2016
+    JetHT_Run2016G_UL2016
+    JetHT_Run2016H_UL2016
 )
 for ((i=0; i<${#inputFolders[@]}; i++)); do
     inputFolder=${inputFolders[$i]}
@@ -50,6 +86,6 @@ for ((i=0; i<${#inputFolders[@]}; i++)); do
     outputPredictedFolder="${baseOutputFolder}/ML/predict/"
     compile generate_sample.cpp
     rm "${outputRecoFolder}"/*.root
-    run_parallel generate_sample -nchunks $nchunks -nparts $nparts -opt "-I ${inputFolder} -O ${outputRecoFolder} --jinit_ptlow ${jinit_ptlow} --jinit_pthigh ${jinit_pthigh} --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --SampleType CMSMCGen"
+    run_parallel generate_sample -nchunks $nchunks -nparts $nparts -opt "-I ${inputFolder} -O ${outputRecoFolder} --jinit_ptlow ${jinit_ptlow} --jinit_pthigh ${jinit_pthigh} --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --SampleType CMSData"
 
 done

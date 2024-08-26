@@ -83,7 +83,7 @@ public:
     //todo: Save more eventsweight for systematic
     EventsAnalyzer(CommonTool::Options _options)
     {
-        weightcut=Hists("tabel/OverWeightedEventRemoval/GeneratorWeightcut.root");
+        weightcut=Hists("table/OverWeightedEventRemoval/GeneratorWeightcut.root");
         options = _options;
         md = metadata.CreateMetaData(options.executablefile);
         EventSelection = Selection("EventSelection");
@@ -164,7 +164,8 @@ public:
         }
     }
     void MatchPlanes(){
-        match = JetBranch::matchPlanes(planes_arr.at(1),planes_arr.at(0),"second", 0.5);
+        if(SampleType != "CMSData")
+            match = JetBranch::matchPlanes(planes_arr.at(1),planes_arr.at(0),"second", 0.5);
     }
     void SavePlanes(){
         for(int levelindex=0;levelindex<level.size();levelindex++){
@@ -490,6 +491,12 @@ public:
                    [this]
                    {
                        return this->events->RecoPassDijet;
+                   });
+            AddSelection(
+                   EventSelection, "HLT450 selection",
+                   [this]
+                   {
+                       return this->events->TriggerBits->back();
                    });
         }
         if(inputFolder.find("Flat_herwig") != std::string::npos) {
