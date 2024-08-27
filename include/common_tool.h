@@ -154,6 +154,7 @@ public:
         int OneGeVCut = 0; // Default value for OneGeVCut
 
         double lumi = 1.0; // Default value for lumi 1pb
+        double scale = 1.0;
         std::string xsection_file;
         std::string root_file;
         std::string output_file;
@@ -176,6 +177,7 @@ public:
             {"spin", required_argument, 0, 0},
             {"OneGeVCut", required_argument, 0, 0},
             {"lumi", required_argument, 0, 0},
+            {"scale", required_argument, 0, 0},
             {"xsection_file", required_argument, 0, 0},
             {"root_file", required_argument, 0, 0},
             {"output_file", required_argument, 0, 0},
@@ -241,6 +243,10 @@ public:
                 else if (strcmp(long_options[long_index].name, "lumi") == 0)
                 {
                     options.lumi = std::atof(optarg);
+                }
+                else if (strcmp(long_options[long_index].name, "scale") == 0)
+                {
+                    options.scale = std::atof(optarg);
                 }
                 else if (strcmp(long_options[long_index].name, "xsection_file") == 0)
                 {

@@ -71,9 +71,14 @@ public:
         Hists histIn(root_file);
         this->Add(histIn,scale);
     }
-    void Scale(double scale){
+    void Scale(double scale,bool isstderr=false){
         for (auto& pair : hists) {
-            pair.second->Scale(scale);  
+            pair.second->Scale(scale); 
+            if(isstderr){
+                for(int i=0;i<pair.second->GetNbinsX()+2;i++){
+                    pair.second->SetBinError(i,sqrt(pair.second->GetBinContent(i)));
+                }
+            }
         }
     }
     void Write(const TString& filename = "output.root") {
