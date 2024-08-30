@@ -62,6 +62,7 @@ namespace chiscan
     bool isprint_iteration_result = true;
     bool isinvlocal = false;
     double expect_resolution = 0.0001;
+    bool isprint_result = true;
     chiscan(TH1D *_data, TH2D *_datacov, TH1D *_theory, vector<TH1D *> _nuisance, vector<int> _bin_range = {-1, -1}, bool _float_theory_height = false)
     {
       nuisance = _nuisance;
@@ -272,8 +273,13 @@ namespace chiscan
         // cout<<chi2_best<<" "<<k<<" "<<theta_pool.at(0).at(0)<<" "<<theta_pool.at(0).at(nslice)<<endl;
         // //cout<<nuisance_theta_best.at(0)<<" "<<float_height_distance_best<<endl;
       }
-      print_result();
+      if(isprint_result)
+        print_result();
       // cout<<theta_pool.at(0).at(1)<<endl;
+    }
+    void HiddenOutput(){
+      isprint_result=false;
+      isprint_iteration_result=false;
     }
     void write_result(TString out_name = "scan_out.root"){
       TFile *f_out = new TFile(out_name,"RECREATE");
