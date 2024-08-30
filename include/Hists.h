@@ -75,7 +75,7 @@ public:
         for (auto& pair : hists) {
             pair.second->Scale(scale); 
             if(isstderr){
-                for(int i=0;i<pair.second->GetNbinsX()+2;i++){
+                for(int i=0;i<pair.second->GetNcells ()+2;i++){
                     pair.second->SetBinError(i,sqrt(pair.second->GetBinContent(i)));
                 }
             }
