@@ -499,7 +499,7 @@ public:
                        return this->events->TriggerBits->back();
                    });
         }
-        if(inputFolder.find("Flat_herwig") != std::string::npos) {
+        if(options.inputFolder.find("Flat_herwig") != std::string::npos) {
             AddSelection(
                 EventSelection, "Overweighted Events Removal",
                 [this]
@@ -767,3 +767,4 @@ int main(int argc, char *argv[])
     CommonTool::processAndSaveDataWithMetaInfo(options, analyzer);
     return 0;
 }
+
