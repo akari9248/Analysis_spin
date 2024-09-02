@@ -500,13 +500,14 @@ public:
                    });
         }
         if(options.inputFolder.find("Flat_herwig") != std::string::npos) {
+            cout<<"Add events selection: Overweighted Events Removal"<<endl;
             AddSelection(
                 EventSelection, "Overweighted Events Removal",
                 [this]
                 {
-                    if (this->events->GenJetPt->size() > 0)
+                    if (this->Branches.at(0).JetPt->size() > 0)
                     {
-                        int bin =this->weightcut["GeneratorWeightCutSmoothHist"]->FindBin(this->events->GenJetPt->at(0));
+                        int bin =this->weightcut["GeneratorWeightCutSmoothHist"]->FindBin(this->Branches.at(0).JetPt->at(0));
                         if (this->events->GeneratorWeight > this->weightcut["GeneratorWeightCutSmoothHist"]->GetBinContent(bin))
                         {
                             return false;
