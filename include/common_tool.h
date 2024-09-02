@@ -8,6 +8,8 @@
 #include <getopt.h>
 #include <cstdlib>
 #include <sstream>
+#include <thread>
+#include <functional>
 class CommonTool
 {
 public:
@@ -330,6 +332,30 @@ public:
                 analyzer.treeEvents,
                 options.outputFolder + "/Chunk" + std::to_string(options.chunki) + "_Part" + std::to_string(part) + ".root", false);
             analyzer.metadata.SaveToRootFile(options.outputFolder + "/Chunk" + std::to_string(options.chunki) + "_Part" + std::to_string(part) + ".root");
+        }
+    }
+    void parallel_for(int nthreads, int begin, int end, std::function<void(int)> func)
+    {
+        int iteration_count = end - begin;
+        int chunkSize = iteration_count / nthreads;
+
+        std::vector<std::thread> threads;
+
+        for (int i = 0; i < nthreads; ++i)
+        {
+            int start = begin + i * chunkSize;
+            int finish = (i == nthreads - 1) ? end : start + chunkSize;
+
+            threads.emplace_back([start, finish, &func]()
+                                 {
+            for (int j = start; j < finish; ++j) {
+                func(j);  
+            } });
+        }
+
+        for (auto &t : threads)
+        {
+            t.join();
         }
     }
 };
