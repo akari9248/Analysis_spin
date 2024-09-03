@@ -289,7 +289,8 @@ public:
         }
         if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen")
         {
-           t->Add((TString)options.inputFolder + "/Chunk*.root/jetInfos/JetsAndDaughters");
+           if(options.inputFolder.find("Run3") != std::string::npos) t->Add((TString)options.inputFolder + "/Chunk*.root/JetsAndDaughters");
+           else t->Add((TString)options.inputFolder + "/Chunk*.root/jetInfos/JetsAndDaughters");
            if(SampleType == "CMSMC"){
                prefixs = {"Gen","Reco"};
                suffixs = {""};
@@ -684,8 +685,43 @@ public:
                 }
                 return true;
             });
+            // AddSelection(
+            // PlaneSelection, "Gen Plane2 and Plane3 Exist (Reco Jet must matched to Gen Jet)",
+            // [this]
+            // {
+            //     for (int i=0;i<level.size();i++) 
+            //     {
+            //         auto planes = &planes_arr.at(i);
+            //         if(level.at(i).prefix == "Gen") {
+            //             planes_arr.at(i).at(0).erase(
+            //                 std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
+            //                                [this](const JetBranch::threeplanes &threeplanes)
+            //                                {
+            //                                    return !threeplanes.ismatched||
+            //                                           threeplanes.second.harder_nparticles == 0 ||
+            //                                           threeplanes.second.softer_nparticles == 0 ||
+            //                                           threeplanes.third.harder_nparticles == 0 ||
+            //                                           threeplanes.third.softer_nparticles == 0;
+            //                                }),
+            //                 planes_arr.at(i).at(0).end());
+            //         }else{
+            //             planes_arr.at(i).at(0).erase(
+            //                 std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
+            //                                [this](const JetBranch::threeplanes &threeplanes)
+            //                                {
+            //                                    return !threeplanes.ismatched||
+            //                                           threeplanes.matchedthreeplanes.second.harder_nparticles == 0 ||
+            //                                           threeplanes.matchedthreeplanes.second.softer_nparticles == 0 ||
+            //                                           threeplanes.matchedthreeplanes.third.harder_nparticles == 0 ||
+            //                                           threeplanes.matchedthreeplanes.third.softer_nparticles == 0;
+            //                                }),
+            //                 planes_arr.at(i).at(0).end());
+            //         }
+            //     }
+            //     return true;
+            // });
             AddSelection(
-            PlaneSelection, "Gen Plane2 and Plane3 Exist (Reco Jet must matched to Gen Jet)",
+            PlaneSelection, "Gen Plane2 Exist (Reco Jet must matched to Gen Jet)",
             [this]
             {
                 for (int i=0;i<level.size();i++) 
@@ -698,9 +734,7 @@ public:
                                            {
                                                return !threeplanes.ismatched||
                                                       threeplanes.second.harder_nparticles == 0 ||
-                                                      threeplanes.second.softer_nparticles == 0 ||
-                                                      threeplanes.third.harder_nparticles == 0 ||
-                                                      threeplanes.third.softer_nparticles == 0;
+                                                      threeplanes.second.softer_nparticles == 0 ;
                                            }),
                             planes_arr.at(i).at(0).end());
                     }else{
@@ -710,9 +744,7 @@ public:
                                            {
                                                return !threeplanes.ismatched||
                                                       threeplanes.matchedthreeplanes.second.harder_nparticles == 0 ||
-                                                      threeplanes.matchedthreeplanes.second.softer_nparticles == 0 ||
-                                                      threeplanes.matchedthreeplanes.third.harder_nparticles == 0 ||
-                                                      threeplanes.matchedthreeplanes.third.softer_nparticles == 0;
+                                                      threeplanes.matchedthreeplanes.second.softer_nparticles == 0 ;
                                            }),
                             planes_arr.at(i).at(0).end());
                     }
