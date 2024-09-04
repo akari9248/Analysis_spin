@@ -78,12 +78,14 @@ public:
     std::vector<std::vector<std::vector<JetBranch::threeplanes>>> planes_arr;
     bool SaveParticles = false;
     Hists weightcut;
+    Hists weightcut_pythia8;
     //todo: Add particle selection (1. Particle Energy scale )
     //todo: Add Jet selection (for systematic JES and JER )
     //todo: Save more eventsweight for systematic
     EventsAnalyzer(CommonTool::Options _options)
     {
         weightcut=Hists("table/OverWeightedEventRemoval/GeneratorWeightcut.root");
+        weightcut_pythia8=Hists("table/OverWeightedEventRemoval/GeneratorWeightcut_pythia8.root");
         options = _options;
         md = metadata.CreateMetaData(options.executablefile);
         EventSelection = Selection("EventSelection");
@@ -510,6 +512,23 @@ public:
                     {
                         int bin =this->weightcut["GeneratorWeightCutSmoothHist"]->FindBin(this->Branches.at(0).JetPt->at(0));
                         if (this->events->GeneratorWeight > this->weightcut["GeneratorWeightCutSmoothHist"]->GetBinContent(bin))
+                        {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+        }
+        if(options.inputFolder.find("Flat_pythia") != std::string::npos) {
+            cout<<"Add events selection: Overweighted Events Removal"<<endl;
+            AddSelection(
+                EventSelection, "Overweighted Events Removal",
+                [this]
+                {
+                    if (this->Branches.at(0).JetPt->size() > 0)
+                    {
+                        int bin =this->weightcut_pythia8["GeneratorWeightCutSmoothHist"]->FindBin(this->Branches.at(0).JetPt->at(0));
+                        if (this->events->GeneratorWeight > this->weightcut_pythia8["GeneratorWeightCutSmoothHist"]->GetBinContent(bin))
                         {
                             return false;
                         }
