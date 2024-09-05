@@ -40,42 +40,23 @@ j2_pthigh=7000
 # sampleTypes=(
 #     "CMS_herwig_Pt-15to7000"
 # )
-# for ((i=0; i<${#inputFolders[@]}; i++)); do
-#     inputFolder=${inputFolders[$i]}
-#     SampleType=${sampleTypes[$i]}
-    
-#     ptselection="jinitpt${jinit_ptlow}${jinit_pthigh}j2pt${j2_ptlow}${j2_pthigh}"
-#     outputRecoFolder="${baseOutputFolder}/RecoPlanes/${SampleType}"${ptselection}
-#     outputTrainFolder="${baseOutputFolder}/RecoPlanesTrain/${SampleType}${ptselection}"
-#     outputPredictedFolder="${baseOutputFolder}/ML/predict/"
-#     compile generate_sample.cpp
-#     rm "${outputRecoFolder}"/*.root
-#     run_parallel generate_sample -nchunks $nchunks -nparts $nparts -opt "-I ${inputFolder} -O ${outputRecoFolder} --jinit_ptlow ${jinit_ptlow} --jinit_pthigh ${jinit_pthigh} --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --SampleType CMSMCGen"
 
-# done
-
+# inputFolders=(
+#     "/extdisk/zlin/Machine_learning/test_datasets/QCD_Pt-15to7000_Flat_herwig7-Run3Summer22"
+#     "/extdisk/zlin/Machine_learning/test_datasets/QCD_Pt-15to7000_Flat_herwig7-Run3Summer22_SpinOFF"
+# )
+# sampleTypes=(
+#     "CMS_herwig_Pt-15to7000Run3"
+#     "CMS_herwig_Pt-15to7000Run3_SpinOFF"
+# )
 inputFolders=(
-    /home/public/Datasets/newdata/JetHT_Run2016B-ver1_HIPM_UL2016
-    /home/public/Datasets/newdata/JetHT_Run2016B-ver2_HIPM_UL2016
-    /home/public/Datasets/newdata/JetHT_Run2016C_HIPM_UL2016
-    /home/public/Datasets/newdata/JetHT_Run2016D_HIPM_UL2016
-    /home/public/Datasets/newdata/JetHT_Run2016E_HIPM_UL2016
-    /home/public/Datasets/newdata/JetHT_Run2016F_HIPM_UL2016
-    /home/public/Datasets/newdata/JetHT_Run2016F_UL2016
-    /home/public/Datasets/newdata/JetHT_Run2016G_UL2016
-    /home/public/Datasets/newdata/JetHT_Run2016H_UL2016
+    "/extdisk/zlin/Machine_learning/test_datasets/QCD_Pt-15to7000_Flat_pythia8-Run3Summer22"
 )
 sampleTypes=(
-    JetHT_Run2016B-ver1_HIPM_UL2016
-    JetHT_Run2016B-ver2_HIPM_UL2016
-    JetHT_Run2016C_HIPM_UL2016
-    JetHT_Run2016D_HIPM_UL2016
-    JetHT_Run2016E_HIPM_UL2016
-    JetHT_Run2016F_HIPM_UL2016
-    JetHT_Run2016F_UL2016
-    JetHT_Run2016G_UL2016
-    JetHT_Run2016H_UL2016
+    "CMS_pythia_Pt-15to7000Run3"
 )
+nchunks=100
+nparts=10
 for ((i=0; i<${#inputFolders[@]}; i++)); do
     inputFolder=${inputFolders[$i]}
     SampleType=${sampleTypes[$i]}
@@ -86,6 +67,42 @@ for ((i=0; i<${#inputFolders[@]}; i++)); do
     outputPredictedFolder="${baseOutputFolder}/ML/predict/"
     compile generate_sample.cpp
     rm "${outputRecoFolder}"/*.root
-    run_parallel generate_sample -nchunks $nchunks -nparts $nparts -opt "-I ${inputFolder} -O ${outputRecoFolder} --jinit_ptlow ${jinit_ptlow} --jinit_pthigh ${jinit_pthigh} --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --SampleType CMSData"
+    run_parallel generate_sample -nchunks $nchunks -nparts $nparts -opt "-I ${inputFolder} -O ${outputRecoFolder} --jinit_ptlow ${jinit_ptlow} --jinit_pthigh ${jinit_pthigh} --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --SampleType CMSMCGen"
 
 done
+
+# inputFolders=(
+#     /home/public/Datasets/newdata/JetHT_Run2016B-ver1_HIPM_UL2016
+#     /home/public/Datasets/newdata/JetHT_Run2016B-ver2_HIPM_UL2016
+#     /home/public/Datasets/newdata/JetHT_Run2016C_HIPM_UL2016
+#     /home/public/Datasets/newdata/JetHT_Run2016D_HIPM_UL2016
+#     /home/public/Datasets/newdata/JetHT_Run2016E_HIPM_UL2016
+#     /home/public/Datasets/newdata/JetHT_Run2016F_HIPM_UL2016
+#     /home/public/Datasets/newdata/JetHT_Run2016F_UL2016
+#     /home/public/Datasets/newdata/JetHT_Run2016G_UL2016
+#     /home/public/Datasets/newdata/JetHT_Run2016H_UL2016
+# )
+# sampleTypes=(
+#     JetHT_Run2016B-ver1_HIPM_UL2016
+#     JetHT_Run2016B-ver2_HIPM_UL2016
+#     JetHT_Run2016C_HIPM_UL2016
+#     JetHT_Run2016D_HIPM_UL2016
+#     JetHT_Run2016E_HIPM_UL2016
+#     JetHT_Run2016F_HIPM_UL2016
+#     JetHT_Run2016F_UL2016
+#     JetHT_Run2016G_UL2016
+#     JetHT_Run2016H_UL2016
+# )
+# for ((i=0; i<${#inputFolders[@]}; i++)); do
+#     inputFolder=${inputFolders[$i]}
+#     SampleType=${sampleTypes[$i]}
+    
+#     ptselection="jinitpt${jinit_ptlow}${jinit_pthigh}j2pt${j2_ptlow}${j2_pthigh}"
+#     outputRecoFolder="${baseOutputFolder}/RecoPlanes/${SampleType}"${ptselection}
+#     outputTrainFolder="${baseOutputFolder}/RecoPlanesTrain/${SampleType}${ptselection}"
+#     outputPredictedFolder="${baseOutputFolder}/ML/predict/"
+#     compile generate_sample.cpp
+#     rm "${outputRecoFolder}"/*.root
+#     run_parallel generate_sample -nchunks $nchunks -nparts $nparts -opt "-I ${inputFolder} -O ${outputRecoFolder} --jinit_ptlow ${jinit_ptlow} --jinit_pthigh ${jinit_pthigh} --j2_ptlow $j2_ptlow  --j2_pthigh $j2_pthigh --SampleType CMSData"
+
+# done

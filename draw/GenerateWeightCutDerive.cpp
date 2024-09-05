@@ -15,7 +15,7 @@
 void TwoPads(vector<TH1D *> hists,TString filename,TString ExtraText="",vector<TString> legend_name={});
 void GenerateWeightCutDerive(){
 
-    Hists hists("GeneratorWeight.root");
+    Hists hists("GeneratorWeight_pythia8.root");
     TH2D *GeneratorWeight=(TH2D *)hists["GeneratorWeight"];
     TH1D *GeneratorWeightCut = GeneratorWeight->ProjectionX();
 
@@ -35,7 +35,7 @@ void GenerateWeightCutDerive(){
         }
     }
 
-    TFile *f = new TFile("GeneratorWeightcut.root","recreate");
+    TFile *f = new TFile("GeneratorWeightcut_pythia8.root","recreate");
     GeneratorWeightCut->Write();
     TF1 *GeneratorWeightCut_fit=GetSmoothFit(GeneratorWeightCut,30,4500,10,true,2.0);
     GeneratorWeightCut_fit->SetRange(30,7000);

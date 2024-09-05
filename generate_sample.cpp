@@ -71,6 +71,7 @@ public:
     Selection JetSelection;
     Selection PlaneSelection;
     Selection ParticleSelection;
+    Selection BranchSelection;
     string SampleType="PrivateMC";
     vector<PrefixAndSuffix> level;
     std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match;
@@ -78,20 +79,19 @@ public:
     std::vector<std::vector<std::vector<JetBranch::threeplanes>>> planes_arr;
     bool SaveParticles = false;
     Hists weightcut;
-    Hists weightcut_pythia8;
+    Hists pileupweight;
     //todo: Add particle selection (1. Particle Energy scale )
     //todo: Add Jet selection (for systematic JES and JER )
     //todo: Save more eventsweight for systematic
     EventsAnalyzer(CommonTool::Options _options)
     {
-        weightcut=Hists("table/OverWeightedEventRemoval/GeneratorWeightcut.root");
-        weightcut_pythia8=Hists("table/OverWeightedEventRemoval/GeneratorWeightcut_pythia8.root");
         options = _options;
         md = metadata.CreateMetaData(options.executablefile);
         EventSelection = Selection("EventSelection");
         JetSelection = Selection("JetSelection");
         ParticleSelection = Selection("ParticleSelection");
         PlaneSelection = Selection("PlaneSelection");
+        BranchSelection = Selection("BranchSelection");
         md->AddParameter("IO Paramter", "Input Folder = " + options.inputFolder);
         md->AddParameter("IO Paramter", "Output Folder = " + options.outputFolder);
     }
@@ -104,6 +104,7 @@ public:
         InitParticleSelection();
         InitPlaneSelection();
         InitOutputBranch();
+        InitBranchSelection();
     }
     void analyze() override
     {
@@ -116,6 +117,7 @@ public:
         MatchPlanes();
         treeEvents.BeginEvent();
         SavePlanes();
+        BranchSelection.Evaluate();
     }
     void DeriveLevelsJetsDaughters(){
         levelsjetsdaughters.clear();
@@ -504,6 +506,7 @@ public:
         }
         if(options.inputFolder.find("Flat_herwig") != std::string::npos) {
             cout<<"Add events selection: Overweighted Events Removal"<<endl;
+            weightcut=Hists("table/OverWeightedEventRemoval/GeneratorWeightcut.root");        
             AddSelection(
                 EventSelection, "Overweighted Events Removal",
                 [this]
@@ -521,14 +524,15 @@ public:
         }
         if(options.inputFolder.find("Flat_pythia") != std::string::npos) {
             cout<<"Add events selection: Overweighted Events Removal"<<endl;
+            weightcut=Hists("table/OverWeightedEventRemoval/GeneratorWeightcut_pythia8.root");
             AddSelection(
                 EventSelection, "Overweighted Events Removal",
                 [this]
                 {
                     if (this->Branches.at(0).JetPt->size() > 0)
                     {
-                        int bin =this->weightcut_pythia8["GeneratorWeightCutSmoothHist"]->FindBin(this->Branches.at(0).JetPt->at(0));
-                        if (this->events->GeneratorWeight > this->weightcut_pythia8["GeneratorWeightCutSmoothHist"]->GetBinContent(bin))
+                        int bin =this->weightcut["GeneratorWeightCutSmoothHist"]->FindBin(this->Branches.at(0).JetPt->at(0));
+                        if (this->events->GeneratorWeight > this->weightcut["GeneratorWeightCutSmoothHist"]->GetBinContent(bin))
                         {
                             return false;
                         }
@@ -773,10 +777,40 @@ public:
         }
         
     }
+    void InitBranchSelection(){
+        if(SampleType.find("CMSMC") != std::string::npos) {
+            treeEvents.addBranches("NumberTruePileup/D");
+            treeEvents.addBranches("NumberPrimaryVertex/I");
+            treeEvents.addBranches("NumberGoodVertex/I");
+            AddSelection(
+                BranchSelection, "Add pile up branch",
+                [this]
+                {
+                    this->treeEvents.assign("NumberTruePileup",this->events->NumberTruePileup);
+                    this->treeEvents.assign("NumberPrimaryVertex",this->events->NumberPrimaryVertex);
+                    this->treeEvents.assign("NumberGoodVertex",this->events->NumberGoodVertex);
+                    return true;
+                });
+        }
+        if(options.inputFolder.find("Flat_pythia") != std::string::npos) {
+            pileupweight = Hists("table/Pileup_reweighting/pileup_weight.root");
+            treeEvents.addBranches("PileupWeight/D");
+            AddSelection(
+                BranchSelection, "Add pile up weight",
+                [this]
+                {
+                    int bin = this->pileupweight["PileupReweight"]->FindBin(this->events->NumberTruePileup);
+                    this->treeEvents.assign("PileupWeight",this->pileupweight["PileupReweight"]->GetBinContent(bin));
+                    return true;
+                });
+
+        }
+    }
     void AddSelection(Selection &selection,const std::string& description, std::function<bool()> condition){
         selection.AddCondition(condition);
         md->AddParameter(selection, description);
     };
+
     void AssignFlavour(JetBranch::threeplanes &planes)
     {
         int pdgid11 = JetBranch::GetIFNFlavour(planes.first.harder);

@@ -49,6 +49,8 @@ public:
       hists["score2"]->Fill(events->Genscore2->at(i));
     }
   }
+
+
 };
 void SymmetryTwoPads(vector<TH1D *> hists,TString filename,TString ExtraText="",vector<TString> legend_name={}){
       chiscan::chiscan chi2(hists[0],chiscan::chiscan::GetStandarCov(hists[0]),hists[1],{});
@@ -75,38 +77,47 @@ void SymmetryTwoPads(vector<TH1D *> hists,TString filename,TString ExtraText="",
 int main(int argc, char *argv[])
 {
   CommonTool::Options options;
-  options.inputFolder = "/home/zlin/Machine_learning/ML/Datasets/Prediction/CMS_herwig_Pt-15to7000jinitpt6007000j2pt1307000_FourLabel_unmatched";
-  EventsAnalyzer CMSMC(options);
-  CMSMC.run_frac(1);
+  options.inputFolder = "/home/zlin/Machine_learning/ML/Datasets/Prediction/CMS_herwig_Pt-15to7000Run3jinitpt6007000j2pt1307000_FourLabel_unmatched";
+  EventsAnalyzer spinon_sample(options);
+  options.inputFolder = "/home/zlin/Machine_learning/ML/Datasets/Prediction/CMS_herwig_Pt-15to7000Run3_SpinOFFjinitpt6007000j2pt1307000_FourLabel_unmatched";
+  EventsAnalyzer spinoff_sample(options);
+  
+  spinon_sample.run_frac(1);
+  spinoff_sample.run_frac(1);
   // spinon_sample.run(100000000);
   // spinoff_sample.run(100000000);
-  CMSMC.finalize("draw/cmsmc.root");
+  spinon_sample.finalize("draw/cmsmc_on.root");
+  spinoff_sample.finalize("draw/cmsmc_off.root");
   Hists spinon("draw/spinon.root");
   Hists spinoff("draw/spinoff.root");
   vector<string> types = {"type0", "type1", "type2", "type3", "type4", "type5","typeqq"};
 
   for (auto &type : types)
   {
-    TH1D *hist_cmsmc = (TH1D *)CMSMC.hists["phi_" + type];
+    TH1D *hist_cmsmc_spinon = (TH1D *)spinon_sample.hists["phi_" + type];
+    TH1D *hist_cmsmc_spinoff = (TH1D *)spinoff_sample.hists["phi_" + type];
     TH1D *hist_spinon = (TH1D *)spinon["phi_" + type];
     TH1D *hist_spinoff = (TH1D *)spinoff["phi_" + type];
-    hist_cmsmc->SetTitle("CMS Herwig");
+    hist_cmsmc_spinon->SetTitle("CMS Herwig Spinon");
+    hist_cmsmc_spinoff->SetTitle("CMS Herwig Spinoff");
     hist_spinon->SetTitle("spin on");
     hist_spinoff->SetTitle("spin off");
-    vector<TH1D *> hists_draw = {hist_spinoff, hist_spinon,hist_cmsmc};
+    vector<TH1D *> hists_draw = {hist_spinoff, hist_spinon,hist_cmsmc_spinon,hist_cmsmc_spinoff};
     SymmetryTwoPads(hists_draw,"draw/"+type+ ".pdf",
                     "plane type: " + type);
   }
   for (auto &type : types)
   {
-    TH1D *hist_cmsmc = (TH1D *)CMSMC.hists["dphiX_" + type];
+    TH1D *hist_cmsmc_spinon = (TH1D *)spinon_sample.hists["dphiX_" + type];
+    TH1D *hist_cmsmc_spinoff = (TH1D *)spinoff_sample.hists["dphiX_" + type];
     TH1D *hist_spinon = (TH1D *)spinon["dphiX_" + type];
     TH1D *hist_spinoff = (TH1D *)spinoff["dphiX_" + type];
-    hist_cmsmc->SetTitle("CMS Herwig");
+    hist_cmsmc_spinon->SetTitle("CMS Herwig Spinon");
+    hist_cmsmc_spinoff->SetTitle("CMS Herwig Spinoff");
     hist_spinon->SetTitle("spin on");
     hist_spinoff->SetTitle("spin off");
-    vector<TH1D *> hists_draw = {hist_spinoff, hist_spinon,hist_cmsmc};
-    SymmetryTwoPads(hists_draw,"draw/"+type+ "dphiX.pdf",
+    vector<TH1D *> hists_draw = {hist_spinoff, hist_spinon,hist_cmsmc_spinon,hist_cmsmc_spinoff};
+    SymmetryTwoPads(hists_draw,"draw/"+type+ "dphiX_.pdf",
                     "plane type: " + type);
   }
   return 0;

@@ -13,9 +13,10 @@
 using namespace std;
 class Hists {
 private:
-    std::map<std::string, TH1*> hists;
+    
 
 public:
+    std::map<std::string, TH1*> hists;
     Hists(){}
     Hists(TString filename){
         Hists::Load(filename);

@@ -334,7 +334,7 @@ public:
             analyzer.metadata.SaveToRootFile(options.outputFolder + "/Chunk" + std::to_string(options.chunki) + "_Part" + std::to_string(part) + ".root");
         }
     }
-    void parallel_for(int nthreads, int begin, int end, std::function<void(int)> func)
+    static void parallel_for(int nthreads, int begin, int end, std::function<void(int)> func)
     {
         int iteration_count = end - begin;
         int chunkSize = iteration_count / nthreads;

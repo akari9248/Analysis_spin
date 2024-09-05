@@ -21,12 +21,12 @@ public:
   vector<string> cut_strs;
   int count;
   CommonTool::Options options;
-  vector<>
   EventsAnalyzer(CommonTool::Options _options){
     options=_options;
   }
   void initialize() override {
     t->Add((TString)options.inputFolder+"/Chunk*.root/DNNTrainTree");
+    events = new DNNTrainTree(t);
     for(int i=0;i<=5;i++){
       hists.addHist((string)TString::Format("phi_type%d",i), 10 , 0, TMath::Pi());
       hists.addHist((string)TString::Format("dphiX_type%d",i), 10 , 0, TMath::Pi());
@@ -37,6 +37,7 @@ public:
   }
   void analyze() override {
     for(int i=0;i<events->type2_Hadron->size();i++){
+      
       hists[(string)TString::Format("phi_type%d",events->type2_Hadron->at(i))]->Fill(events->Phi2_Hadron->at(i));
       hists[(string)TString::Format("dphiX_type%d",events->type2_Hadron->at(i))]->Fill(events->dPhi12_X2_Hadron->at(i));
       double score2_weight[4] = {1,20,1,200};
@@ -83,8 +84,8 @@ int main(int argc, char *argv[])
   spinoff_sample.run_frac(1);
   // spinon_sample.run(100000000);
   // spinoff_sample.run(100000000);
-  spinon_sample.finalize("draw/spinon.root");
-  spinoff_sample.finalize("draw/spinoff.root");
+  spinon_sample.finalize("draw/spinon1.root");
+  spinoff_sample.finalize("draw/spinoff1.root");
 
   vector<string> types = {"type0", "type1", "type2", "type3", "type4", "type5","typeqq"};
 
