@@ -40,7 +40,8 @@ public:
         std::vector<double> *Energy = new std::vector<double>;
         std::vector<int> *PdgId = new std::vector<int>;
         std::vector<int> *Charge = new std::vector<int>;
-        
+        std::vector<double> *Charge_d = new std::vector<double>;
+
         std::vector<int> *JetId = new std::vector<int>;
         std::vector<double> *JetPt = new std::vector<double>;
         std::vector<double> *JetEta = new std::vector<double>;
@@ -242,7 +243,7 @@ public:
                            branchvector.Phi->at(i), branchvector.Energy->at(i));
             PseudoJet particle = PseudoJet(p.Px(), p.Py(), p.Pz(), p.Energy());
             int pdgid = branchvector.PdgId->at(i);
-            int charge = branchvector.Charge->at(i);
+            int charge = branchvector.Charge_d->at(i);
             ParticleInfo particleInfo(pdgid, charge, branchvector.Pt->at(i), branchvector.Eta->at(i),
                                       branchvector.Phi->at(i), branchvector.Energy->at(i));
             particlesinfo.push_back(particleInfo);
@@ -397,6 +398,7 @@ public:
                     t->SetBranchAddress(prefixTStr + "JetEnergy" + suffixTStr, &it->JetEnergy);
                     t->SetBranchAddress(prefixTStr + "JetMatching" + suffixTStr, &it->JetMatching);
                     t->SetBranchAddress(prefixTStr + "DaughterJetId" + suffixTStr, &it->JetId);
+                    t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &it->Charge);
                     prefixTStr = (TString)prefix + "Daughter";
                     suffixTStr = (TString)suffix;
                 }
@@ -405,7 +407,7 @@ public:
                 t->SetBranchAddress(prefixTStr + "Phi" + suffixTStr, &it->Phi);
                 t->SetBranchAddress(prefixTStr + "Energy" + suffixTStr, &it->Energy);
                 t->SetBranchAddress(prefixTStr + "PdgId" + suffixTStr, &it->PdgId);
-                t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &it->Charge);
+                if(SampleType == "PrivateMC") t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &it->Charge_d);
                 
                 ++it; 
             }
@@ -810,7 +812,6 @@ public:
         selection.AddCondition(condition);
         md->AddParameter(selection, description);
     };
-
     void AssignFlavour(JetBranch::threeplanes &planes)
     {
         int pdgid11 = JetBranch::GetIFNFlavour(planes.first.harder);
