@@ -27,6 +27,7 @@
 #include <vector>
 #include "include/MetaDataManager.h"
 #include "include/Selection.h"
+#include "TLeaf.h"
 using namespace fastjet;
 using namespace std;
 
@@ -74,6 +75,7 @@ public:
     Selection ParticleSelection;
     Selection BranchSelection;
     string SampleType="PrivateMC";
+    bool charge_d=false;
     vector<PrefixAndSuffix> level;
     std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match;
     std::vector<std::vector<EventsAnalyzer::JetAndDaughters>>  levelsjetsdaughters;  
@@ -243,7 +245,15 @@ public:
                            branchvector.Phi->at(i), branchvector.Energy->at(i));
             PseudoJet particle = PseudoJet(p.Px(), p.Py(), p.Pz(), p.Energy());
             int pdgid = branchvector.PdgId->at(i);
-            int charge = branchvector.Charge_d->at(i);
+            int charge;
+            if (charge_d)
+            {
+                charge = branchvector.Charge_d->at(i);
+            }
+            else
+            {
+                charge = branchvector.Charge->at(i);
+            }
             ParticleInfo particleInfo(pdgid, charge, branchvector.Pt->at(i), branchvector.Eta->at(i),
                                       branchvector.Phi->at(i), branchvector.Energy->at(i));
             particlesinfo.push_back(particleInfo);
@@ -407,7 +417,27 @@ public:
                 t->SetBranchAddress(prefixTStr + "Phi" + suffixTStr, &it->Phi);
                 t->SetBranchAddress(prefixTStr + "Energy" + suffixTStr, &it->Energy);
                 t->SetBranchAddress(prefixTStr + "PdgId" + suffixTStr, &it->PdgId);
-                if(SampleType == "PrivateMC") t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &it->Charge_d);
+                if (SampleType == "PrivateMC")
+                {
+                    TBranch *branch = t->GetBranch(prefixTStr + "Charge" + suffixTStr);
+                    if (branch)
+                    {
+                        TLeaf *leaf = branch->GetLeaf(branch->GetName());
+                        if (leaf)
+                        {
+                            std::string typeName = leaf->GetTypeName(); 
+                            if (typeName == "vector<double>" || typeName == "std::vector<double>" || typeName == "vector<Double_t>")
+                            {
+                                charge_d = true;
+                                t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &(it->Charge_d));
+                                std::cout << "Branch " << prefixTStr + "Charge" + suffixTStr << " is of type vector<double>." << std::endl;
+                            }else{
+                                t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &it->Charge);
+                                std::cout << "Branch " << prefixTStr + "Charge" + suffixTStr << " is of type vector<int>." << std::endl;
+                            }
+                        }
+                    }
+                }
                 
                 ++it; 
             }
