@@ -408,9 +408,9 @@ public:
                     t->SetBranchAddress(prefixTStr + "JetEnergy" + suffixTStr, &it->JetEnergy);
                     t->SetBranchAddress(prefixTStr + "JetMatching" + suffixTStr, &it->JetMatching);
                     t->SetBranchAddress(prefixTStr + "DaughterJetId" + suffixTStr, &it->JetId);
-                    t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &it->Charge);
                     prefixTStr = (TString)prefix + "Daughter";
                     suffixTStr = (TString)suffix;
+                    t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &it->Charge);
                 }
                 t->SetBranchAddress(prefixTStr + "Pt" + suffixTStr, &it->Pt);
                 t->SetBranchAddress(prefixTStr + "Eta" + suffixTStr, &it->Eta);
