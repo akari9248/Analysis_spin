@@ -698,8 +698,8 @@ public:
                             std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
                                            [this](const JetBranch::threeplanes &threeplanes)
                                            {
-                                               return threeplanes.first.softer.pt() < this->options.jinit_ptlow 
-                                               || threeplanes.first.softer.pt() > this->options.jinit_pthigh;
+                                               return threeplanes.first.initJet.Pt() < this->options.jinit_ptlow 
+                                               || threeplanes.first.initJet.Pt() > this->options.jinit_pthigh;
                                            }),
                             planes_arr.at(i).at(0).end());
                     }else{
@@ -707,8 +707,8 @@ public:
                             std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
                                            [this](const JetBranch::threeplanes &threeplanes)
                                            {
-                                               return threeplanes.matchedthreeplanes.first.softer.pt() < this->options.jinit_ptlow || 
-                                                      threeplanes.matchedthreeplanes.first.softer.pt() > this->options.jinit_pthigh;
+                                               return threeplanes.matchedthreeplanes.first.initJet.Pt() < this->options.jinit_ptlow || 
+                                                      threeplanes.matchedthreeplanes.first.initJet.Pt() > this->options.jinit_pthigh;
                                            }),
                             planes_arr.at(i).at(0).end());
                     }
@@ -740,6 +740,38 @@ public:
                 }
                 return true;
             });
+            AddSelection(
+                PlaneSelection, (std::string)TString::Format("Gen Plane2 JetPt = [ %d , %d ]", options.j2_ptlow, options.j2_pthigh),
+                [this]
+                {
+                    for (int i = 0; i < level.size(); i++)
+                    {
+                        auto planes = &planes_arr.at(i);
+
+                        if (level.at(i).prefix == "Gen")
+                        {
+                            planes_arr.at(i).at(0).erase(
+                                std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
+                                               [this](const JetBranch::threeplanes &threeplanes)
+                                               {
+                                                   return threeplanes.first.softer.pt() < this->options.j2_ptlow || threeplanes.first.softer.pt() > this->options.j2_pthigh;
+                                               }),
+                                planes_arr.at(i).at(0).end());
+                        }
+                        else
+                        {
+                            planes_arr.at(i).at(0).erase(
+                                std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
+                                               [this](const JetBranch::threeplanes &threeplanes)
+                                               {
+                                                   return threeplanes.matchedthreeplanes.first.softer.pt() < this->options.j2_ptlow ||
+                                                          threeplanes.matchedthreeplanes.first.softer.pt() > this->options.j2_pthigh;
+                                               }),
+                                planes_arr.at(i).at(0).end());
+                        }
+                    }
+                    return true;
+                });
             // AddSelection(
             // PlaneSelection, "Gen Plane2 and Plane3 Exist (Reco Jet must matched to Gen Jet)",
             // [this]
