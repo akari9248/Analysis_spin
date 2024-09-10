@@ -698,8 +698,8 @@ public:
                             std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
                                            [this](const JetBranch::threeplanes &threeplanes)
                                            {
-                                               return threeplanes.first.softer.Pt() < this->options.jinit_ptlow 
-                                               || threeplanes.first.softer.Pt() > this->options.jinit_pthigh;
+                                               return threeplanes.first.softer.pt() < this->options.jinit_ptlow 
+                                               || threeplanes.first.softer.pt() > this->options.jinit_pthigh;
                                            }),
                             planes_arr.at(i).at(0).end());
                     }else{
@@ -707,8 +707,8 @@ public:
                             std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
                                            [this](const JetBranch::threeplanes &threeplanes)
                                            {
-                                               return threeplanes.matchedthreeplanes.first.softer.Pt() < this->options.jinit_ptlow || 
-                                                      threeplanes.matchedthreeplanes.first.softer.Pt() > this->options.jinit_pthigh;
+                                               return threeplanes.matchedthreeplanes.first.softer.pt() < this->options.jinit_ptlow || 
+                                                      threeplanes.matchedthreeplanes.first.softer.pt() > this->options.jinit_pthigh;
                                            }),
                             planes_arr.at(i).at(0).end());
                     }
