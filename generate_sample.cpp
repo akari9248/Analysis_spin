@@ -204,7 +204,7 @@ public:
                 }
             }
         }
-        if(SampleType == "CMSMC" || SampleType == "CMSMCGen"){
+        if(options.inputFolder.find("JetHT") == std::string::npos){
             treeEvents.assign("GeneratorWeight",events->GeneratorWeight);
         }
     }
