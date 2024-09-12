@@ -317,8 +317,8 @@ public:
                                    threeplanes.second.harder_constituents_info,
                                    threeplanes.second.softer_constituents_info);
     auto planetheta2=spinobservable2.GetPlaneTheta();
-    SpinObservable spinobservable3(threeplanes.first.harder_constituents_info,
-                                   threeplanes.first.softer_constituents_info,
+    SpinObservable spinobservable3(threeplanes.first.softer_constituents_info,
+                                   threeplanes.first.harder_constituents_info,
                                    threeplanes.third.harder_constituents_info,
                                    threeplanes.third.softer_constituents_info);
     auto planetheta3=spinobservable3.GetPlaneTheta();
