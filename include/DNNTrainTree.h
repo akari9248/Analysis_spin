@@ -461,7 +461,10 @@ public :
    vector<double>  *Recoscore1;
    vector<double>  *Recoscore2;
    vector<double>  *Recoscore3;
-
+   Int_t           NumberGoodVertex;
+   Int_t           NumberPrimaryVertex;
+   Double_t        NumberTruePileup;
+   Double_t        PileupWeight;
    // List of branches
    TBranch        *b_GenPhi2;   //!
    TBranch        *b_GenPhi3;   //!
@@ -901,7 +904,10 @@ public :
    TBranch        *b_score2_Hadron;   //!
    TBranch        *b_score3_Hadron;   //!
    TBranch        *b_validate_Hadron;   //!
-
+   TBranch        *b_NumberGoodVertex;   //!
+   TBranch        *b_NumberPrimaryVertex;   //!
+   TBranch        *b_NumberTruePileup;   //!
+   TBranch        *b_PileupWeight;   //!
    DNNTrainTree(TTree *tree=0);
    virtual ~DNNTrainTree();
    virtual Int_t    Cut(Long64_t entry);
@@ -1852,6 +1858,11 @@ void DNNTrainTree::Init(TTree *tree)
    SetBranchAddressSafe(fChain,"Recoscore1", &Recoscore1, &b_Recoscore1);
    SetBranchAddressSafe(fChain,"Recoscore2", &Recoscore2, &b_Recoscore2);
    SetBranchAddressSafe(fChain,"Recoscore3", &Recoscore3, &b_Recoscore3);
+   SetBranchAddressSafe(fChain,"MatchedRecoPhi", &MatchedRecoPhi, &b_MatchedRecoPhi);
+   SetBranchAddressSafe(fChain,"NumberGoodVertex", &NumberGoodVertex, &b_NumberGoodVertex);
+   SetBranchAddressSafe(fChain,"NumberPrimaryVertex", &NumberPrimaryVertex, &b_NumberPrimaryVertex);
+   SetBranchAddressSafe(fChain,"NumberTruePileup", &NumberTruePileup, &b_NumberTruePileup);
+   SetBranchAddressSafe(fChain,"PileupWeight", &PileupWeight, &b_PileupWeight);
    Notify();
 }
 
