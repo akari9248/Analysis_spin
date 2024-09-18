@@ -304,7 +304,7 @@ public:
         }
         if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen")
         {
-           if(options.inputFolder.find("Run3") != std::string::npos) t->Add((TString)options.inputFolder + "/Chunk*.root/JetsAndDaughters");
+           if(options.inputFolder.find("Run3") != std::string::npos||options.inputFolder.find("Run2022") != std::string::npos) t->Add((TString)options.inputFolder + "/Chunk*.root/JetsAndDaughters");
            else t->Add((TString)options.inputFolder + "/Chunk*.root/jetInfos/JetsAndDaughters");
            if(SampleType == "CMSMC"){
                prefixs = {"Gen","Reco"};
