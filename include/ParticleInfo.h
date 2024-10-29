@@ -25,6 +25,11 @@ class ParticleInfo : public PseudoJet::UserInfoBase{
   int chargeInt;
   double px,py,pz,e;
   double pt,eta,phi;
+  double TrackerUncertainty=0;
+  double EcalUncertainty=0;
+  double HcalUncertainty=0;
+  double RandomDrop=1;
+  TLorentzVector lorentzvector;
   // ParticleInfo(int pdgid_,int index_,double px_,double py_,double pz_,double e_){
   //   pdgid = pdgid_;
   //   index = index_;
@@ -40,6 +45,7 @@ class ParticleInfo : public PseudoJet::UserInfoBase{
     eta = eta_;
     phi = phi_;
     e = e_;
+    lorentzvector.SetPtEtaPhiE(pt,eta,phi,e);
   }
   ParticleInfo(int pdgid_,int charge_,double pt_,double eta_,double phi_,double e_){
     pdgid = pdgid_;
@@ -49,17 +55,25 @@ class ParticleInfo : public PseudoJet::UserInfoBase{
     eta = eta_;
     phi = phi_;
     e = e_;
+    lorentzvector.SetPtEtaPhiE(pt,eta,phi,e);
   }
   ParticleInfo(double pt_,double eta_,double phi_,double e_){
     pt = pt_;
     eta = eta_;
     phi = phi_;
     e = e_;
+    lorentzvector.SetPtEtaPhiE(pt,eta,phi,e);
   }
   ParticleInfo(int pdgid_,int charge_){
     pdgid = pdgid_;
     charge = charge_;
     chargeInt = charge_;
+  }
+  void SetDetectorUncertainty(double _TrackerUncertainty,double _EcalUncertainty,double _HcalUncertainty,double _RandomDrop){
+    TrackerUncertainty= _TrackerUncertainty;
+    EcalUncertainty= _EcalUncertainty;
+    HcalUncertainty= _HcalUncertainty;
+    RandomDrop= _RandomDrop;
   }
   ParticleInfo(){}
 };
