@@ -75,5 +75,13 @@ class ParticleInfo : public PseudoJet::UserInfoBase{
     HcalUncertainty= _HcalUncertainty;
     RandomDrop= _RandomDrop;
   }
+  void ScaleGlobalEnergy(double scale){
+    pt=pt*scale;
+    e=e*scale;
+    lorentzvector.SetPtEtaPhiE(pt,eta,phi,e);
+  }
+  void UpdateLorentzVector(){
+    lorentzvector.SetPtEtaPhiE(pt,eta,phi,e);
+  }
   ParticleInfo(){}
 };
