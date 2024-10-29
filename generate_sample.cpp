@@ -609,6 +609,25 @@ public:
     }
     void InitParticleSelection(){
         AddSelection(
+            ParticleSelection, "Scale particle pt sum = jet pt",
+            [this]
+            {
+                for (auto &jetsdaughters : this->levelsjetsdaughters)
+                {
+                    for(auto &jd:jetsdaughters){
+                        TLorentzVector j0;
+                        for(auto &dau:jd.daughters){
+                            j0+=dau.lorentzvector;
+                        }
+                        double scale = jd.jet.Pt()*1.0/j0.Pt();
+                        for(auto &dau:jd.daughters){
+                            dau.ScaleGlobalEnergy(scale);
+                        }
+                    }
+                }
+                return true;
+            });
+        AddSelection(
             ParticleSelection, "Particle Pt >= 1 GeV",
             [this]
             {
@@ -626,6 +645,8 @@ public:
                 }
                 return true;
             });
+
+
     }
     void InitPlaneSelection(){
         if(SampleType == "PrivateMC"||SampleType == "CMSMC"||SampleType == "CMSData")
@@ -907,7 +928,6 @@ public:
     {
         return TLorentzVector(pj.px(), pj.py(), pj.pz(), pj.e());
     }
-
 };
 int main(int argc, char *argv[])
 {
