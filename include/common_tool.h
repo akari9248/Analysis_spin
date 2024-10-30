@@ -162,6 +162,7 @@ public:
         std::string output_file;
         std::string SampleType;
         bool printhelp=false;
+        std::string jdEnergyUncertainty;
     };
 
     static Options parseArguments(int argc, char *argv[],bool PublicHelp=true)
@@ -184,6 +185,7 @@ public:
             {"root_file", required_argument, 0, 0},
             {"output_file", required_argument, 0, 0},
             {"SampleType", required_argument, 0, 0},
+            {"jdEnergyUncertainty", required_argument, 0, 0},
             {0, 0, 0, 0}};
 
         int long_index = 0;
@@ -266,6 +268,10 @@ public:
                 {
                     options.SampleType = optarg;
                 }
+                else if (strcmp(long_options[long_index].name, "jdEnergyUncertainty") == 0)
+                {
+                    options.jdEnergyUncertainty = optarg;
+                }
                 break;
             default:
                 options.printhelp = true;
@@ -338,21 +344,17 @@ public:
     {
         int iteration_count = end - begin;
         int chunkSize = iteration_count / nthreads;
-
         std::vector<std::thread> threads;
-
         for (int i = 0; i < nthreads; ++i)
         {
             int start = begin + i * chunkSize;
             int finish = (i == nthreads - 1) ? end : start + chunkSize;
-
             threads.emplace_back([start, finish, &func]()
                                  {
             for (int j = start; j < finish; ++j) {
                 func(j);  
             } });
         }
-
         for (auto &t : threads)
         {
             t.join();
