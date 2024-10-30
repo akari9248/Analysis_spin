@@ -113,8 +113,8 @@ public:
     {
         DeriveLevelsJetsDaughters();
         if (!EventSelection.Evaluate()) return;
-        JetSelection.Evaluate();
         ParticleSelection.Evaluate();
+        JetSelection.Evaluate();
         RecoSplitPlanes();
         PlaneSelection.Evaluate();
         MatchPlanes();
@@ -226,6 +226,17 @@ public:
                                                            branchvector.Eta->at(i),
                                                            branchvector.Phi->at(i),
                                                            branchvector.Energy->at(i)));
+            // ***** Add temporary ecal un. hcal un. track un. and track eff 
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<> dis(0.0, 1.0);
+            jetsdaughters.at(jetid).daughters.back().SetDetectorUncertainty(
+                (branchvector.Charge->at(i) != 0) ? 0.01 : 0,
+                (branchvector.PdgId->at(i) == 22) ? 0.03 : 0,
+                (branchvector.Charge->at(i) == 0 && branchvector.PdgId->at(i) != 22) ? 0.05 : 0,
+                (dis(gen) < 0.03) ? 1.0 : 0.0
+            );
+            // *****                                          
             TLorentzVector p;
             p.SetPtEtaPhiE(branchvector.Pt->at(i), branchvector.Eta->at(i), branchvector.Phi->at(i), branchvector.Energy->at(i));
         }
@@ -403,6 +414,7 @@ public:
                 TString suffixTStr = (TString)suffix;
                 if(SampleType == "CMSMC" ||SampleType == "CMSData" ||SampleType == "CMSMCGen"){
                     t->SetBranchAddress(prefixTStr + "JetPt" + suffixTStr, &it->JetPt);
+                    ApplyJetEnergyScale(prefixTStr,&it->JetPt);
                     t->SetBranchAddress(prefixTStr + "JetEta" + suffixTStr, &it->JetEta);
                     t->SetBranchAddress(prefixTStr + "JetPhi" + suffixTStr, &it->JetPhi);
                     t->SetBranchAddress(prefixTStr + "JetEnergy" + suffixTStr, &it->JetEnergy);
@@ -627,6 +639,7 @@ public:
                 }
                 return true;
             });
+        ApplyParticleEnergyScale();
         AddSelection(
             ParticleSelection, "Particle Pt >= 1 GeV",
             [this]
@@ -645,8 +658,6 @@ public:
                 }
                 return true;
             });
-
-
     }
     void InitPlaneSelection(){
         if(SampleType == "PrivateMC"||SampleType == "CMSMC"||SampleType == "CMSData")
@@ -890,6 +901,7 @@ public:
                 });
 
         }
+        ApplyPileupUncertainty();
     }
     void AddSelection(Selection &selection,const std::string& description, std::function<bool()> condition){
         selection.AddCondition(condition);
@@ -923,6 +935,80 @@ public:
         planes.second.softer_flav= pdgid22;
         planes.third.harder_flav= pdgid31;
         planes.third.softer_flav= pdgid32;
+    }
+    void ApplyPileupUncertainty(){
+        if(options.inputFolder.find("Flat_herwig") != std::string::npos) {
+            pileupweight = Hists("table/Pileup_reweighting/pileup_weight_herwig.root");
+            treeEvents.addBranches("PileupWeightNm/D");
+            treeEvents.addBranches("PileupWeightUp/D");
+            treeEvents.addBranches("PileupWeightDn/D");
+            AddSelection(
+                BranchSelection, "Add pile up weight Uncertainty: table/Pileup_reweighting/pileup_weight_herwig.root",
+                [this]
+                {
+                    int bin = this->pileupweight["NominalWeight"]->FindBin(this->events->NumberTruePileup);
+                    this->treeEvents.assign("PileupWeightNm",this->pileupweight["NominalWeight"]->GetBinContent(bin));
+                    bin = this->pileupweight["UpWeight"]->FindBin(this->events->NumberTruePileup);
+                    this->treeEvents.assign("PileupWeightUp",this->pileupweight["UpWeight"]->GetBinContent(bin));
+                    bin = this->pileupweight["DnWeight"]->FindBin(this->events->NumberTruePileup);
+                    this->treeEvents.assign("PileupWeightDn",this->pileupweight["DnWeight"]->GetBinContent(bin));
+                    return true;
+                });
+        }
+    }
+    void ApplyParticleEnergyScale(){
+        AddSelection(
+            ParticleSelection, "Scale particle energy as " + options.jdEnergyUncertainty,
+            [this]
+            {
+                for (auto &jetsdaughters : this->levelsjetsdaughters)
+                {
+                    for(auto &jd:jetsdaughters){
+                        for(auto &dau:jd.daughters){
+                            if(options.jdEnergyUncertainty.find("ChargedUp") != std::string::npos)
+                                 dau.ScaleGlobalEnergy(1+dau.TrackerUncertainty);
+                            if(options.jdEnergyUncertainty.find("ChargedDn") != std::string::npos)
+                                 dau.ScaleGlobalEnergy(1-dau.TrackerUncertainty);
+                            if(options.jdEnergyUncertainty.find("PhotonUp") != std::string::npos)
+                                 dau.ScaleGlobalEnergy(1+dau.EcalUncertainty);
+                            if(options.jdEnergyUncertainty.find("PhotonDn") != std::string::npos)
+                                 dau.ScaleGlobalEnergy(1-dau.EcalUncertainty);
+                            if(options.jdEnergyUncertainty.find("NeutralUp") != std::string::npos)
+                                 dau.ScaleGlobalEnergy(1+dau.HcalUncertainty);
+                            if(options.jdEnergyUncertainty.find("NeutralDn") != std::string::npos)
+                                 dau.ScaleGlobalEnergy(1-dau.HcalUncertainty);
+                        }
+                        if (options.jdEnergyUncertainty.find("TrackEff") != std::string::npos)
+                        {
+                            jd.daughters.erase(
+                                std::remove_if(jd.daughters.begin(), jd.daughters.end(),
+                                               [&](const auto &dau)
+                                               {
+                                                   return dau.RandomDrop;
+                                               }),
+                                jd.daughters.end());
+                        }
+                        TLorentzVector j0;
+                        for(auto &dau:jd.daughters){
+                            j0+=dau.lorentzvector;
+                        }
+                        jd.jet = j0;
+                    }
+                }
+                return true;
+            });
+    }
+    void ApplyJetEnergyScale(TString prefixTStr, std::vector<double> **jetpt_vector)
+    {
+        if (prefixTStr == "Reco" &&
+            (options.jdEnergyUncertainty.find("JESUp") != std::string::npos ||
+             options.jdEnergyUncertainty.find("JESDn") != std::string::npos ||
+             options.jdEnergyUncertainty.find("JERUp") != std::string::npos ||
+             options.jdEnergyUncertainty.find("JERDn") != std::string::npos ||
+             options.jdEnergyUncertainty.find("JERNm") != std::string::npos))
+        {
+            t->SetBranchAddress(prefixTStr + "JetPt" + options.jdEnergyUncertainty,jetpt_vector);
+        }
     }
     TLorentzVector PseudoJetToTLorentzVector(const fastjet::PseudoJet &pj)
     {
