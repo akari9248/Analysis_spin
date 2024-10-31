@@ -457,7 +457,6 @@ public:
     }
     void InitEventSelection()
     {
-        events->
         if (SampleType == "PrivateMC")
         {
             AddSelection(
