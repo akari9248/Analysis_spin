@@ -457,6 +457,7 @@ public:
     }
     void InitEventSelection()
     {
+        events->
         if (SampleType == "PrivateMC")
         {
             AddSelection(
@@ -874,7 +875,7 @@ public:
         
     }
     void InitBranchSelection(){
-        if(SampleType.find("CMSMC") != std::string::npos) {
+        if(SampleType.find("CMS") != std::string::npos) {
             treeEvents.addBranches("NumberTruePileup/D");
             treeEvents.addBranches("NumberPrimaryVertex/I");
             treeEvents.addBranches("NumberGoodVertex/I");
