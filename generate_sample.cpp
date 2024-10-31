@@ -286,6 +286,7 @@ public:
         vector<JetAndDaughters> jetsdaughters(jetnum, JetAndDaughters());
         for (int i = 0; i < jetnum; i++)
         {
+            jetsdaughters.at(i).jetid = i;
             jetsdaughters.at(i).jet = PseudoJetToTLorentzVector(csjets.at(i));
             for (auto &particle : csjets.at(i).constituents())
             {
@@ -910,7 +911,7 @@ public:
                 [this]
                 {
                     this->treeEvents.assign("NumberTruePileup",this->events->NumberTruePileup);
-                    this->treeEvents.assign("Numbe rPrimaryVertex",this->events->NumberPrimaryVertex);
+                    this->treeEvents.assign("NumberPrimaryVertex",this->events->NumberPrimaryVertex);
                     this->treeEvents.assign("NumberGoodVertex",this->events->NumberGoodVertex);
                     return true;
                 });

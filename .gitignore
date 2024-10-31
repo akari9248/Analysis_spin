@@ -13,3 +13,6 @@ log/
 draw*.cpp
 Draw*.cpp
 run.sh
+hadd_CMSMC.sh
+hadd.txt
+

@@ -270,6 +270,9 @@ void CMSJetsAndDaughters::Init(TTree *tree)
    QCDScaleWeights = 0;
    PDFWeights = 0;
    GenPartonPt = 0;
+   RecoJetPassHotZone= 0;
+   RecoDaughterRandomDrop= 0;
+   MetFilterBits= 0;
    // Set branch addresses and branch pointers
    if (!tree)
       return;
