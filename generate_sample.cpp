@@ -52,6 +52,7 @@ public:
          
     };
     struct JetAndDaughters{
+        int jetid;
         TLorentzVector jet;
         std::vector<ParticleInfo> daughters;
     };
@@ -242,6 +243,7 @@ public:
         }
         for (int i = 0; i < jetsdaughters.size(); i++)
         {
+            jetsdaughters.at(i).jetid = i;
             jetsdaughters.at(i).jet.SetPtEtaPhiE(branchvector.JetPt->at(i), branchvector.JetEta->at(i), branchvector.JetPhi->at(i), branchvector.JetEnergy->at(i));
         }
         return jetsdaughters;
@@ -584,6 +586,14 @@ public:
                     return true;
                 });
         }
+        if(SampleType.find("CMS") != std::string::npos) {
+            AddSelection(
+                   EventSelection, "MetFilter",
+                   [this]
+                   {
+                       return std::all_of(this->events->MetFilterBits->begin(), this->events->MetFilterBits->end(), [](bool bit) { return bit; });
+                   });
+        }
     }
     void InitJetSelection(){
         if(SampleType=="CMSMCGen") return;
@@ -618,6 +628,23 @@ public:
                 }
                 return true;
             });
+        if (SampleType.find("CMS") != std::string::npos)
+        {
+            AddSelection(
+                JetSelection, "Jet HotZone removal",
+                [this]
+                {
+                    auto &jetsdaughters = this->levelsjetsdaughters.back();
+                    jetsdaughters.erase(
+                        std::remove_if(jetsdaughters.begin(), jetsdaughters.end(),
+                                       [this](const JetAndDaughters &jd)
+                                       {
+                                           return !this->events->RecoJetPassHotZone->at(jd.jetid);
+                                       }),
+                        jetsdaughters.end());
+                    return true;
+                });
+        }
     }
     void InitParticleSelection(){
         AddSelection(
@@ -883,7 +910,7 @@ public:
                 [this]
                 {
                     this->treeEvents.assign("NumberTruePileup",this->events->NumberTruePileup);
-                    this->treeEvents.assign("NumberPrimaryVertex",this->events->NumberPrimaryVertex);
+                    this->treeEvents.assign("Numbe rPrimaryVertex",this->events->NumberPrimaryVertex);
                     this->treeEvents.assign("NumberGoodVertex",this->events->NumberGoodVertex);
                     return true;
                 });

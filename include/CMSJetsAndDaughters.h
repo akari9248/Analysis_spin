@@ -47,8 +47,11 @@ public:
    vector<double> *RecoJetPtJERUp;
    vector<double> *RecoJetPtJERDn;
    vector<double> *RecoJetQGLiklihood;
+   vector<bool>    *RecoJetPassHotZone;
+   vector<bool>    *RecoDaughterRandomDrop;
    vector<bool> *TriggerBits;
    vector<double> *TriggerPrescales;
+   vector<bool>    *MetFilterBits;
    Double_t CrossSection;
    Int_t NumberInteractionPileup;
    Double_t NumberTruePileup;
@@ -110,9 +113,12 @@ public:
    TBranch *b_RecoJetPtJERNm;             //!
    TBranch *b_RecoJetPtJERUp;             //!
    TBranch *b_RecoJetPtJERDn;             //!
+   TBranch        *b_RecoJetPassHotZone;   //!
+   TBranch        *b_RecoDaughterRandomDrop;   //!
    TBranch *b_RecoJetQGLiklihood;         //!
    TBranch *b_TriggerBits;                //!
    TBranch *b_TriggerPrescales;           //!
+   TBranch        *b_MetFilterBits;   //!
    TBranch *b_CrossSection;               //!
    TBranch *b_NumberInteractionPileup;    //!
    TBranch *b_NumberTruePileup;           //!
@@ -299,6 +305,9 @@ void CMSJetsAndDaughters::Init(TTree *tree)
    SetBranchAddressSafe(fChain, "RecoJetPtJERUp", &RecoJetPtJERUp, &b_RecoJetPtJERUp);
    SetBranchAddressSafe(fChain, "RecoJetPtJERDn", &RecoJetPtJERDn, &b_RecoJetPtJERDn);
    SetBranchAddressSafe(fChain, "RecoJetQGLiklihood", &RecoJetQGLiklihood, &b_RecoJetQGLiklihood);
+   SetBranchAddressSafe(fChain, "RecoJetPassHotZone", &RecoJetPassHotZone, &b_RecoJetPassHotZone);
+   SetBranchAddressSafe(fChain, "RecoDaughterRandomDrop", &RecoDaughterRandomDrop, &b_RecoDaughterRandomDrop);
+   SetBranchAddressSafe(fChain, "MetFilterBits", &MetFilterBits, &b_MetFilterBits);
    SetBranchAddressSafe(fChain, "TriggerBits", &TriggerBits, &b_TriggerBits);
    SetBranchAddressSafe(fChain, "TriggerPrescales", &TriggerPrescales, &b_TriggerPrescales);
    SetBranchAddressSafe(fChain, "CrossSection", &CrossSection, &b_CrossSection);
