@@ -28,6 +28,7 @@
 #include "include/MetaDataManager.h"
 #include "include/Selection.h"
 #include "TLeaf.h"
+#include "TRandom3.h"
 using namespace fastjet;
 using namespace std;
 
@@ -915,6 +916,19 @@ public:
                     this->treeEvents.assign("NumberGoodVertex",this->events->NumberGoodVertex);
                     return true;
                 });
+
+            treeEvents.addBranches("PSWeights/vD");
+            treeEvents.addBranches("PDFWeights/vD");
+            treeEvents.addBranches("QCDScaleWeights/vD");
+            AddSelection(
+                BranchSelection, "Add Theory uncertainty",
+                [this]
+                {
+                    for(auto &PSWeight:*this->events->PSWeights) this->treeEvents.push_back("PSWeights",PSWeight);
+                    for(auto &QCDScaleWeight:*this->events->QCDScaleWeights) this->treeEvents.push_back("QCDScaleWeights",QCDScaleWeight);
+                    for(auto &PDFWeight:*this->events->PDFWeights) this->treeEvents.push_back("PDFWeights",PDFWeight);
+                    return true;
+                });
         }
         if(options.inputFolder.find("Flat_pythia") != std::string::npos) {
             pileupweight = Hists("table/Pileup_reweighting/pileup_weight.root");
@@ -1005,17 +1019,18 @@ public:
                                  dau.ScaleGlobalEnergy(1+dau.HcalUncertainty);
                             if(options.jdEnergyUncertainty.find("NeutralDn") != std::string::npos)
                                  dau.ScaleGlobalEnergy(1-dau.HcalUncertainty);
-                        }
-                        if (options.jdEnergyUncertainty.find("TrackEff") != std::string::npos)
-                        {
-                            jd.daughters.erase(
-                                std::remove_if(jd.daughters.begin(), jd.daughters.end(),
-                                               [&](const auto &dau)
-                                               {
-                                                   return dau.RandomDrop;
-                                               }),
-                                jd.daughters.end());
-                        }
+                            if(options.jdEnergyUncertainty.find("TrackEff") != std::string::npos && dau.RandomDrop){
+                                TRandom3 rd(0);
+                                double dropWeight = rd.Gaus(1.0, 0.1);
+                                while (dropWeight < 0.0)
+                                {
+                                    dropWeight = rd.Gaus(1.0, 0.1);
+                                }
+                                dau.ScaleGlobalEnergy(dropWeight);
+                                dau.charge=0;
+                                dau.chargeInt=0;
+                            }
+                        } 
                         TLorentzVector j0;
                         for(auto &dau:jd.daughters){
                             j0+=dau.lorentzvector;
