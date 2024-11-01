@@ -50,7 +50,9 @@ public:
         std::vector<double> *JetPhi = new std::vector<double>;
         std::vector<double> *JetEnergy = new std::vector<double>;
         std::vector<int> *JetMatching = new std::vector<int>;
-         
+        
+        TString Prefix="";
+        TString Suffix="";
     };
     struct JetAndDaughters{
         int jetid;
@@ -228,16 +230,24 @@ public:
                                                            branchvector.Eta->at(i),
                                                            branchvector.Phi->at(i),
                                                            branchvector.Energy->at(i)));
-            // ***** Add temporary ecal un. hcal un. track un. and track eff 
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<> dis(0.0, 1.0);
-            jetsdaughters.at(jetid).daughters.back().SetDetectorUncertainty(
-                (branchvector.Charge->at(i) != 0) ? 0.01 : 0,
-                (branchvector.PdgId->at(i) == 22) ? 0.03 : 0,
-                (branchvector.Charge->at(i) == 0 && branchvector.PdgId->at(i) != 22) ? 0.05 : 0,
-                (dis(gen) < 0.03) ? 1.0 : 0.0
-            );
+            // ***** Add temporary ecal un. hcal un. track un. and track eff
+            if(branchvector.Prefix=="Reco"){
+                std::random_device rd;
+                std::mt19937 gen(rd());
+                std::uniform_real_distribution<> dis(0.0, 1.0);
+                jetsdaughters.at(jetid).daughters.back().SetDetectorUncertainty(
+                    events->RecoDaughterTrackerUncertainty->at(i),
+                    events->RecoDaughterEcalUncertainty->at(i),
+                    events->RecoDaughterHcalUncertainty->at(i),
+                    (dis(gen) < 0.03) ? 1.0 : 0.0);
+                // jetsdaughters.at(jetid).daughters.back().SetDetectorUncertainty(
+                //     (branchvector.Charge->at(i) != 0) ? 0.01 : 0,
+                //     (branchvector.PdgId->at(i) == 22) ? 0.03 : 0,
+                //     (branchvector.Charge->at(i) == 0 && branchvector.PdgId->at(i) != 22) ? 0.05 : 0,
+                //     (dis(gen) < 0.03) ? 1.0 : 0.0
+                // );
+            }
+            
             // *****                                          
             TLorentzVector p;
             p.SetPtEtaPhiE(branchvector.Pt->at(i), branchvector.Eta->at(i), branchvector.Phi->at(i), branchvector.Energy->at(i));
@@ -416,6 +426,8 @@ public:
             {
                 TString prefixTStr = (TString)prefix;
                 TString suffixTStr = (TString)suffix;
+                it->Prefix=prefixTStr;
+                it->Suffix=suffixTStr;
                 if(SampleType == "CMSMC" ||SampleType == "CMSData" ||SampleType == "CMSMCGen"){
                     t->SetBranchAddress(prefixTStr + "JetPt" + suffixTStr, &it->JetPt);
                     ApplyJetEnergyScale(prefixTStr,&it->JetPt);
