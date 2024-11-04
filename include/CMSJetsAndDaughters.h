@@ -84,6 +84,10 @@ public:
    vector<double> *GenPartonPt;
    Long64_t TotalEventNumber;
    Double_t NextPassedNumber;
+   vector<double> *RecoDaughterTrackerUncertainty;
+   vector<double> *RecoDaughterEcalUncertainty;
+   vector<double> *RecoDaughterHcalUncertainty;
+
 
    // List of branches
    TBranch *b_RunID;                      //!
@@ -151,6 +155,11 @@ public:
    TBranch *b_GenPartonPt;                //!
    TBranch *b_TotalEventNumber;           //!
    TBranch *b_NextPassedNumber;           //!
+
+   TBranch *b_RecoDaughterTrackerUncertainty;                //!
+   TBranch *b_RecoDaughterEcalUncertainty;           //!
+   TBranch *b_RecoDaughterHcalUncertainty;           //!
+
 
    CMSJetsAndDaughters(TTree *tree = 0);
    virtual ~CMSJetsAndDaughters();
@@ -273,6 +282,10 @@ void CMSJetsAndDaughters::Init(TTree *tree)
    RecoJetPassHotZone= 0;
    RecoDaughterRandomDrop= 0;
    MetFilterBits= 0;
+
+   RecoDaughterTrackerUncertainty = 0;
+   RecoDaughterEcalUncertainty =0;
+   RecoDaughterHcalUncertainty=0;
    // Set branch addresses and branch pointers
    if (!tree)
       return;
@@ -345,6 +358,10 @@ void CMSJetsAndDaughters::Init(TTree *tree)
    SetBranchAddressSafe(fChain, "GenPartonPt", &GenPartonPt, &b_GenPartonPt);
    SetBranchAddressSafe(fChain, "TotalEventNumber", &TotalEventNumber, &b_TotalEventNumber);
    SetBranchAddressSafe(fChain, "NextPassedNumber", &NextPassedNumber, &b_NextPassedNumber);
+
+   SetBranchAddressSafe(fChain, "RecoDaughterTrackerUncertainty", &RecoDaughterTrackerUncertainty, &b_RecoDaughterTrackerUncertainty);
+   SetBranchAddressSafe(fChain, "RecoDaughterEcalUncertainty", &RecoDaughterEcalUncertainty, &b_RecoDaughterEcalUncertainty);
+   SetBranchAddressSafe(fChain, "RecoDaughterHcalUncertainty", &RecoDaughterHcalUncertainty, &b_RecoDaughterHcalUncertainty);
    Notify();
 }
 
