@@ -584,7 +584,7 @@ public:
         }
         if(options.inputFolder.find("Flat_pythia") != std::string::npos) {
             cout<<"Add events selection: Overweighted Events Removal"<<endl;
-            weightcut=Hists("table/OverWeightedEventRemoval/GeneratorWeightcut_pythia8.root");
+            weightcut=Hists("table/OverWeightedEventRemoval/GeneratorWeightcut_pythia8_Flat2018.root");
             AddSelection(
                 EventSelection, "Overweighted Events Removal",
                 [this]
