@@ -584,7 +584,10 @@ public:
         }
         if(options.inputFolder.find("Flat_pythia") != std::string::npos) {
             cout<<"Add events selection: Overweighted Events Removal"<<endl;
-            weightcut=Hists("table/OverWeightedEventRemoval/GeneratorWeightcut_pythia8_Flat2018.root");
+            if(options.inputFolder.find("Flat_pythia8-Run3Summer22") != std::string::npos)
+                weightcut=Hists("table/OverWeightedEventRemoval/GeneratorWeightcut_pythia8.root");
+            if(options.inputFolder.find("Flat_pythia_RunIISummer20UL18") != std::string::npos)
+                weightcut=Hists("table/OverWeightedEventRemoval/GeneratorWeightcut_pythia8_Flat2018.root");
             AddSelection(
                 EventSelection, "Overweighted Events Removal",
                 [this]
