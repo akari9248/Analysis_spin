@@ -235,17 +235,17 @@ public:
                 std::random_device rd;
                 std::mt19937 gen(rd());
                 std::uniform_real_distribution<> dis(0.0, 1.0);
-                jetsdaughters.at(jetid).daughters.back().SetDetectorUncertainty(
-                    events->RecoDaughterTrackerUncertainty->at(i),
-                    events->RecoDaughterEcalUncertainty->at(i),
-                    events->RecoDaughterHcalUncertainty->at(i),
-                    (dis(gen) < 0.03) ? 1.0 : 0.0);
                 // jetsdaughters.at(jetid).daughters.back().SetDetectorUncertainty(
-                //     (branchvector.Charge->at(i) != 0) ? 0.01 : 0,
-                //     (branchvector.PdgId->at(i) == 22) ? 0.03 : 0,
-                //     (branchvector.Charge->at(i) == 0 && branchvector.PdgId->at(i) != 22) ? 0.05 : 0,
-                //     (dis(gen) < 0.03) ? 1.0 : 0.0
-                // );
+                //     events->RecoDaughterTrackerUncertainty->at(i),
+                //     events->RecoDaughterEcalUncertainty->at(i),
+                //     events->RecoDaughterHcalUncertainty->at(i),
+                //     (dis(gen) < 0.03) ? 1.0 : 0.0);
+                jetsdaughters.at(jetid).daughters.back().SetDetectorUncertainty(
+                    (branchvector.Charge->at(i) != 0) ? 0.01 : 0,
+                    (branchvector.PdgId->at(i) == 22) ? 0.03 : 0,
+                    (branchvector.Charge->at(i) == 0 && branchvector.PdgId->at(i) != 22) ? 0.05 : 0,
+                    (dis(gen) < 0.03) ? 1.0 : 0.0
+                );
             }
             
             // *****                                          
@@ -484,7 +484,7 @@ public:
                     jets.push_back(jetdaughters.jet);
                 }
                 double pTCut = 30;
-                double etaCut = 2.1;
+                double etaCut = 1.7;
                 if (jets.size() < 2) return false;
                 if (jets.at(0).Pt() < pTCut || abs(jets.at(0).Eta()) > etaCut) return false;
                 if (jets.at(1).Pt() < pTCut || abs(jets.at(1).Eta()) > etaCut) return false;
@@ -628,7 +628,7 @@ public:
                 return true;
             });
         AddSelection(
-            JetSelection, "JetEta = [ -2.1 , 2.1 ]",
+            JetSelection, "JetEta = [ -1.7 , 1.7 ]",
             [this]
             {
                 for (auto &jetsdaughters : this->levelsjetsdaughters) 
@@ -636,7 +636,7 @@ public:
                     jetsdaughters.erase(
                         std::remove_if(jetsdaughters.begin(), jetsdaughters.end(),
                                     [](const JetAndDaughters &jd) {
-                                        return abs(jd.jet.Eta()) >=2.1;
+                                        return abs(jd.jet.Eta()) >=1.7;
                                     }),
                         jetsdaughters.end());
                 }
@@ -789,7 +789,7 @@ public:
                 return true;
             });
             AddSelection(
-            PlaneSelection, "Gen Jet Eta = [ -2.1 , 2.1]",
+            PlaneSelection, "Gen Jet Eta = [ -1.7 , 1.7]",
             [this]
             {
                 for (int i=0;i<level.size();i++) 
@@ -799,14 +799,14 @@ public:
                         planes_arr.at(i).at(0).erase(
                             std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
                                            [this](const JetBranch::threeplanes &threeplanes)
-                                           { return abs(threeplanes.first.initJet.Eta()) >= 2.1; }),
+                                           { return abs(threeplanes.first.initJet.Eta()) >= 1.7; }),
                             planes_arr.at(i).at(0).end());
                     }else{
                         planes_arr.at(i).at(0).erase(
                             std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
                                            [this](const JetBranch::threeplanes &threeplanes)
                                            {
-                                                return abs(threeplanes.matchedthreeplanes.first.initJet.Eta()) >= 2.1;
+                                                return abs(threeplanes.matchedthreeplanes.first.initJet.Eta()) >= 1.7;
                                            }),
                             planes_arr.at(i).at(0).end());
                     }
