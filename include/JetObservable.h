@@ -47,6 +47,8 @@ public:
     double pt2_sum = 0;
     double pt_sum = 0;
     for (auto particle : particles) {
+      if (particle.pt < 0.00001)
+        continue;
       pt2_sum += particle.pt * particle.pt;
       pt_sum += particle.pt;
     }
@@ -62,6 +64,8 @@ public:
     // jet_lorentzvector.SetPtEtaPhiE(jet.pt, jet.eta, jet.phi, jet.e);
 
     for (auto particle : particles) {
+      if (particle.pt < 0.0001)
+        continue;
       TLorentzVector particle_lorentzvector;
       particle_lorentzvector.SetPtEtaPhiE(particle.pt, particle.eta,
                                           particle.phi, particle.e);

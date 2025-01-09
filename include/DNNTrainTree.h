@@ -465,6 +465,16 @@ public :
    Int_t           NumberPrimaryVertex;
    Double_t        NumberTruePileup;
    Double_t        PileupWeight;
+   vector<vector<int> > *bHadron_PdgId;
+   vector<vector<double> > *bHadron_Pt;
+   vector<vector<double> > *bHadron_Eta;
+   vector<vector<double> > *bHadron_Phi;
+   vector<vector<double> > *bHadron_Energy;
+   vector<vector<int> > *bHadron_PdgId;
+   vector<vector<double> > *cHadron_Pt;
+   vector<vector<double> > *cHadron_Eta;
+   vector<vector<double> > *cHadron_Phi;
+   vector<vector<double> > *cHadron_Energy;
    // List of branches
    TBranch        *b_GenPhi2;   //!
    TBranch        *b_GenPhi3;   //!
@@ -908,6 +918,16 @@ public :
    TBranch        *b_NumberPrimaryVertex;   //!
    TBranch        *b_NumberTruePileup;   //!
    TBranch        *b_PileupWeight;   //!
+   TBranch        *b_bHadron_PdgId;   //!
+   TBranch        *b_bHadron_Pt;   //!
+   TBranch        *b_bHadron_Eta;   //!
+   TBranch        *b_bHadron_Phi;   //!
+   TBranch        *b_bHadron_Energy;   //!
+   // TBranch        *b_bHadron_PdgId;   //!
+   TBranch        *b_cHadron_Pt;   //!
+   TBranch        *b_cHadron_Eta;   //!
+   TBranch        *b_cHadron_Phi;   //!
+   TBranch        *b_cHadron_Energy;   //!
    DNNTrainTree(TTree *tree=0);
    virtual ~DNNTrainTree();
    virtual Int_t    Cut(Long64_t entry);
@@ -1412,6 +1432,16 @@ void DNNTrainTree::Init(TTree *tree)
    Recoscore1 = 0;
    Recoscore2 = 0;
    Recoscore3 = 0;
+   bHadron_PdgId = 0;
+   bHadron_Pt = 0;
+   bHadron_Eta = 0;
+   bHadron_Phi = 0;
+   bHadron_Energy = 0;
+   bHadron_PdgId = 0;
+   cHadron_Pt = 0;
+   cHadron_Eta = 0;
+   cHadron_Phi = 0;
+   cHadron_Energy = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -1863,6 +1893,16 @@ void DNNTrainTree::Init(TTree *tree)
    SetBranchAddressSafe(fChain,"NumberPrimaryVertex", &NumberPrimaryVertex, &b_NumberPrimaryVertex);
    SetBranchAddressSafe(fChain,"NumberTruePileup", &NumberTruePileup, &b_NumberTruePileup);
    SetBranchAddressSafe(fChain,"PileupWeight", &PileupWeight, &b_PileupWeight);
+   SetBranchAddressSafe(fChain,"bHadron_PdgId", &bHadron_PdgId, &b_bHadron_PdgId);
+   SetBranchAddressSafe(fChain,"bHadron_Pt", &bHadron_Pt, &b_bHadron_Pt);
+   SetBranchAddressSafe(fChain,"bHadron_Eta", &bHadron_Eta, &b_bHadron_Eta);
+   SetBranchAddressSafe(fChain,"bHadron_Phi", &bHadron_Phi, &b_bHadron_Phi);
+   SetBranchAddressSafe(fChain,"bHadron_Energy", &bHadron_Energy, &b_bHadron_Energy);
+//    SetBranchAddressSafe("bHadron_PdgId", &bHadron_PdgId, &b_bHadron_PdgId);
+   SetBranchAddressSafe(fChain,"cHadron_Pt", &cHadron_Pt, &b_cHadron_Pt);
+   SetBranchAddressSafe(fChain,"cHadron_Eta", &cHadron_Eta, &b_cHadron_Eta);
+   SetBranchAddressSafe(fChain,"cHadron_Phi", &cHadron_Phi, &b_cHadron_Phi);
+   SetBranchAddressSafe(fChain,"cHadron_Energy", &cHadron_Energy, &b_cHadron_Energy);
    Notify();
 }
 

@@ -29,10 +29,12 @@ using namespace fastjet;
 using namespace std;
 using namespace fastjet::contrib;
 
-class RecoPlane {
+class RecoPlane
+{
 public:
   static JetBranch::twoplanes
-  JetConstituents(vector<ParticleInfo> constituents) {
+  JetConstituents(vector<ParticleInfo> constituents)
+  {
     double z1cut = 0;
     double z2cut = 0;
     double kt1cut = 1;
@@ -41,7 +43,8 @@ public:
     vector<JetBranch::twoplanes> twoplanes;
     std::vector<PseudoJet> particles;
     std::vector<ParticleInfo> particlesinfo;
-    for (size_t i = 0; i < constituents.size(); ++i) {
+    for (size_t i = 0; i < constituents.size(); ++i)
+    {
       TLorentzVector p;
       p.SetPtEtaPhiE(constituents.at(i).pt, constituents.at(i).eta,
                      constituents.at(i).phi, constituents.at(i).e);
@@ -68,7 +71,7 @@ public:
     vector<PseudoJet> jets_IFN = sorted_by_pt(cs_IFN.inclusive_jets());
     PseudoJet j0, j1, j2, j3, j4;
     j0 = jets_IFN[0];
-    
+
     double Q = j0.e();
     auto twoplane = JetBranch::findPrimaryAndSecondaryJets(
         j0, z1cut, z2cut, kt1cut * 2 * Q, kt2cut * 2 * Q, particlesinfo,
@@ -77,7 +80,8 @@ public:
     return twoplane;
   }
   static JetBranch::threeplanes
-  JetConstituents_threeplanes(vector<ParticleInfo> constituents) {
+  JetConstituents_threeplanes(vector<ParticleInfo> constituents)
+  {
     double z1cut = 0;
     double z2cut = 0;
     double kt1cut = 1;
@@ -86,7 +90,8 @@ public:
     vector<JetBranch::twoplanes> twoplanes;
     std::vector<PseudoJet> particles;
     std::vector<ParticleInfo> particlesinfo;
-    for (size_t i = 0; i < constituents.size(); ++i) {
+    for (size_t i = 0; i < constituents.size(); ++i)
+    {
       TLorentzVector p;
       p.SetPtEtaPhiE(constituents.at(i).pt, constituents.at(i).eta,
                      constituents.at(i).phi, constituents.at(i).e);
@@ -114,7 +119,6 @@ public:
     vector<PseudoJet> jets_IFN = sorted_by_pt(cs_IFN.inclusive_jets());
     PseudoJet j0, j1, j2, j3, j4;
     j0 = jets_IFN[0];
-    
     double Q = j0.e();
     auto threeplanes = JetBranch::findPrimarySecondaryAndThirdaryJets(
         j0, z1cut, z2cut, kt1cut * 2 * Q, kt2cut * 2 * Q, particlesinfo,
@@ -123,7 +127,8 @@ public:
     return threeplanes;
   }
   static JetBranch::threeplanes
-  JetConstituents_threeplanesGHS(vector<ParticleInfo> constituents) {
+  JetConstituents_threeplanesGHS(vector<ParticleInfo> constituents)
+  {
     double z1cut = 0;
     double z2cut = 0;
     double kt1cut = 1;
@@ -132,7 +137,8 @@ public:
     vector<JetBranch::twoplanes> twoplanes;
     std::vector<PseudoJet> particles;
     std::vector<ParticleInfo> particlesinfo;
-    for (size_t i = 0; i < constituents.size(); ++i) {
+    for (size_t i = 0; i < constituents.size(); ++i)
+    {
       TLorentzVector p;
       p.SetPtEtaPhiE(constituents.at(i).pt, constituents.at(i).eta,
                      constituents.at(i).phi, constituents.at(i).e);
@@ -148,16 +154,16 @@ public:
                              JetDefinition::max_allowable_R);
     fastjet::contrib::FlavRecombiner flav_recombiner;
     jet_def_CA.set_recombiner(&flav_recombiner);
-    
+
     double GHS_alpha = 1.0; // < flav-kt distance parameter alpha
     double GHS_omega = 2.0;
     ClusterSequence cs_CA(particles, jet_def_CA);
     vector<PseudoJet> jets_CA = sorted_by_pt(cs_CA.inclusive_jets());
-    vector<PseudoJet> GHS_jets  = run_GHS(jets_CA, 0, GHS_alpha, GHS_omega, flav_recombiner);
+    vector<PseudoJet> GHS_jets = run_GHS(jets_CA, 0, GHS_alpha, GHS_omega, flav_recombiner);
 
     PseudoJet j0, j1, j2, j3, j4;
     j0 = GHS_jets[0];
-    
+
     double Q = j0.e();
     auto threeplanes = JetBranch::findPrimarySecondaryAndThirdaryJets(
         j0, z1cut, z2cut, kt1cut * 2 * Q, kt2cut * 2 * Q, particlesinfo,
@@ -166,7 +172,8 @@ public:
     return threeplanes;
   }
   static void SavePlanes(JetBranch::twoplanes twoplanes, TreeEvents &treeEvents,
-                         int jetindex, string prefix = "", string suffix = "") {
+                         int jetindex, string prefix = "", string suffix = "")
+  {
     treeEvents.push_back(prefix + "pt1" + suffix, twoplanes.first.harder.pt());
     treeEvents.push_back(prefix + "eta1" + suffix,
                          twoplanes.first.harder.eta());
@@ -247,7 +254,8 @@ public:
     treeEvents.push_back(prefix + "je" + suffix, twoplanes.first.initJet.E());
 
     for (int ii = 0; ii < twoplanes.first.harder_constituents_info.size();
-         ii++) {
+         ii++)
+    {
       auto particle = twoplanes.first.harder_constituents_info.at(ii);
       treeEvents.push_back(prefix + "particle1_pt" + suffix, particle.pt);
       treeEvents.push_back(prefix + "particle1_eta" + suffix, particle.eta);
@@ -259,7 +267,8 @@ public:
       treeEvents.push_back(prefix + "particle1_jetid" + suffix, jetindex);
     }
     for (int ii = 0; ii < twoplanes.first.softer_constituents_info.size();
-         ii++) {
+         ii++)
+    {
       auto particle = twoplanes.first.softer_constituents_info.at(ii);
       treeEvents.push_back(prefix + "particle2_pt" + suffix, particle.pt);
       treeEvents.push_back(prefix + "particle2_eta" + suffix, particle.eta);
@@ -272,7 +281,8 @@ public:
     }
 
     for (int ii = 0; ii < twoplanes.second.harder_constituents_info.size();
-         ii++) {
+         ii++)
+    {
       auto particle = twoplanes.second.harder_constituents_info.at(ii);
       treeEvents.push_back(prefix + "particle3_pt" + suffix, particle.pt);
       treeEvents.push_back(prefix + "particle3_eta" + suffix, particle.eta);
@@ -284,7 +294,8 @@ public:
       treeEvents.push_back(prefix + "particle3_jetid" + suffix, jetindex);
     }
     for (int ii = 0; ii < twoplanes.second.softer_constituents_info.size();
-         ii++) {
+         ii++)
+    {
       auto particle = twoplanes.second.softer_constituents_info.at(ii);
       treeEvents.push_back(prefix + "particle4_pt" + suffix, particle.pt);
       treeEvents.push_back(prefix + "particle4_eta" + suffix, particle.eta);
@@ -297,8 +308,8 @@ public:
     }
   }
   static void SavePlanes(JetBranch::threeplanes threeplanes, TreeEvents &treeEvents,
-                         int jetindex, string prefix = "", string suffix = "",bool SaveParticles = true) {
-
+                         int jetindex, string prefix = "", string suffix = "", bool SaveParticles = true)
+  {
     JetObservable JetObservable1(threeplanes.first.harder_constituents_info);
     JetObservable JetObservable2(threeplanes.first.softer_constituents_info);
     JetObservable JetObservable3(threeplanes.second.harder_constituents_info);
@@ -316,12 +327,14 @@ public:
                                    threeplanes.first.softer_constituents_info,
                                    threeplanes.second.harder_constituents_info,
                                    threeplanes.second.softer_constituents_info);
-    auto planetheta2=spinobservable2.GetPlaneTheta();
+    auto planetheta2 = spinobservable2.GetPlaneTheta();
     SpinObservable spinobservable3(threeplanes.first.softer_constituents_info,
                                    threeplanes.first.harder_constituents_info,
                                    threeplanes.third.harder_constituents_info,
                                    threeplanes.third.softer_constituents_info);
-    auto planetheta3=spinobservable3.GetPlaneTheta();
+    auto planetheta3 = spinobservable3.GetPlaneTheta();
+
+    treeEvents.push_back(prefix + "primaryindex" + suffix, threeplanes.firstindex);
 
     treeEvents.push_back(prefix + "pt1" + suffix, threeplanes.first.harder.pt());
     treeEvents.push_back(prefix + "eta1" + suffix,
@@ -351,11 +364,11 @@ public:
     treeEvents.push_back(prefix + "nparticles2" + suffix,
                          threeplanes.first.softer_nparticles);
     treeEvents.push_back(prefix + "flavour2" + suffix,
-                         threeplanes.first.softer_flav);  
+                         threeplanes.first.softer_flav);
     treeEvents.push_back(prefix + "pTD2" + suffix, JetObservable2.pTD());
     treeEvents.push_back(prefix + "sigma2" + suffix, width2.sigma);
     treeEvents.push_back(prefix + "sigma12" + suffix, width2.sigma1);
-    treeEvents.push_back(prefix + "sigma22" + suffix, width2.sigma2);            
+    treeEvents.push_back(prefix + "sigma22" + suffix, width2.sigma2);
 
     treeEvents.push_back(prefix + "pt3" + suffix, threeplanes.second.harder.pt());
     treeEvents.push_back(prefix + "eta3" + suffix,
@@ -385,7 +398,7 @@ public:
     treeEvents.push_back(prefix + "nparticles4" + suffix,
                          threeplanes.second.softer_nparticles);
     treeEvents.push_back(prefix + "flavour4" + suffix,
-                         threeplanes.second.softer_flav);  
+                         threeplanes.second.softer_flav);
     treeEvents.push_back(prefix + "pTD4" + suffix, JetObservable4.pTD());
     treeEvents.push_back(prefix + "sigma4" + suffix, width4.sigma);
     treeEvents.push_back(prefix + "sigma14" + suffix, width4.sigma1);
@@ -419,20 +432,100 @@ public:
     treeEvents.push_back(prefix + "nparticles6" + suffix,
                          threeplanes.third.softer_nparticles);
     treeEvents.push_back(prefix + "flavour6" + suffix,
-                         threeplanes.third.softer_flav); 
+                         threeplanes.third.softer_flav);
     treeEvents.push_back(prefix + "pTD6" + suffix, JetObservable6.pTD());
     treeEvents.push_back(prefix + "sigma6" + suffix, width6.sigma);
     treeEvents.push_back(prefix + "sigma16" + suffix, width6.sigma1);
     treeEvents.push_back(prefix + "sigma26" + suffix, width6.sigma2);
 
+    treeEvents.push_back(prefix + "init_pdgid1" + suffix,
+                         threeplanes.first.harder_init_pdgid);
+    treeEvents.push_back(prefix + "init_descri1" + suffix,
+                         threeplanes.first.harder_init_descri);
+    treeEvents.push_back(prefix + "final_pdgid1" + suffix,
+                         threeplanes.first.harder_final_pdgid);
+    treeEvents.push_back(prefix + "final_descri1" + suffix,
+                         threeplanes.first.harder_final_descri);
+
+    treeEvents.push_back(prefix + "init_pdgid2" + suffix,
+                         threeplanes.first.softer_init_pdgid);
+    treeEvents.push_back(prefix + "init_descri2" + suffix,
+                         threeplanes.first.softer_init_descri);
+    treeEvents.push_back(prefix + "final_pdgid2" + suffix,
+                         threeplanes.first.softer_final_pdgid);
+    treeEvents.push_back(prefix + "final_descri2" + suffix,
+                         threeplanes.first.softer_final_descri);
+
+    treeEvents.push_back(prefix + "init_pdgid3" + suffix,
+                         threeplanes.second.harder_init_pdgid);
+    treeEvents.push_back(prefix + "init_descri3" + suffix,
+                         threeplanes.second.harder_init_descri);
+    treeEvents.push_back(prefix + "final_pdgid3" + suffix,
+                         threeplanes.second.harder_final_pdgid);
+    treeEvents.push_back(prefix + "final_descri3" + suffix,
+                         threeplanes.second.harder_final_descri);
+
+    treeEvents.push_back(prefix + "init_pdgid4" + suffix,
+                         threeplanes.second.softer_init_pdgid);
+    treeEvents.push_back(prefix + "init_descri4" + suffix,
+                         threeplanes.second.softer_init_descri);
+    treeEvents.push_back(prefix + "final_pdgid4" + suffix,
+                         threeplanes.second.softer_final_pdgid);
+    treeEvents.push_back(prefix + "final_descri4" + suffix,
+                         threeplanes.second.softer_final_descri);
+
+    treeEvents.push_back(prefix + "init_pdgid5" + suffix,
+                         threeplanes.third.harder_init_pdgid);
+    treeEvents.push_back(prefix + "init_descri5" + suffix,
+                         threeplanes.third.harder_init_descri);
+    treeEvents.push_back(prefix + "final_pdgid5" + suffix,
+                         threeplanes.third.harder_final_pdgid);
+    treeEvents.push_back(prefix + "final_descri5" + suffix,
+                         threeplanes.third.harder_final_descri);
+
+    treeEvents.push_back(prefix + "init_pdgid6" + suffix,
+                         threeplanes.third.softer_init_pdgid);
+    treeEvents.push_back(prefix + "init_descri6" + suffix,
+                         threeplanes.third.softer_init_descri);
+    treeEvents.push_back(prefix + "final_pdgid6" + suffix,
+                         threeplanes.third.softer_final_pdgid);
+    treeEvents.push_back(prefix + "final_descri6" + suffix,
+                         threeplanes.third.softer_final_descri);
+
+    treeEvents.push_back(prefix + "nbHadrons1" + suffix,
+                         threeplanes.first.harder_ghostb);
+    treeEvents.push_back(prefix + "nbHadrons2" + suffix,
+                         threeplanes.first.softer_ghostb);
+    treeEvents.push_back(prefix + "nbHadrons3" + suffix,
+                         threeplanes.second.harder_ghostb);
+    treeEvents.push_back(prefix + "nbHadrons4" + suffix,
+                         threeplanes.second.softer_ghostb);
+    treeEvents.push_back(prefix + "nbHadrons5" + suffix,
+                         threeplanes.third.harder_ghostb);
+    treeEvents.push_back(prefix + "nbHadrons6" + suffix,
+                         threeplanes.third.softer_ghostb);
+
+    treeEvents.push_back(prefix + "ncHadrons1" + suffix,
+                         threeplanes.first.harder_ghostc);
+    treeEvents.push_back(prefix + "ncHadrons2" + suffix,
+                         threeplanes.first.softer_ghostc);
+    treeEvents.push_back(prefix + "ncHadrons3" + suffix,
+                         threeplanes.second.harder_ghostc);
+    treeEvents.push_back(prefix + "ncHadrons4" + suffix,
+                         threeplanes.second.softer_ghostc);
+    treeEvents.push_back(prefix + "ncHadrons5" + suffix,
+                         threeplanes.third.harder_ghostc);
+    treeEvents.push_back(prefix + "ncHadrons6" + suffix,
+                         threeplanes.third.softer_ghostc);
+
     treeEvents.push_back(prefix + "z1" + suffix, threeplanes.first.z);
     treeEvents.push_back(prefix + "kt1" + suffix, threeplanes.first.kt);
     treeEvents.push_back(prefix + "theta1" + suffix, threeplanes.first.theta);
     treeEvents.push_back(prefix + "deltaR1" + suffix, threeplanes.first.deltaR);
-    treeEvents.push_back( prefix + "eec1" + suffix,
-        (threeplanes.first.harder.e() * threeplanes.first.softer.e()) * 1.0 /
-            threeplanes.Q / threeplanes.Q);
-    treeEvents.push_back(prefix + "type1" + suffix, JetObservable::determineType(threeplanes.first.softer_flav,threeplanes.first.harder_flav));
+    treeEvents.push_back(prefix + "eec1" + suffix,
+                         (threeplanes.first.harder.e() * threeplanes.first.softer.e()) * 1.0 /
+                             threeplanes.Q / threeplanes.Q);
+    treeEvents.push_back(prefix + "type1" + suffix, JetObservable::determineType(threeplanes.first.softer_flav, threeplanes.first.harder_flav));
 
     treeEvents.push_back(prefix + "z2" + suffix, threeplanes.second.z);
     treeEvents.push_back(prefix + "kt2" + suffix, threeplanes.second.kt);
@@ -442,7 +535,7 @@ public:
         prefix + "eec2" + suffix,
         (threeplanes.second.harder.e() * threeplanes.second.softer.e()) * 1.0 /
             threeplanes.Q / threeplanes.Q);
-    treeEvents.push_back(prefix + "type2" + suffix, JetObservable::determineType(threeplanes.second.softer_flav,threeplanes.second.harder_flav));
+    treeEvents.push_back(prefix + "type2" + suffix, JetObservable::determineType(threeplanes.second.softer_flav, threeplanes.second.harder_flav));
 
     treeEvents.push_back(prefix + "z3" + suffix, threeplanes.third.z);
     treeEvents.push_back(prefix + "kt3" + suffix, threeplanes.third.kt);
@@ -452,7 +545,7 @@ public:
         prefix + "eec3" + suffix,
         (threeplanes.third.harder.e() * threeplanes.third.softer.e()) * 1.0 /
             threeplanes.Q / threeplanes.Q);
-    treeEvents.push_back(prefix + "type3" + suffix, JetObservable::determineType(threeplanes.third.softer_flav,threeplanes.third.harder_flav));
+    treeEvents.push_back(prefix + "type3" + suffix, JetObservable::determineType(threeplanes.third.softer_flav, threeplanes.third.harder_flav));
 
     treeEvents.push_back(prefix + "n1x" + suffix, threeplanes.first.n.x());
     treeEvents.push_back(prefix + "n1y" + suffix, threeplanes.first.n.y());
