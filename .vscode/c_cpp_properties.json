@@ -8,7 +8,7 @@
                 "${workspaceFolder}/analysis/simulation",
                 "/usr/local/opt/root/include/root",
                 "/usr/local/root/6.24.04/include",
-                "/home/zlin/CA_recluster/fastjet-install/include",
+                "/stroage/shuangyuan/code/fastjet/include",
                 "${env:HOME}/.local/include",
                 "${env:HOME}/.local/include/nlo++",
                 "${env:HOME}/.local/include/cteq",

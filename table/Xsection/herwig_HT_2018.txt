@@ -1,0 +1,4 @@
+QCD_HT700to1000-madgraphMLM-pythia8-RunIISummer20UL18 6344
+QCD_HT1000to1500-madgraphMLM-pythia8-RunIISummer20UL18 1092
+QCD_HT1500to2000-madgraphMLM-pythia8-RunIISummer20UL18 99.76
+QCD_HT2000toInf-madgraphMLM-pythia8-RunIISummer20UL18 20.35

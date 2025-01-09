@@ -5,9 +5,9 @@
         "./python"
     ],
     "files.associations": {
+        "*.cpp": "cpp",
         "*.py": "python",
         "MetaDataManager,h": "cpp",
-        "*.cpp": "cpp",
         "*.tcc": "cpp",
         "cctype": "cpp",
         "clocale": "cpp",
@@ -71,6 +71,7 @@
         "variant": "cpp",
         "bit": "cpp",
         "allocator": "cpp",
-        "CMSJetsAndDaughters.C": "cpp"
+        "CMSJetsAndDaughters.C": "cpp",
+        "bitset": "cpp"
     }
 }

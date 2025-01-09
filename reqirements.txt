@@ -4,3 +4,5 @@ scikit-image==0.17.2
 scikit-learn==1.3.2
 scipy==1.8.0
 uproot
+
+./generate_sample -i 0 -n 50 -k 50 -I /storage/xiaoxue/code/data/herwig/Decay_0_spinoff_600_Inf_forai/ -O /storage/shuangyuan/code/analysis_spin/Machine_learning/features_ak8_flavour/Private_herwig_spinoff_jinitpt_700_7000_j2pt_700_7000 --jinit_ptlow 700 --jinit_pthigh 7000 --j2_ptlow 700 --j2_pthigh 7000 --SampleType PrivateMC

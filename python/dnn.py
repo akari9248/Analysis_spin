@@ -1,3 +1,5 @@
+import xgboost as xgb
+from sklearn.metrics import accuracy_score
 from keras.optimizers import Adam
 import tensorflow as tf
 from tensorflow.keras import layers,models,regularizers # type: ignore
@@ -361,6 +363,11 @@ def LoadTree(sample_paths):
     for sample_path in sample_paths:
         tree.Add(sample_path + "/DataInfo")
     return tree,tree.GetEntries()
+def LoadTree2(sample_paths):
+    tree = ROOT.TChain()
+    for sample_path in sample_paths:
+        tree.Add(sample_path + "/DNNTrainTree")
+    return tree,tree.GetEntries()
 def LoadROOTFile(sample_paths, entries, branches_name=[], select_opt="", num_processes=40,batch_size=1000,entry_begin=0):
     tree = ROOT.TChain()
     for sample_path in sample_paths:
@@ -448,6 +455,92 @@ def LoadROOTFile(sample_paths, entries, branches_name=[], select_opt="", num_pro
     index_to_branch = {i: name for i, name in enumerate(feature_names)}
 
     return data_array, branch_to_index, index_to_branch, branch_names, branch_types
+def LoadROOTFile2(sample_paths, entries, branches_name=[], select_opt="", num_processes=40,batch_size=1000,entry_begin=0):
+    tree = ROOT.TChain()
+    for sample_path in sample_paths:
+        tree.Add(sample_path + "/DNNTrainTree")
+        
+    nentries = tree.GetEntries()
+    full_entries = nentries
+    nentries = min(nentries-entry_begin, entries)
+    print(nentries)
+    branches = {}
+    branch_buffers = {}
+    branch_names = []
+    branch_types = []
+    
+    # Set up branch reading
+    if len(branches_name) == 0:
+        for branch in tree.GetListOfBranches():
+            branch_name = branch.GetName()
+            branches_name.append(branch_name)
+    
+    for branch_name0 in branches_name:
+        for branch in tree.GetListOfBranches():
+            branch_name = branch.GetName()
+            if branch_name0 != branch_name:
+                continue
+            branch_names.append(branch_name)
+            leaf = branch.GetLeaf(branch_name)
+            leaf_type = leaf.GetTypeName()
+            branch_types.append(leaf_type)
+            if leaf_type.startswith('vector<double>'):
+                branch_buffers[branch_name] = ROOT.std.vector('double')()
+            elif leaf_type.startswith('vector<float>'):
+                branch_buffers[branch_name] = ROOT.std.vector('float')()
+            elif leaf_type.startswith('vector<int>'):
+                branch_buffers[branch_name] = ROOT.std.vector('int')()
+            elif 'Double' in leaf_type:
+                branch_buffers[branch_name] = array('d', [0.0])
+            elif 'Float' in leaf_type:
+                branch_buffers[branch_name] = array('f', [0.0])
+            elif 'Int' in leaf_type:
+                branch_buffers[branch_name] = array('i', [0])
+            else:
+                print(f"Unsupported type for branch {branch_name}: {leaf_type}")
+                continue
+            tree.SetBranchAddress(branch_name, branch_buffers[branch_name])
+            branches[branch_name] = []
+
+    # Split the entries into chunks for each process
+    chunk_size = nentries // num_processes
+    manager = Manager()
+    q = manager.Queue()  # Queue for progress bar updates
+
+    # Prepare arguments for each process
+    args = []
+    for i in range(num_processes):
+        start = i * chunk_size + entry_begin
+        end = (i + 1) * chunk_size + entry_begin if i < num_processes - 1 else nentries+ entry_begin
+        args.append((tree, branch_buffers, start, end, q, batch_size))
+
+    # Start processes with a pool and monitor progress
+    with Pool(processes=num_processes) as pool:
+        result_async = pool.map_async(read_entries, args)
+        pbar = tqdm(total=nentries, desc=f"Overall Progress, full entries : {full_entries}, target entries : {nentries+ entry_begin}, entry: {entry_begin} => {nentries+ entry_begin}")
+        while not result_async.ready() or not q.empty():
+            while not q.empty():
+                pbar.update(q.get())
+            time.sleep(0.1)
+        results = result_async.get()
+        pbar.close()
+    combined_branches = {name: [] for name in branch_buffers.keys()}
+    for result in results:
+        for name, data in result.items():
+            combined_branches[name].extend(data)
+
+    # Convert to numpy array
+    feature_names = list(combined_branches.keys())
+    data_array = list(map(list, zip(*[combined_branches[name] for name in feature_names])))
+    num_rows = len(data_array)
+    num_cols = len(data_array[0]) if num_rows > 0 else 0
+    print(f"Shape: ({num_rows}, {num_cols})")
+    
+    # Create mappings
+    branch_to_index = {name: i for i, name in enumerate(feature_names)}
+    index_to_branch = {i: name for i, name in enumerate(feature_names)}
+
+    return data_array, branch_to_index, index_to_branch, branch_names, branch_types
 def split_and_format(expression):
     parts = expression.split('>')  
     variable_name = parts[0].strip()
@@ -480,14 +573,52 @@ def convert_to_one_hot_fourlabel(labels,match):
 def convert_to_one_hot_fourlabel2(labels,match):
     one_hot_labels = np.zeros((labels.shape[0], 4))
     for i, label in enumerate(labels):
-        if np.array_equal(label, [3]) :
-            one_hot_labels[i, 0] = 1  
-        elif np.array_equal(label, [1]):
-            one_hot_labels[i, 1] = 1  
-        elif np.array_equal(label, [2]) or np.array_equal(label, [4]):
-            one_hot_labels[i, 2] = 1  
-        elif np.array_equal(label, [0]) and (match[i] >= 0):
+        if np.array_equal(label, [3]) and (match[i] >= 0):
             one_hot_labels[i, 3] = 1  
+        elif np.array_equal(label, [1]) and (match[i] >= 0):
+            one_hot_labels[i, 1] = 1  
+        elif (np.array_equal(label, [2]) or np.array_equal(label, [4]) and (match[i] >= 0)):
+            one_hot_labels[i, 2] = 1  
+        elif np.array_equal(label, [0]) and (match[i] < 0):
+            one_hot_labels[i, 0] = 1  
+    return one_hot_labels
+def convert_to_one_hot_sevenlabel(labels,match):
+    one_hot_labels = np.zeros((labels.shape[0], 7))
+    for i, label in enumerate(labels):      
+        if np.array_equal(label, [1]) and (match[i] >= 0): # gg
+            one_hot_labels[i, 1] = 1  
+        elif np.array_equal(label, [2]) and (match[i] >= 0): # qq
+            one_hot_labels[i, 2] = 1  
+        elif np.array_equal(label, [3]) and (match[i] >= 0): # qg
+            one_hot_labels[i, 3] = 1  
+        elif np.array_equal(label, [4]) and (match[i] >= 0): # qr
+            one_hot_labels[i, 4] = 1  
+        elif np.array_equal(label, [5]) and (match[i] >= 0): # gr
+            one_hot_labels[i, 5] = 1  
+        elif np.array_equal(label, [0]) and (match[i] >= 0): # rr
+            one_hot_labels[i, 6] = 1  
+        elif np.array_equal(label, [0]) and (match[i] < 0): #unmatched
+            one_hot_labels[i, 0] = 1  
+    return one_hot_labels
+def convert_to_one_hot_fourlabel_kt(labels,match,kt):
+    one_hot_labels = np.zeros((labels.shape[0], 4))
+    for i, label in enumerate(labels):
+        if np.array_equal(label, [3]) and (match[i] >= 0) and (kt[i] > 2):
+            one_hot_labels[i, 3] = 1  
+        elif np.array_equal(label, [1]) and (match[i] >= 0) and (kt[i] > 2):
+            one_hot_labels[i, 1] = 1  
+        elif (np.array_equal(label, [2]) or np.array_equal(label, [4]) and (match[i] >= 0)) and (kt[i] > 2):
+            one_hot_labels[i, 2] = 1  
+        elif np.array_equal(label, [0]) and (match[i] < 0) and (kt[i] > 2):
+            one_hot_labels[i, 0] = 1  
+    return one_hot_labels
+def convert_to_one_hot_twolabel_spin(labels, match, kt, spin):
+    one_hot_labels = np.zeros((labels.shape[0], 2))
+    for i, label in enumerate(labels):
+        if np.array_equal(label, [2]) and (match[i] >= 0) and (kt[i] > 2) and spin[i] == 0:
+            one_hot_labels[i, 0] = 1  
+        elif np.array_equal(label, [2]) and (match[i] >= 0) and (kt[i] > 2) and spin[i] == 1:
+            one_hot_labels[i, 1] = 1   
     return one_hot_labels
 def convert_to_one_hot_threeLabel(labels,match):
     one_hot_labels = np.zeros((labels.shape[0], 3))
@@ -551,8 +682,7 @@ def train_and_save_model(X_train, Y_train, X_val, Y_val,hidden_units=[16],learni
         #callbacks=[roc_auc_callback]
     )  
     return model
-import xgboost as xgb
-from sklearn.metrics import accuracy_score
+
 def train_and_save_model_bdt_params(X_train, Y_train, X_val, Y_val, best_params):
     num_classes = len(np.unique(Y_train))
     
@@ -591,10 +721,13 @@ def train_and_save_model_bdt_params(X_train, Y_train, X_val, Y_val, best_params)
 
     return model
 
-def train_and_save_model_bdt(X_train, Y_train, X_val, Y_val, hidden_units=[16], learning_rate=0.0001, l2_reg=0):
+def train_and_save_model_bdt2(X_train, Y_train, X_val, Y_val, hidden_units=[16], learning_rate=0.0001, l2_reg=0):
     # Determine the number of classes by checking the unique values in Y_train
-    num_classes = len(np.unique(Y_train))
     
+    Y_train = np.argmax(Y_train, axis=1)  # 转换为整数类别
+    Y_val = np.argmax(Y_val, axis=1)
+
+    num_classes = len(np.unique(Y_train))
     # Set the objective based on the number of classes
     if num_classes == 2:
         objective = 'binary:logistic'
@@ -614,22 +747,20 @@ def train_and_save_model_bdt(X_train, Y_train, X_val, Y_val, hidden_units=[16], 
         'alpha': 0.5,
         'subsample': 0.8,
         'colsample_bytree': 0.8,
-        'eval_metric': eval_metric
+        'eval_metric': eval_metric,
+        'nthread': 1  # 使用单核
     }
-
     
     if num_classes > 2:
         params['num_class'] = num_classes
-    
     # Create DMatrix for XGBoost
+    global dtrain, dval, evals
     dtrain = xgb.DMatrix(X_train, label=Y_train)
     dval = xgb.DMatrix(X_val, label=Y_val)
-
     evals = [(dtrain, 'train'), (dval, 'eval')]
-
     # Train the model
     model = xgb.train(params, dtrain, num_boost_round=1000, evals=evals, early_stopping_rounds=10)
-
+    
     # Predict on validation set
     y_pred = model.predict(dval)
     
@@ -762,23 +893,25 @@ def train_and_save_model_ThreeLabel(X_train, Y_train, X_val, Y_val,hidden_units=
         #callbacks=[roc_auc_callback]
     )  
     return model
+from tensorflow.keras.callbacks import EarlyStopping
 def train_and_save_model_MultiLabel(X_train, Y_train, X_val, Y_val,hidden_units=[16],learning_rate=0.0001,l2_reg=0,model = tf.keras.Sequential()):
     #hidden_units=math.ceil((X_train.shape[1]+1)/2)
     #hidden_units=math.ceil((X_train.shape[1]+1)*2.0/3)
     #model = build_binary_classification_model(X_train.shape[1], hidden_layers=2, hidden_units=16)
     if isinstance(model, tf.keras.Sequential) and len(model.layers) == 0:
-        model = build_multiLabel_classification_model(X_train.shape[1],Y_train.shape[1], hidden_units=hidden_units,l2_reg=l2_reg)
+        model = build_multiLabel_classification_model(X_train.shape[1],Y_train.shape[1], hidden_units=hidden_units,l2_reg=l2_reg, dropout_rate=0.5)
         adam_optimizer = Adam(learning_rate=learning_rate)
         model.compile(optimizer=adam_optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
     # roc_auc_callback = RocAucCallback()
     # roc_auc_callback.training_data = (X_train, Y_train)
     # roc_auc_callback.validation_data = (X_val, Y_val)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
     history = model.fit(
         X_train, Y_train,
         epochs=50,
         batch_size=256,
         validation_data=(X_val, Y_val),
-        #callbacks=[roc_auc_callback]
+        callbacks=[early_stopping]
     )  
     return model
 def save_predictions_to_root(X_data,train_val_index,full_predictions,root_filename,branch_name):
@@ -834,7 +967,8 @@ def save_multiclass_predictions_to_root(X_data, root_filename, branch_names, bra
     n_entries = len(next(iter(data_dict.values())))
     max_entries_per_chunk = 1000000
     n_chunks = n_entries // max_entries_per_chunk + (n_entries % max_entries_per_chunk > 0)
-
+    print(len(X_data))
+    print(n_chunks)
     for i in range(n_chunks):
         start = i * max_entries_per_chunk
         end = min((i + 1) * max_entries_per_chunk, n_entries)
