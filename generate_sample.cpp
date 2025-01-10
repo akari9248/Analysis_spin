@@ -155,13 +155,6 @@ public:
             for (int i = 0; i < jetsdaughters.size(); i++)
             {
                 auto jetdaughters = jetsdaughters.at(i).daughters;
-                // std::cout << "aaaaaaaaaaaaaaaaaaaaaaaa" << std::endl;
-                // std::cout << "size: " << jetsdaughters.at(i).daughters.size() << std::endl;
-                // for (auto &particle : jetsdaughters.at(i).daughters)
-                // {
-                //     std::cout << "Pt : " << particle.pt << " Pdgid: " << particle.eta << std::endl;
-                // }
-                // std::cout << "yyyyyyyyyyyyyyyyyyyyyyyy" << std::endl;
                 auto planes = RecoPlane::JetConstituents_threeplanes(jetdaughters);
                 planes.first.initJet = jetsdaughters.at(i).jet;
                 planes.second.initJet = jetsdaughters.at(i).jet;
@@ -287,7 +280,6 @@ public:
         }
         for (int i = 0; i < jetsdaughters.size(); i++)
         {
-            // std::cout << i << " " << jetsdaughters.at(i).jetid << std::endl;
             jetsdaughters.at(i).jetid = i;
             jetsdaughters.at(i).jet.SetPtEtaPhiE(branchvector.JetPt->at(i), branchvector.JetEta->at(i), branchvector.JetPhi->at(i), branchvector.JetEnergy->at(i));
             if (options.inputFolder.find("Herwig") != std::string::npos || options.inputFolder.find("herwig") != std::string::npos ||
@@ -302,13 +294,9 @@ public:
                     bhadron.SetPtEtaPhiE(events->bHadrons_Pt_slimmedGenJetsFlavourInfos->at(ii), events->bHadrons_Eta_slimmedGenJetsFlavourInfos->at(ii),
                                          events->bHadrons_Phi_slimmedGenJetsFlavourInfos->at(ii), events->bHadrons_Energy_slimmedGenJetsFlavourInfos->at(ii));
                     jet.SetPtEtaPhiE(jetsdaughters.at(i).jet.Pt(), jetsdaughters.at(i).jet.Eta(), jetsdaughters.at(i).jet.Phi(), jetsdaughters.at(i).jet.Energy());
-                    // std::cout << "jetpt: " << jetsdaughters.at(i).jet.Pt() << " jeteta: " << jetsdaughters.at(i).jet.Eta() << std::endl;
                     if (bhadron.DeltaR(jet) < 0.8)
                     {
                         hasb++;
-                        if (abs(events->bHadrons_PdgId_slimmedGenJetsFlavourInfos->at(ii) / 100 % 10) != 5 &&
-                            abs(events->bHadrons_PdgId_slimmedGenJetsFlavourInfos->at(ii) / 1000 % 10) != 5)
-                            std::cout << events->bHadrons_PdgId_slimmedGenJetsFlavourInfos->at(ii) << std::endl;
                         jetsdaughters.at(i).bhadrons.push_back(bhadron);
                         jetsdaughters.at(i).daughters.push_back(ParticleInfo(events->bHadrons_PdgId_slimmedGenJetsFlavourInfos->at(ii), 0,
                                                                              bhadron.Pt() * scale,
@@ -323,12 +311,9 @@ public:
                     bhadron.SetPtEtaPhiE(events->cHadrons_Pt_slimmedGenJetsFlavourInfos->at(ii), events->cHadrons_Eta_slimmedGenJetsFlavourInfos->at(ii),
                                          events->cHadrons_Phi_slimmedGenJetsFlavourInfos->at(ii), events->cHadrons_Energy_slimmedGenJetsFlavourInfos->at(ii));
                     jet.SetPtEtaPhiE(jetsdaughters.at(i).jet.Pt(), jetsdaughters.at(i).jet.Eta(), jetsdaughters.at(i).jet.Phi(), jetsdaughters.at(i).jet.Energy());
-                    // std::cout << "jetpt: " << jetsdaughters.at(i).jet.Pt() << " jeteta: " << jetsdaughters.at(i).jet.Eta() << std::endl;
                     if (bhadron.DeltaR(jet) < 0.8)
                     {
                         hasc++;
-                        // if (jetsdaughters.at(i).jet.Pt() > 700)
-                        //     std::cout  << " bhadron pt: " << bhadron.Pt() << std::endl;
                         jetsdaughters.at(i).chadrons.push_back(bhadron);
                         jetsdaughters.at(i).daughters.push_back(ParticleInfo(events->cHadrons_PdgId_slimmedGenJetsFlavourInfos->at(ii), 0,
                                                                              bhadron.Pt() * scale,
@@ -1210,13 +1195,6 @@ public:
                                     continue;
                                 this->treeEvents.push_back("JetnbHadrons", jd.hasb);
                                 this->treeEvents.push_back("JetncHadrons", jd.hasc);
-                                // std::cout << "1234567890" << std::endl;
-                                // std::cout << "size: " << jd.daughters.size() << std::endl;
-                                // for (auto &du : jd.daughters)
-                                // {
-                                //     std::cout << "Pt : " << du.pt << " Pdgid: " << du.pdgid << std::endl;
-                                // }
-                                // std::cout << "hasb: " << jd.hasb << std::endl;
 
                                 for (auto &jetbhadron : jd.bhadrons)
                                 {

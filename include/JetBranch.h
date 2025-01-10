@@ -298,16 +298,6 @@ public:
     int bnum = GetGhostNumber(jinit, particlesinfo, 5);
     int cnum = GetGhostNumber(jinit, particlesinfo, 4);
     int index = 0;
-    // std::cout << "xxxxxxxxxxxxxxxxxxxx" << std::endl;
-    // std::cout << "size: " << j0.constituents().size() << std::endl;
-    // for (auto &particle: j0.constituents())
-    // {
-    //   std::cout << "Pt : " << particle.pt() << " Eta:" << particle.eta() << " Pdgid: " << particlesinfo.at(particle.user_index()).pdgid << std::endl;
-    // }
-    // std::cout << "bnum: " << " " << bnum << std::endl;
-    // std::cout << "--------------------" << std::endl;
-    // if (bnum != 2 && cnum != 2)
-    //   return planes;
     planes.nbhadrons = bnum;
     planes.nchadrons = cnum;
     if (bnum == 2)
