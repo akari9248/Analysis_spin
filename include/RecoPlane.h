@@ -90,6 +90,7 @@ public:
     vector<JetBranch::twoplanes> twoplanes;
     std::vector<PseudoJet> particles;
     std::vector<ParticleInfo> particlesinfo;
+    int bnum = 0;
     for (size_t i = 0; i < constituents.size(); ++i)
     {
       TLorentzVector p;
@@ -102,6 +103,9 @@ public:
       particle.set_user_index(i);
       particle.set_user_info(new FlavHistory(pdgid));
       particles.push_back(particle);
+      if ((abs(pdgid / 100 % 10) == 5 ||
+           abs(pdgid / 1000 % 10) == 5))
+        bnum++;
     }
     JetDefinition jet_def_CA(cambridge_algorithm,
                              JetDefinition::max_allowable_R);
@@ -123,9 +127,53 @@ public:
     auto threeplanes = JetBranch::findPrimarySecondaryAndThirdaryJets(
         j0, z1cut, z2cut, kt1cut * 2 * Q, kt2cut * 2 * Q, particlesinfo,
         issecondsoft);
-
     return threeplanes;
   }
+  // static JetBranch::BhadronPlanes
+  // JetConstituents_bhadronplanes(vector<ParticleInfo> constituents)
+  // {
+  //   double z1cut = 0;
+  //   double z2cut = 0;
+  //   double kt1cut = 1;
+  //   double kt2cut = 0;
+  //   double issecondsoft = true;
+  //   vector<JetBranch::twoplanes> twoplanes;
+  //   std::vector<PseudoJet> particles;
+  //   std::vector<ParticleInfo> particlesinfo;
+  //   for (size_t i = 0; i < constituents.size(); ++i)
+  //   {
+  //     TLorentzVector p;
+  //     p.SetPtEtaPhiE(constituents.at(i).pt, constituents.at(i).eta,
+  //                    constituents.at(i).phi, constituents.at(i).e);
+  //     PseudoJet particle = PseudoJet(p.Px(), p.Py(), p.Pz(), p.Energy());
+  //     int pdgid = constituents.at(i).pdgid;
+  //     ParticleInfo particleInfo(pdgid, constituents.at(i).chargeInt);
+  //     particlesinfo.push_back(particleInfo);
+  //     particle.set_user_index(i);
+  //     particle.set_user_info(new FlavHistory(pdgid));
+  //     particles.push_back(particle);
+  //   }
+  //   JetDefinition jet_def_CA(cambridge_algorithm,
+  //                            JetDefinition::max_allowable_R);
+  //   fastjet::contrib::FlavRecombiner flav_recombiner;
+  //   jet_def_CA.set_recombiner(&flav_recombiner);
+
+  //   double alpha = 1.0;
+  //   double omega = 3.0 - alpha;
+  //   fastjet::contrib::FlavRecombiner::FlavSummation flav_summation =
+  //       fastjet::contrib::FlavRecombiner::net;
+  //   auto ifn_plugin = new IFNPlugin(jet_def_CA, alpha, omega, flav_summation);
+  //   JetDefinition IFN_jet_def(ifn_plugin);
+  //   IFN_jet_def.delete_plugin_when_unused();
+  //   ClusterSequence cs_IFN(particles, IFN_jet_def);
+  //   vector<PseudoJet> jets_IFN = sorted_by_pt(cs_IFN.inclusive_jets());
+  //   PseudoJet j0, j1, j2, j3, j4;
+  //   j0 = jets_IFN[0];
+  //   double Q = j0.e();
+  //   auto threeplanes = JetBranch::findBhadronPlanes(j0, particlesinfo);
+
+  //   return threeplanes;
+  // }
   static JetBranch::threeplanes
   JetConstituents_threeplanesGHS(vector<ParticleInfo> constituents)
   {
@@ -308,7 +356,8 @@ public:
     }
   }
   static void SavePlanes(JetBranch::threeplanes threeplanes, TreeEvents &treeEvents,
-                         int jetindex, string prefix = "", string suffix = "", bool SaveParticles = true)
+                         int jetindex, string prefix = "", string suffix = "", 
+                         bool SaveParticles = true, std::string SampleType = "PrivateMC")
   {
     JetObservable JetObservable1(threeplanes.first.harder_constituents_info);
     JetObservable JetObservable2(threeplanes.first.softer_constituents_info);
@@ -573,6 +622,76 @@ public:
                          threeplanes.first.initJet.Phi());
     treeEvents.push_back(prefix + "je" + suffix, threeplanes.first.initJet.E());
 
+    if (SampleType.find("CMS") != std::string::npos)
+    {
+      treeEvents.push_back(prefix + "subjetbpt1" + suffix, threeplanes.bchadrons.bhadron1.pt());
+      treeEvents.push_back(prefix + "subjetbeta1" + suffix,
+                           threeplanes.bchadrons.bhadron1.eta());
+      treeEvents.push_back(prefix + "subjetbphi1" + suffix,
+                           threeplanes.bchadrons.bhadron1.phi());
+      treeEvents.push_back(prefix + "subjetbe1" + suffix, threeplanes.bchadrons.bhadron1.e());
+
+      treeEvents.push_back(prefix + "subjetbpt2" + suffix, threeplanes.bchadrons.bhadron2.pt());
+      treeEvents.push_back(prefix + "subjetbeta2" + suffix,
+                           threeplanes.bchadrons.bhadron2.eta());
+      treeEvents.push_back(prefix + "subjetbphi2" + suffix,
+                           threeplanes.bchadrons.bhadron2.phi());
+      treeEvents.push_back(prefix + "subjetbe2" + suffix, threeplanes.bchadrons.bhadron2.e());
+
+      treeEvents.push_back(prefix + "subjetbpt3" + suffix, threeplanes.bchadrons.bhadron3.pt());
+      treeEvents.push_back(prefix + "subjetbeta3" + suffix,
+                           threeplanes.bchadrons.bhadron3.eta());
+      treeEvents.push_back(prefix + "subjetbphi3" + suffix,
+                           threeplanes.bchadrons.bhadron3.phi());
+      treeEvents.push_back(prefix + "subjetbe3" + suffix, threeplanes.bchadrons.bhadron3.e());
+
+      treeEvents.push_back(prefix + "subjetbpt4" + suffix, threeplanes.bchadrons.bhadron4.pt());
+      treeEvents.push_back(prefix + "subjetbeta4" + suffix,
+                           threeplanes.bchadrons.bhadron4.eta());
+      treeEvents.push_back(prefix + "subjetbphi4" + suffix,
+                           threeplanes.bchadrons.bhadron4.phi());
+      treeEvents.push_back(prefix + "subjetbe4" + suffix, threeplanes.bchadrons.bhadron4.e());
+
+      treeEvents.push_back(prefix + "subjetbPhi" + suffix, threeplanes.bchadrons.bhadronphi);
+      treeEvents.push_back(prefix + "subjetbdPhi12_X" + suffix,
+                           threeplanes.bchadrons.bhadronboostphi);
+
+      treeEvents.push_back(prefix + "subjetcpt1" + suffix, threeplanes.bchadrons.chadron1.pt());
+      treeEvents.push_back(prefix + "subjetceta1" + suffix,
+                           threeplanes.bchadrons.chadron1.eta());
+      treeEvents.push_back(prefix + "subjetcphi1" + suffix,
+                           threeplanes.bchadrons.chadron1.phi());
+      treeEvents.push_back(prefix + "subjetce1" + suffix, threeplanes.bchadrons.chadron1.e());
+
+      treeEvents.push_back(prefix + "subjetcpt2" + suffix, threeplanes.bchadrons.chadron2.pt());
+      treeEvents.push_back(prefix + "subjetceta2" + suffix,
+                           threeplanes.bchadrons.chadron2.eta());
+      treeEvents.push_back(prefix + "subjetcphi2" + suffix,
+                           threeplanes.bchadrons.chadron2.phi());
+      treeEvents.push_back(prefix + "subjetce2" + suffix, threeplanes.bchadrons.chadron2.e());
+
+      treeEvents.push_back(prefix + "subjetcpt3" + suffix, threeplanes.bchadrons.chadron3.pt());
+      treeEvents.push_back(prefix + "subjetceta3" + suffix,
+                           threeplanes.bchadrons.chadron3.eta());
+      treeEvents.push_back(prefix + "subjetcphi3" + suffix,
+                           threeplanes.bchadrons.chadron3.phi());
+      treeEvents.push_back(prefix + "subjetce3" + suffix, threeplanes.bchadrons.chadron3.e());
+
+      treeEvents.push_back(prefix + "subjetcpt4" + suffix, threeplanes.bchadrons.chadron4.pt());
+      treeEvents.push_back(prefix + "subjetceta4" + suffix,
+                           threeplanes.bchadrons.chadron4.eta());
+      treeEvents.push_back(prefix + "subjetcphi4" + suffix,
+                           threeplanes.bchadrons.chadron4.phi());
+      treeEvents.push_back(prefix + "subjetce4" + suffix, threeplanes.bchadrons.chadron4.e());
+
+      treeEvents.push_back(prefix + "subjetcPhi" + suffix, threeplanes.bchadrons.chadronphi);
+      treeEvents.push_back(prefix + "subjetcdPhi12_X" + suffix,
+                           threeplanes.bchadrons.chadronboostphi);
+
+      treeEvents.push_back(prefix + "nbhadrons" + suffix, threeplanes.bchadrons.nbhadrons);
+      treeEvents.push_back(prefix + "nchadrons" + suffix,
+                           threeplanes.bchadrons.nchadrons);
+    }
     if (SaveParticles)
     {
       for (int ii = 0; ii < threeplanes.first.harder_constituents_info.size();

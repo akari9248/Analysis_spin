@@ -18,6 +18,8 @@
 #include "fastjet/contrib/IFNPlugin.hh"
 #include "TDatabasePDG.h"
 #include "TParticlePDG.h"
+#include "SpinObservable.h"
+
 class Matching;
 using namespace fastjet;
 using namespace fastjet::contrib;
@@ -25,6 +27,23 @@ using namespace std;
 class JetBranch
 {
 public:
+  struct BChadronPlanes
+  {
+    PseudoJet bhadron1;
+    PseudoJet bhadron2;
+    PseudoJet bhadron3;
+    PseudoJet bhadron4;
+    double bhadronphi;
+    double bhadronboostphi;
+    PseudoJet chadron1;
+    PseudoJet chadron2;
+    PseudoJet chadron3;
+    PseudoJet chadron4;
+    double chadronphi;
+    double chadronboostphi;
+    int nbhadrons;
+    int nchadrons;
+  };
   struct PlaneVariables
   {
     PseudoJet harder;
@@ -77,13 +96,11 @@ public:
             particlesinfo.at(particle.user_index()).pdgid,
             particlesinfo.at(particle.user_index()).charge, particle.pt(),
             particle.eta(), particle.phi(), particle.e()));
-        if ((particle.pt() < 0.0001) &&
-            (abs(particlesinfo.at(particle.user_index()).pdgid / 100 % 10) == 5 ||
+        if ((abs(particlesinfo.at(particle.user_index()).pdgid / 100 % 10) == 5 ||
              abs(particlesinfo.at(particle.user_index()).pdgid / 1000 % 10) == 5))
           harder_ghostb_temp++;
-        if ((particle.pt() < 0.0001) &&
-            (abs(particlesinfo.at(particle.user_index()).pdgid / 100 % 10) == 4 ||
-             abs(particlesinfo.at(particle.user_index()).pdgid / 1000 % 10) == 4))
+        else if ((abs(particlesinfo.at(particle.user_index()).pdgid / 100 % 10) == 4 ||
+                  abs(particlesinfo.at(particle.user_index()).pdgid / 1000 % 10) == 4))
           harder_ghostc_temp++;
       }
       for (int i = 0; i < softer_constituents.size(); i++)
@@ -93,13 +110,11 @@ public:
             particlesinfo.at(particle.user_index()).pdgid,
             particlesinfo.at(particle.user_index()).charge, particle.pt(),
             particle.eta(), particle.phi(), particle.e()));
-        if ((particle.pt() < 0.0001) &&
-            (abs(particlesinfo.at(particle.user_index()).pdgid / 100 % 10) == 5 ||
+        if ((abs(particlesinfo.at(particle.user_index()).pdgid / 100 % 10) == 5 ||
              abs(particlesinfo.at(particle.user_index()).pdgid / 1000 % 10) == 5))
           softer_ghostb_temp++;
-        if ((particle.pt() < 0.0001) &&
-            (abs(particlesinfo.at(particle.user_index()).pdgid / 100 % 10) == 4 ||
-             abs(particlesinfo.at(particle.user_index()).pdgid / 1000 % 10) == 4))
+        else if ((abs(particlesinfo.at(particle.user_index()).pdgid / 100 % 10) == 4 ||
+                  abs(particlesinfo.at(particle.user_index()).pdgid / 1000 % 10) == 4))
           softer_ghostc_temp++;
       }
       harder_ghostb = harder_ghostb_temp;
@@ -130,6 +145,7 @@ public:
     JetBranch::PlaneVariables first;
     JetBranch::PlaneVariables second;
     JetBranch::PlaneVariables third;
+    JetBranch::BChadronPlanes bchadrons;
     double deltaPhi = -10;
     double deltaPhi2 = -10;
     double Q = 0;
@@ -137,8 +153,8 @@ public:
     int firstindex = 0;
     pseudothreeplanes() = default;
     pseudothreeplanes(const JetBranch::PlaneVariables &f, const JetBranch::PlaneVariables &s, const JetBranch::PlaneVariables &t,
-                      double dPhi, double dPhi2, double q, bool _ismatched, int _firstindex)
-        : first(f), second(s), third(t), deltaPhi(dPhi), deltaPhi2(dPhi2), Q(q), ismatched(_ismatched), firstindex(_firstindex) {}
+                      double dPhi, double dPhi2, double q, bool _ismatched, int _firstindex, JetBranch::BChadronPlanes _bchadrons)
+        : first(f), second(s), third(t), deltaPhi(dPhi), deltaPhi2(dPhi2), Q(q), ismatched(_ismatched), firstindex(_firstindex), bchadrons(_bchadrons) {}
   };
 
   struct threeplanes
@@ -146,6 +162,7 @@ public:
     JetBranch::PlaneVariables first;
     JetBranch::PlaneVariables second;
     JetBranch::PlaneVariables third;
+    JetBranch::BChadronPlanes bchadrons;
     double deltaPhi;
     double deltaPhi2;
     double Q = 0;
@@ -161,7 +178,7 @@ public:
         t_deltaPhi = -10;
       if (third.softer_nparticles == 0 || third.harder_nparticles == 0)
         t_deltaPhi2 = -10;
-      return pseudothreeplanes(first, second, third, t_deltaPhi, t_deltaPhi2, Q, ismatched, firstindex);
+      return pseudothreeplanes(first, second, third, t_deltaPhi, t_deltaPhi2, Q, ismatched, firstindex, bchadrons);
     }
   };
   static double DeltaPhi(PlaneVariables plane1, PlaneVariables plane2)
@@ -270,6 +287,118 @@ public:
     twoplanes_out.second = maxSecondary;
     twoplanes_out.deltaPhi = JetBranch::DeltaPhi(maxPrimary, maxSecondary);
     return twoplanes_out;
+  }
+  static BChadronPlanes findBhadronPlanes(PseudoJet &j0, std::vector<ParticleInfo> particlesinfo)
+  {
+    PseudoJet j1, j2, j3, j4, jinit;
+    BChadronPlanes planes = {PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), -10, -10,
+                             PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), -10, -10,
+                             0, 0};
+    jinit = j0;
+    int bnum = GetGhostNumber(jinit, particlesinfo, 5);
+    int cnum = GetGhostNumber(jinit, particlesinfo, 4);
+    int index = 0;
+    // std::cout << "xxxxxxxxxxxxxxxxxxxx" << std::endl;
+    // std::cout << "size: " << j0.constituents().size() << std::endl;
+    // for (auto &particle: j0.constituents())
+    // {
+    //   std::cout << "Pt : " << particle.pt() << " Eta:" << particle.eta() << " Pdgid: " << particlesinfo.at(particle.user_index()).pdgid << std::endl;
+    // }
+    // std::cout << "bnum: " << " " << bnum << std::endl;
+    // std::cout << "--------------------" << std::endl;
+    // if (bnum != 2 && cnum != 2)
+    //   return planes;
+    planes.nbhadrons = bnum;
+    planes.nchadrons = cnum;
+    if (bnum == 2)
+    {
+      while (jinit.has_parents(j1, j2))
+      {
+        index++;
+        int bnum_j1 = GetGhostNumber(j1, particlesinfo, 5);
+        int bnum_j2 = GetGhostNumber(j2, particlesinfo, 5);
+        // std::cout << bnum_j1 << " " << bnum_j2 << std::endl;
+        if ((bnum_j1 == 1 && bnum_j2 == 1))
+        {
+          PseudoJet j_partner;
+          if (jinit.has_partner(j_partner))
+          {
+            SpinObservable spin(PseudoJetToTLorentzVector(jinit), PseudoJetToTLorentzVector(j_partner),
+                                PseudoJetToTLorentzVector(j1), PseudoJetToTLorentzVector(j2));
+            planes.bhadron1 = jinit;
+            planes.bhadron2 = j_partner;
+            planes.bhadron3 = j1;
+            planes.bhadron4 = j2;
+            planes.bhadronphi = spin.GetPhi();
+            planes.bhadronboostphi = spin.GetPlaneTheta().dphi12_X;
+          }
+          else
+          {
+            planes.bhadronphi = -5;
+            planes.bhadronboostphi = -5;
+          }
+          break;
+        }
+        else if (bnum_j1 == 2 && bnum_j2 == 0)
+        {
+          jinit = j1;
+        }
+        else if (bnum_j1 == 0 && bnum_j2 == 2)
+        {
+          jinit = j2;
+        }
+        else
+        {
+          std::cout << "Error: bnum not right" << std::endl;
+        }
+      }
+    }
+
+    jinit = j0;
+    if (cnum == 2)
+    {
+      while (jinit.has_parents(j1, j2))
+      {
+        index++;
+        int cnum_j1 = GetGhostNumber(j1, particlesinfo, 4);
+        int cnum_j2 = GetGhostNumber(j2, particlesinfo, 4);
+        if (cnum_j1 == 1 && cnum_j2 == 1)
+        {
+          PseudoJet j_partner;
+          if (jinit.has_partner(j_partner))
+          {
+            SpinObservable spin(PseudoJetToTLorentzVector(jinit), PseudoJetToTLorentzVector(j_partner),
+                                PseudoJetToTLorentzVector(j1), PseudoJetToTLorentzVector(j2));
+            planes.chadron1 = jinit;
+            planes.chadron2 = j_partner;
+            planes.chadron3 = j1;
+            planes.chadron4 = j2;
+            planes.chadronphi = spin.GetPhi();
+            planes.chadronboostphi = spin.GetPlaneTheta().dphi12_X;
+          }
+          else
+          {
+            planes.chadronphi = -5;
+            planes.chadronboostphi = -5;
+          }
+          break;
+        }
+        else if (cnum_j1 == 2 && cnum_j2 == 0)
+        {
+          jinit = j1;
+        }
+        else if (cnum_j1 == 0 && cnum_j2 == 2)
+        {
+          jinit = j2;
+        }
+        else
+        {
+          std::cout << "Error: cnum not right" << std::endl;
+        }
+      }
+    }
+
+    return planes;
   }
   static threeplanes findPrimarySecondaryAndThirdaryJets(PseudoJet &j0, double z1cut, double z2cut, double kt1cut, double kt2cut, std::vector<ParticleInfo> particlesinfo, bool issecondsoft = true)
   {
@@ -388,7 +517,8 @@ public:
         break;
       }
     }
-
+    j0 = jinit;
+    JetBranch::BChadronPlanes bcplanes = findBhadronPlanes(j0, particlesinfo);
     /// Add plane vector
     maxPrimary.GetVector(particlesinfo);
     maxSecondary.GetVector(particlesinfo);
@@ -403,6 +533,7 @@ public:
     threeplanes_out.deltaPhi = JetBranch::DeltaPhi(maxPrimary, maxSecondary);
     threeplanes_out.deltaPhi2 = JetBranch::DeltaPhi(maxPrimary, maxThirdary);
     threeplanes_out.firstindex = index;
+    threeplanes_out.bchadrons = bcplanes;
     return threeplanes_out;
   }
   static int netflavour(PseudoJet j, vector<ParticleInfo> particlesinfo, double minflavourpt = 0)
@@ -831,5 +962,28 @@ public:
       pdgid = 0;
 
     return pdgid;
+  };
+
+  static int GetGhostNumber(PseudoJet &j0, std::vector<ParticleInfo> particlesinfo, int type = 5)
+  {
+    int bnum = 0;
+    int cnum = 0;
+    PseudoJet jinit = j0;
+    for (int i = 0; i < jinit.constituents().size(); i++)
+    {
+      auto particle = jinit.constituents().at(i);
+      if ((abs(particlesinfo.at(particle.user_index()).pdgid / 100 % 10) == 5 ||
+           abs(particlesinfo.at(particle.user_index()).pdgid / 1000 % 10) == 5))
+        bnum++;
+      else if ((abs(particlesinfo.at(particle.user_index()).pdgid / 100 % 10) == 4 ||
+                abs(particlesinfo.at(particle.user_index()).pdgid / 1000 % 10) == 4))
+        cnum++;
+    }
+    if (type == 5)
+      return bnum;
+    else if (type == 4)
+      return cnum;
+    else
+      return 0;
   };
 };

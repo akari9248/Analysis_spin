@@ -155,6 +155,13 @@ public:
             for (int i = 0; i < jetsdaughters.size(); i++)
             {
                 auto jetdaughters = jetsdaughters.at(i).daughters;
+                // std::cout << "aaaaaaaaaaaaaaaaaaaaaaaa" << std::endl;
+                // std::cout << "size: " << jetsdaughters.at(i).daughters.size() << std::endl;
+                // for (auto &particle : jetsdaughters.at(i).daughters)
+                // {
+                //     std::cout << "Pt : " << particle.pt << " Pdgid: " << particle.eta << std::endl;
+                // }
+                // std::cout << "yyyyyyyyyyyyyyyyyyyyyyyy" << std::endl;
                 auto planes = RecoPlane::JetConstituents_threeplanes(jetdaughters);
                 planes.first.initJet = jetsdaughters.at(i).jet;
                 planes.second.initJet = jetsdaughters.at(i).jet;
@@ -200,7 +207,7 @@ public:
             for (int i = 0; i < planes_arr.at(levelindex).at(0).size(); i++)
             {
                 auto planes = planes_arr.at(levelindex).at(0).at(i);
-                RecoPlane::SavePlanes(planes, treeEvents, i, level.at(levelindex).prefix, level.at(levelindex).suffix, SaveParticles);
+                RecoPlane::SavePlanes(planes, treeEvents, i, level.at(levelindex).prefix, level.at(levelindex).suffix, SaveParticles, SampleType);
             }
         }
         treeEvents.assign("GeneratorWeight", 1.0);
@@ -280,6 +287,7 @@ public:
         }
         for (int i = 0; i < jetsdaughters.size(); i++)
         {
+            // std::cout << i << " " << jetsdaughters.at(i).jetid << std::endl;
             jetsdaughters.at(i).jetid = i;
             jetsdaughters.at(i).jet.SetPtEtaPhiE(branchvector.JetPt->at(i), branchvector.JetEta->at(i), branchvector.JetPhi->at(i), branchvector.JetEnergy->at(i));
             if (options.inputFolder.find("Herwig") != std::string::npos || options.inputFolder.find("herwig") != std::string::npos ||
@@ -298,8 +306,9 @@ public:
                     if (bhadron.DeltaR(jet) < 0.8)
                     {
                         hasb++;
-                        // if (jetsdaughters.at(i).jet.Pt() > 700)
-                        //     std::cout  << " bhadron pt: " << bhadron.Pt() << std::endl;
+                        if (abs(events->bHadrons_PdgId_slimmedGenJetsFlavourInfos->at(ii) / 100 % 10) != 5 &&
+                            abs(events->bHadrons_PdgId_slimmedGenJetsFlavourInfos->at(ii) / 1000 % 10) != 5)
+                            std::cout << events->bHadrons_PdgId_slimmedGenJetsFlavourInfos->at(ii) << std::endl;
                         jetsdaughters.at(i).bhadrons.push_back(bhadron);
                         jetsdaughters.at(i).daughters.push_back(ParticleInfo(events->bHadrons_PdgId_slimmedGenJetsFlavourInfos->at(ii), 0,
                                                                              bhadron.Pt() * scale,
@@ -474,6 +483,22 @@ public:
                     "dPhi12_X2", "Theta2", "Theta22", "dPhi12_X3", "Theta3", "Theta23",
                     "jpt", "jeta", "jphi", "je",
                     "primaryindex"};
+                if (SampleType.find("CMS") != std::string::npos)
+                {
+                    std::vector<std::string> cms_branch_names = {
+                        "subjetbpt1", "subjetbeta1", "subjetbphi1", "subjetbe1",
+                        "subjetbpt2", "subjetbeta2", "subjetbphi2", "subjetbe2",
+                        "subjetbpt3", "subjetbeta3", "subjetbphi3", "subjetbe3",
+                        "subjetbpt4", "subjetbeta4", "subjetbphi4", "subjetbe4",
+                        "subjetbPhi", "subjetbdPhi12_X",
+                        "subjetcpt1", "subjetceta1", "subjetcphi1", "subjetce1",
+                        "subjetcpt2", "subjetceta2", "subjetcphi2", "subjetce2",
+                        "subjetcpt3", "subjetceta3", "subjetcphi3", "subjetce3",
+                        "subjetcpt4", "subjetceta4", "subjetcphi4", "subjetce4",
+                        "subjetcPhi", "subjetcdPhi12_X",
+                        "nbhadrons", "nchadrons"};
+                    branch_names.insert(branch_names.end(), cms_branch_names.begin(), cms_branch_names.end());
+                }
                 if (SaveParticles)
                 {
                     std::vector<std::string> particles_branch_names = {
@@ -506,7 +531,7 @@ public:
                         branch_name == "particle4_pid" || branch_name == "particle4_jetid" ||
                         branch_name == "particle5_pid" || branch_name == "particle5_jetid" ||
                         branch_name == "particle6_pid" || branch_name == "particle6_jetid" ||
-                        branch_name == "primaryindex")
+                        branch_name == "primaryindex" || branch_name == "nbhadrons" || branch_name == "nchadrons")
                     {
                         treeEvents.addBranches(prefix + branch_name + suffix + "/vI");
                     }
@@ -832,7 +857,11 @@ public:
                             std::remove_if(jd.daughters.begin(), jd.daughters.end(),
                                            [this](const ParticleInfo &dau)
                                            {
-                                               return dau.pt < 1 && dau.pt > 0.00001;
+                                               return dau.pt < 1 &&
+                                                      (abs(dau.pdgid / 100 % 10) != 5 &&
+                                                       abs(dau.pdgid / 1000 % 10) != 5 &&
+                                                       abs(dau.pdgid / 100 % 10) != 4 &&
+                                                       abs(dau.pdgid / 1000 % 10) != 4);
                                            }),
                             jd.daughters.end());
                     }
@@ -1113,36 +1142,36 @@ public:
                     {
                         for (auto &bhadronpt : *this->events->bHadrons_Pt_slimmedGenJetsFlavourInfos)
                         {
-                                this->treeEvents.push_back("bHadron_Pt", bhadronpt);
+                            this->treeEvents.push_back("bHadron_Pt", bhadronpt);
                         }
                         for (auto &bhadroneta : *this->events->bHadrons_Eta_slimmedGenJetsFlavourInfos)
                         {
-                                this->treeEvents.push_back("bHadron_Eta", bhadroneta);
+                            this->treeEvents.push_back("bHadron_Eta", bhadroneta);
                         }
                         for (auto &bhadronphi : *this->events->bHadrons_Phi_slimmedGenJetsFlavourInfos)
                         {
-                                this->treeEvents.push_back("bHadron_Phi", bhadronphi);
+                            this->treeEvents.push_back("bHadron_Phi", bhadronphi);
                         }
                         for (auto &bhadrone : *this->events->bHadrons_Energy_slimmedGenJetsFlavourInfos)
                         {
-                                this->treeEvents.push_back("bHadron_Energy", bhadrone);
+                            this->treeEvents.push_back("bHadron_Energy", bhadrone);
                         }
 
                         for (auto &cHadronpt : *this->events->cHadrons_Pt_slimmedGenJetsFlavourInfos)
                         {
-                                this->treeEvents.push_back("cHadron_Pt", cHadronpt);
+                            this->treeEvents.push_back("cHadron_Pt", cHadronpt);
                         }
                         for (auto &cHadroneta : *this->events->cHadrons_Eta_slimmedGenJetsFlavourInfos)
                         {
-                                this->treeEvents.push_back("cHadron_Eta", cHadroneta);
+                            this->treeEvents.push_back("cHadron_Eta", cHadroneta);
                         }
                         for (auto &cHadronphi : *this->events->cHadrons_Phi_slimmedGenJetsFlavourInfos)
                         {
-                                this->treeEvents.push_back("cHadron_Phi", cHadronphi);
+                            this->treeEvents.push_back("cHadron_Phi", cHadronphi);
                         }
                         for (auto &cHadrone : *this->events->cHadrons_Energy_slimmedGenJetsFlavourInfos)
                         {
-                                this->treeEvents.push_back("cHadron_Energy", cHadrone);
+                            this->treeEvents.push_back("cHadron_Energy", cHadrone);
                         }
                         return true;
                     });
@@ -1181,6 +1210,14 @@ public:
                                     continue;
                                 this->treeEvents.push_back("JetnbHadrons", jd.hasb);
                                 this->treeEvents.push_back("JetncHadrons", jd.hasc);
+                                // std::cout << "1234567890" << std::endl;
+                                // std::cout << "size: " << jd.daughters.size() << std::endl;
+                                // for (auto &du : jd.daughters)
+                                // {
+                                //     std::cout << "Pt : " << du.pt << " Pdgid: " << du.pdgid << std::endl;
+                                // }
+                                // std::cout << "hasb: " << jd.hasb << std::endl;
+
                                 for (auto &jetbhadron : jd.bhadrons)
                                 {
                                     this->treeEvents.push_back("JetbHadron_Pt", jetbhadron.Pt());
@@ -1213,7 +1250,8 @@ public:
                 {
                     for (auto &Btags : *this->events->RecoParticleNet_value)
                     {
-                        this->treeEvents.push_back("RecoBtag_value", Btags);
+                        for (auto &Btag : Btags)
+                            this->treeEvents.push_back("RecoBtag_value", Btag);
                     }
                     return true;
                 });
