@@ -169,12 +169,18 @@ public:
     {
         if (SampleType == "CMSMCGen")
         {
+            // std::cout << "planes_arr.size(): " << planes_arr.size() << std::endl;
             for (int level = 0; level < planes_arr.size(); level++)
             {
                 for (int i = 0; i < planes_arr.at(level).at(0).size(); i++)
                 {
                     int matchindex = Branches.at(level).JetMatching->at(i);
-                    if (matchindex != -1)
+                    // std::cout << "planes_arr.at(planes_arr.size() - level - 1): " << planes_arr.at(planes_arr.size() - level - 1).size() << std::endl;
+                    // std::cout << "matchindex: " << matchindex << std::endl;
+                    // std::cout << "planes_arr.at(planes_arr.size() - level - 1).at(0): " << planes_arr.at(planes_arr.size() - level - 1).at(0).size() << std::endl;
+                    // if (matchindex != -1 && planes_arr.at(planes_arr.size() - level - 1).at(0).size() <= matchindex)
+                    //     std::cout << "lllll" << std::endl;
+                    if (matchindex != -1 && planes_arr.at(planes_arr.size() - level - 1).at(0).size() > matchindex)
                     {
                         planes_arr.at(level).at(0).at(i).ismatched = true;
                         planes_arr.at(planes_arr.size() - level - 1).at(0).at(matchindex).ismatched = true;
@@ -190,7 +196,8 @@ public:
     }
     void MatchPlanes()
     {
-        if (SampleType != "CMSData" && (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos))
+        if (SampleType != "CMSData" && SampleType != "CMSGen" && (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) &&
+            (options.inputFolder.find("AngularLund") == std::string::npos && options.inputFolder.find("DipoleLund") == std::string::npos))
             match = JetBranch::matchPlanes(planes_arr.at(1), planes_arr.at(0), "second", 0.5);
     }
     void SavePlanes()
@@ -204,7 +211,7 @@ public:
             }
         }
         treeEvents.assign("GeneratorWeight", 1.0);
-        if (SampleType != "CMSData" && (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos))
+        if (SampleType != "CMSData" && SampleType != "CMSGen" && (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) && (options.inputFolder.find("AngularLund") == std::string::npos && options.inputFolder.find("DipoleLund") == std::string::npos))
         {
             for (int i = 0; i < match.first.at(0).size(); i++)
             {
@@ -238,7 +245,7 @@ public:
     {
         if (SampleType == "PrivateMC")
             return ClusterJetsAndDaughters(branchvector);
-        if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen")
+        if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen")
             return ExtractJetsAndDaughters(branchvector);
         return {};
     }
@@ -326,6 +333,13 @@ public:
                 jetsdaughters.at(i).hasc = hasc;
             }
         }
+        jetsdaughters.erase(
+                        std::remove_if(jetsdaughters.begin(), jetsdaughters.end(),
+                                       [this](const JetAndDaughters &jd)
+                                       {
+                                           return jd.daughters.size() == 0;
+                                       }),
+                        jetsdaughters.end());
         return jetsdaughters;
     }
     std::vector<EventsAnalyzer::JetAndDaughters> ClusterJetsAndDaughters(EventsAnalyzer::BranchVectors &branchvector)
@@ -392,7 +406,7 @@ public:
         SampleType = options.SampleType;
         if (SampleType.empty())
         {
-            cerr << "Sample type shoule be specified. e.g. PrivateMC, CMSMC , CMSMCGen, CMSData" << endl;
+            cerr << "Sample type shoule be specified. e.g. PrivateMC, CMSMC , CMSMCGen, CMSData, CMSGen" << endl;
             std::exit(EXIT_FAILURE);
         }
         md->AddParameter("Sample Type", SampleType);
@@ -401,17 +415,18 @@ public:
             TString rootname = "*.root";
             if (options.inputFolder.find("sherpa") != std::string::npos || options.inputFolder.find("Sherpa") != std::string::npos)
                 rootname = "*Cluster*.root";
-            for (int i = 1; i <= 60; ++i)
+            for (int i = 1; i <= 50; ++i)
             {
                 t->Add((TString)options.inputFolder +
                        Form("/Chunk%d/", i) + rootname + "/JetsAndDaughters");
             }
             prefixs = {""};
             suffixs = {"_Parton", "_Hadron"};
-            if (options.inputFolder.find("sherpa") != std::string::npos || options.inputFolder.find("Sherpa") != std::string::npos)
+            if (options.inputFolder.find("sherpa") != std::string::npos || options.inputFolder.find("Sherpa") != std::string::npos ||
+                options.inputFolder.find("AngularLund") != std::string::npos || options.inputFolder.find("DipoleLund") != std::string::npos)
                 suffixs = {"_Hadron"};
         }
-        if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen")
+        if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen")
         {
             //    if(options.inputFolder.find("Run3") != std::string::npos||options.inputFolder.find("Run2022") != std::string::npos) t->Add((TString)options.inputFolder + "/Chunk*.root/JetsAndDaughters");
             //    else t->Add((TString)options.inputFolder + "/Chunk*.root/jetInfos/JetsAndDaughters");
@@ -429,6 +444,11 @@ public:
             if ((SampleType == "CMSData"))
             {
                 prefixs = {"Reco"};
+                suffixs = {""};
+            }
+            if ((SampleType == "CMSGen"))
+            {
+                prefixs = {"Gen"};
                 suffixs = {""};
             }
         }
@@ -528,7 +548,7 @@ public:
             }
         }
         treeEvents.addBranches("GeneratorWeight/D");
-        if (SampleType != "CMSData")
+        if (SampleType != "CMSData" && SampleType != "CMSGen")
         {
             treeEvents.addBranches("match2/vI");
             treeEvents.addBranches("match3/vI");
@@ -550,7 +570,7 @@ public:
                 TString suffixTStr = (TString)suffix;
                 it->Prefix = prefixTStr;
                 it->Suffix = suffixTStr;
-                if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen")
+                if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen")
                 {
                     t->SetBranchAddress(prefixTStr + "JetPt" + suffixTStr, &it->JetPt);
                     ApplyJetEnergyScale(prefixTStr, &it->JetPt);
@@ -684,6 +704,15 @@ public:
                     return true;
                 });
         }
+        if (SampleType == "CMSGen")
+        {
+            AddSelection(
+                EventSelection, "Gen DiJet Selection",
+                [this]
+                {
+                    return this->events->GenPassDijet;
+                });
+        }
         if ((SampleType == "CMSData"))
         {
             AddSelection(
@@ -787,7 +816,7 @@ public:
                 }
                 return true;
             });
-        if (SampleType.find("CMS") != std::string::npos)
+        if (SampleType.find("CMS") != std::string::npos && SampleType != "CMSGen")
         {
             AddSelection(
                 JetSelection, "Jet HotZone removal",
@@ -856,7 +885,7 @@ public:
     }
     void InitPlaneSelection()
     {
-        if (SampleType == "PrivateMC" || SampleType == "CMSMC" || SampleType == "CMSData")
+        if (SampleType == "PrivateMC" || SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSGen")
         {
             AddSelection(
                 PlaneSelection, (std::string)TString::Format("Plane2 JetPt = [ %d , %d ]", options.j2_ptlow, options.j2_pthigh),
