@@ -169,17 +169,11 @@ public:
     {
         if (SampleType == "CMSMCGen")
         {
-            // std::cout << "planes_arr.size(): " << planes_arr.size() << std::endl;
             for (int level = 0; level < planes_arr.size(); level++)
             {
                 for (int i = 0; i < planes_arr.at(level).at(0).size(); i++)
                 {
                     int matchindex = Branches.at(level).JetMatching->at(i);
-                    // std::cout << "planes_arr.at(planes_arr.size() - level - 1): " << planes_arr.at(planes_arr.size() - level - 1).size() << std::endl;
-                    // std::cout << "matchindex: " << matchindex << std::endl;
-                    // std::cout << "planes_arr.at(planes_arr.size() - level - 1).at(0): " << planes_arr.at(planes_arr.size() - level - 1).at(0).size() << std::endl;
-                    // if (matchindex != -1 && planes_arr.at(planes_arr.size() - level - 1).at(0).size() <= matchindex)
-                    //     std::cout << "lllll" << std::endl;
                     if (matchindex != -1 && planes_arr.at(planes_arr.size() - level - 1).at(0).size() > matchindex)
                     {
                         planes_arr.at(level).at(0).at(i).ismatched = true;
@@ -354,12 +348,6 @@ public:
             PseudoJet particle = PseudoJet(p.Px(), p.Py(), p.Pz(), p.Energy());
             int pdgid = branchvector.PdgId->at(i);
             int charge;
-            // if (options.inputFolder.find("sherpa") != std::string::npos || options.inputFolder.find("Sherpa") != std::string::npos)
-            // {
-            //     charge = 0;
-            // }
-            // else
-            // {
             if (charge_d)
             {
                 charge = branchvector.Charge_d->at(i);
@@ -368,7 +356,6 @@ public:
             {
                 charge = branchvector.Charge->at(i);
             }
-            // }
             ParticleInfo particleInfo(pdgid, charge, branchvector.Pt->at(i), branchvector.Eta->at(i),
                                       branchvector.Phi->at(i), branchvector.Energy->at(i));
             particlesinfo.push_back(particleInfo);
