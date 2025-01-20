@@ -4,12 +4,15 @@
 #include <string>
 #include <vector>
 using namespace std;
-class JetObservable {
+class JetObservable
+{
   ParticleInfo jet;
   vector<ParticleInfo> particles;
+
 public:
   TLorentzVector jet_lorentzvector;
-  struct Jetwidth {
+  struct Jetwidth
+  {
     double sigma1;
     double sigma2;
     double sigma;
@@ -17,44 +20,56 @@ public:
     Jetwidth(double _sigma1, double _sigma2, double _sigma)
         : sigma1(_sigma1), sigma2(_sigma2), sigma(_sigma) {}
   };
-  JetObservable(ParticleInfo _jet, vector<ParticleInfo> _particles) {
+  JetObservable(ParticleInfo _jet, vector<ParticleInfo> _particles)
+  {
     jet = _jet;
     particles = _particles;
-    for(auto &particle:particles){
+    for (auto &particle : particles)
+    {
       TLorentzVector p;
-      p.SetPtEtaPhiE(particle.pt,particle.eta,particle.phi,particle.e);
-      jet_lorentzvector+=p;
+      p.SetPtEtaPhiE(particle.pt, particle.eta, particle.phi, particle.e);
+      jet_lorentzvector += p;
     }
   }
-  JetObservable(vector<ParticleInfo> _particles) {
+  JetObservable(vector<ParticleInfo> _particles)
+  {
     particles = _particles;
-    for(auto &particle:particles){
+    for (auto &particle : particles)
+    {
       TLorentzVector p;
-      p.SetPtEtaPhiE(particle.pt,particle.eta,particle.phi,particle.e);
-      jet_lorentzvector+=p;
+      p.SetPtEtaPhiE(particle.pt, particle.eta, particle.phi, particle.e);
+      jet_lorentzvector += p;
     }
   }
-  int Ntracks() {
+  int Ntracks()
+  {
     int ntracks = 0;
-    for (auto particle : particles) {
+    for (auto particle : particles)
+    {
       if (particle.charge != 0)
         ntracks++;
     }
     return ntracks;
   }
   int Nparticles() { return particles.size(); }
-  double pTD() {
+  double pTD()
+  {
     double pt2_sum = 0;
     double pt_sum = 0;
-    for (auto particle : particles) {
-      if (particle.pt < 0.00001)
+    for (auto particle : particles)
+    {
+      if (abs(particle.pdgid / 100 % 10) == 5 ||
+          abs(particle.pdgid / 1000 % 10) == 5 ||
+          abs(particle.pdgid / 100 % 10) == 4 ||
+          abs(particle.pdgid / 1000 % 10) == 4)
         continue;
       pt2_sum += particle.pt * particle.pt;
       pt_sum += particle.pt;
     }
     return sqrt(pt2_sum) / pt_sum;
   }
-  Jetwidth jetwidth() {
+  Jetwidth jetwidth()
+  {
     double M11 = 0;
     double M22 = 0;
     double M12 = 0;
@@ -63,8 +78,12 @@ public:
     // TLorentzVector jet_lorentzvector;
     // jet_lorentzvector.SetPtEtaPhiE(jet.pt, jet.eta, jet.phi, jet.e);
 
-    for (auto particle : particles) {
-      if (particle.pt < 0.0001)
+    for (auto particle : particles)
+    {
+      if (abs(particle.pdgid / 100 % 10) == 5 ||
+          abs(particle.pdgid / 1000 % 10) == 5 ||
+          abs(particle.pdgid / 100 % 10) == 4 ||
+          abs(particle.pdgid / 1000 % 10) == 4)
         continue;
       TLorentzVector particle_lorentzvector;
       particle_lorentzvector.SetPtEtaPhiE(particle.pt, particle.eta,
