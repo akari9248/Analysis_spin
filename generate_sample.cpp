@@ -190,7 +190,8 @@ public:
     }
     void MatchPlanes()
     {
-        if (SampleType != "CMSData" && SampleType != "CMSGen" && (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) &&
+        if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" &&
+            (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) &&
             (options.inputFolder.find("AngularLund") == std::string::npos && options.inputFolder.find("DipoleLund") == std::string::npos))
             match = JetBranch::matchPlanes(planes_arr.at(1), planes_arr.at(0), "second", 0.5);
     }
@@ -205,7 +206,9 @@ public:
             }
         }
         treeEvents.assign("GeneratorWeight", 1.0);
-        if (SampleType != "CMSData" && SampleType != "CMSGen" && (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) && (options.inputFolder.find("AngularLund") == std::string::npos && options.inputFolder.find("DipoleLund") == std::string::npos))
+        if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" &&
+            (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) &&
+            (options.inputFolder.find("AngularLund") == std::string::npos && options.inputFolder.find("DipoleLund") == std::string::npos))
         {
             for (int i = 0; i < match.first.at(0).size(); i++)
             {
@@ -237,7 +240,7 @@ public:
     }
     std::vector<EventsAnalyzer::JetAndDaughters> DeriveJetsDaughtersSampleType(EventsAnalyzer::BranchVectors &branchvector)
     {
-        if (SampleType == "PrivateMC")
+        if (SampleType == "PrivateMC" || SampleType == "PrivateMCParton")
             return ClusterJetsAndDaughters(branchvector);
         if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen")
             return ExtractJetsAndDaughters(branchvector);
@@ -328,12 +331,12 @@ public:
             }
         }
         jetsdaughters.erase(
-                        std::remove_if(jetsdaughters.begin(), jetsdaughters.end(),
-                                       [this](const JetAndDaughters &jd)
-                                       {
-                                           return jd.daughters.size() == 0;
-                                       }),
-                        jetsdaughters.end());
+            std::remove_if(jetsdaughters.begin(), jetsdaughters.end(),
+                           [this](const JetAndDaughters &jd)
+                           {
+                               return jd.daughters.size() == 0;
+                           }),
+            jetsdaughters.end());
         return jetsdaughters;
     }
     std::vector<EventsAnalyzer::JetAndDaughters> ClusterJetsAndDaughters(EventsAnalyzer::BranchVectors &branchvector)
@@ -346,6 +349,18 @@ public:
             p.SetPtEtaPhiE(branchvector.Pt->at(i), branchvector.Eta->at(i),
                            branchvector.Phi->at(i), branchvector.Energy->at(i));
             PseudoJet particle = PseudoJet(p.Px(), p.Py(), p.Pz(), p.Energy());
+            double px = particle.px();
+            double py = particle.py();
+            double pz = particle.pz();
+            double E = particle.E();
+            // 检查是否为无效值（例如 NaN 或无穷大）
+            if (std::isnan(px) || std::isnan(py) || std::isnan(pz) || std::isnan(E))
+            {
+                std::cerr << "Invalid PseudoJet data: ";
+                std::cerr << "px = " << px << ", py = " << py << ", pz = " << pz << ", E = " << E << std::endl;
+                continue;
+            }
+
             int pdgid = branchvector.PdgId->at(i);
             int charge;
             if (charge_d)
@@ -393,16 +408,16 @@ public:
         SampleType = options.SampleType;
         if (SampleType.empty())
         {
-            cerr << "Sample type shoule be specified. e.g. PrivateMC, CMSMC , CMSMCGen, CMSData, CMSGen" << endl;
+            cerr << "Sample type shoule be specified. e.g. PrivateMC, PrivateMCParton, CMSMC, CMSMCGen, CMSData, CMSGen" << endl;
             std::exit(EXIT_FAILURE);
         }
         md->AddParameter("Sample Type", SampleType);
-        if (SampleType == "PrivateMC")
+        if (SampleType == "PrivateMC" || SampleType == "PrivateMCParton")
         {
             TString rootname = "*.root";
             if (options.inputFolder.find("sherpa") != std::string::npos || options.inputFolder.find("Sherpa") != std::string::npos)
                 rootname = "*Cluster*.root";
-            for (int i = 1; i <= 50; ++i)
+            for (int i = 1; i <= 100; ++i)
             {
                 t->Add((TString)options.inputFolder +
                        Form("/Chunk%d/", i) + rootname + "/JetsAndDaughters");
@@ -412,6 +427,8 @@ public:
             if (options.inputFolder.find("sherpa") != std::string::npos || options.inputFolder.find("Sherpa") != std::string::npos ||
                 options.inputFolder.find("AngularLund") != std::string::npos || options.inputFolder.find("DipoleLund") != std::string::npos)
                 suffixs = {"_Hadron"};
+            if (SampleType == "PrivateMCParton")
+                suffixs = {"_Parton"};
         }
         if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen")
         {
@@ -535,7 +552,7 @@ public:
             }
         }
         treeEvents.addBranches("GeneratorWeight/D");
-        if (SampleType != "CMSData" && SampleType != "CMSGen")
+        if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton")
         {
             treeEvents.addBranches("match2/vI");
             treeEvents.addBranches("match3/vI");
@@ -575,7 +592,7 @@ public:
                 t->SetBranchAddress(prefixTStr + "Phi" + suffixTStr, &it->Phi);
                 t->SetBranchAddress(prefixTStr + "Energy" + suffixTStr, &it->Energy);
                 t->SetBranchAddress(prefixTStr + "PdgId" + suffixTStr, &it->PdgId);
-                if (SampleType == "PrivateMC")
+                if (SampleType == "PrivateMC" || SampleType == "PrivateMCParton")
                 {
                     TBranch *branch = t->GetBranch(prefixTStr + "Charge" + suffixTStr);
                     if (branch)
@@ -605,7 +622,7 @@ public:
     }
     void InitEventSelection()
     {
-        if (SampleType == "PrivateMC")
+        if (SampleType == "PrivateMC" || SampleType == "PrivateMCParton")
         {
             AddSelection(
                 EventSelection, "DiJet Selection",
@@ -872,7 +889,8 @@ public:
     }
     void InitPlaneSelection()
     {
-        if (SampleType == "PrivateMC" || SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSGen")
+        if (SampleType == "PrivateMC" || SampleType == "PrivateMCParton" ||
+            SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSGen")
         {
             AddSelection(
                 PlaneSelection, (std::string)TString::Format("Plane2 JetPt = [ %d , %d ]", options.j2_ptlow, options.j2_pthigh),
