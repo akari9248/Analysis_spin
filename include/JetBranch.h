@@ -414,6 +414,14 @@ public:
       double primaryZ =
           primarySofter.modp() / (primarySofter.modp() + primaryHarder.modp());
       double primaryKt = primarySofter.modp() * primaryDeltaR;
+
+      // PseudoJet primaryHarder = (j1.pt() > j2.pt()) ? j1 : j2;
+      // PseudoJet primarySofter = (j1.pt() > j2.pt()) ? j2 : j1;
+      // double primaryTheta = primaryHarder.delta_phi_to(primarySofter);
+      // double primaryDeltaR = primaryHarder.delta_R(primarySofter);
+      // double primaryZ =
+      //     primarySofter.modp() / (primarySofter.modp() + primaryHarder.modp());
+      // double primaryKt = primarySofter.pt() * primaryDeltaR;
       // double primaryKt = primarySofter.modp() * sin(primaryTheta);
       // Update maxPrimary if this kt is larger
       bool isselect = false;
@@ -477,6 +485,15 @@ public:
           double thirdaryZ = thirdarySofter.modp() /
                              (thirdarySofter.modp() + thirdaryHarder.modp());
           double thirdaryKt = thirdarySofter.modp() * thirdaryDeltaR;
+
+          // PseudoJet thirdaryHarder = (j3.pt() > j4.pt()) ? j3 : j4;
+          // PseudoJet thirdarySofter = (j3.pt() > j4.pt()) ? j4 : j3;
+          // double thirdaryTheta = thirdaryHarder.delta_phi_to(thirdarySofter);
+          // double thirdaryDeltaR =
+          //     thirdaryHarder.delta_R(thirdarySofter);
+          // double thirdaryZ = thirdarySofter.modp() /
+          //                    (thirdarySofter.modp() + thirdaryHarder.modp());
+          // double thirdaryKt = thirdarySofter.pt() * thirdaryDeltaR;
           if (thirdaryKt > maxThirdary.kt && thirdaryZ > z2cut && thirdaryKt > kt2cut)
           {
             maxThirdary = {thirdaryHarder,
