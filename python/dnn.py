@@ -582,6 +582,18 @@ def convert_to_one_hot_fourlabel2(labels,match):
         elif np.array_equal(label, [0]) and (match[i] < 0):
             one_hot_labels[i, 0] = 1  
     return one_hot_labels
+def convert_to_one_hot_fourlabel3(labels,match,final_descri3,final_descri4):
+    one_hot_labels = np.zeros((labels.shape[0], 4))
+    for i, label in enumerate(labels):
+        if (((abs(final_descri3[i]) > 0 and abs(final_descri3[i]) <= 5) and final_descri4[i] == 21) or ((abs(final_descri4[i]) > 0 and abs(final_descri4[i]) <= 5) and final_descri3[i] == 21)) and (match[i] >= 0):
+            one_hot_labels[i, 3] = 1  
+        elif (final_descri3[i] == 21) and (final_descri4[i] == 21) and (match[i] >= 0):
+            one_hot_labels[i, 1] = 1  
+        elif (abs(final_descri3[i]) > 0 and abs(final_descri3[i]) <= 5) and (final_descri3[i] + final_descri4[i] == 0) and (match[i] >= 0):
+            one_hot_labels[i, 2] = 1  
+        elif (final_descri3[i] == 0) and (final_descri4[i] == 0) and (match[i] < 0):
+            one_hot_labels[i, 0] = 1  
+    return one_hot_labels
 def convert_to_one_hot_sevenlabel(labels,match):
     one_hot_labels = np.zeros((labels.shape[0], 7))
     for i, label in enumerate(labels):      
@@ -894,7 +906,7 @@ def train_and_save_model_ThreeLabel(X_train, Y_train, X_val, Y_val,hidden_units=
     )  
     return model
 from tensorflow.keras.callbacks import EarlyStopping
-def train_and_save_model_MultiLabel(X_train, Y_train, X_val, Y_val,hidden_units=[16],learning_rate=0.0001,l2_reg=0,model = tf.keras.Sequential()):
+def train_and_save_model_MultiLabel(X_train, Y_train, X_val, Y_val,hidden_units=[16],learning_rate=0.0001,l2_reg=0,model = tf.keras.Sequential(), file_suffix=''):
     #hidden_units=math.ceil((X_train.shape[1]+1)/2)
     #hidden_units=math.ceil((X_train.shape[1]+1)*2.0/3)
     #model = build_binary_classification_model(X_train.shape[1], hidden_layers=2, hidden_units=16)
@@ -908,11 +920,29 @@ def train_and_save_model_MultiLabel(X_train, Y_train, X_val, Y_val,hidden_units=
     early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
     history = model.fit(
         X_train, Y_train,
-        epochs=50,
+        epochs=100,
         batch_size=256,
         validation_data=(X_val, Y_val),
-        callbacks=[early_stopping]
-    )  
+        # callbacks=[early_stopping]
+        callbacks=[]
+    ) 
+    
+    plt.figure(figsize=(8, 6))
+    plt.plot(history.history['loss'], label='Training Loss')
+    plt.plot(history.history['val_loss'], label='Validation Loss')
+    plt.title('Loss vs. Epoch')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.grid(True)
+    if file_suffix:
+        plot_file_name = f'loss_vs_epoch_{file_suffix}.pdf'
+    else:
+        plot_file_name = 'loss_vs_epoch.pdf'
+    plot_file_path = os.path.join('/storage/shuangyuan/code/analysis_spin/Machine_learning/ML/loss_epoch/', plot_file_name)
+    plt.savefig(plot_file_path, format='pdf')
+    plt.show() 
+    
     return model
 def save_predictions_to_root(X_data,train_val_index,full_predictions,root_filename,branch_name):
     data_dict = {name: X_data[:, i] for i, name in enumerate(branch_name)}
