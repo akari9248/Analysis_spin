@@ -46,6 +46,13 @@ public:
         std::vector<int> *Charge = new std::vector<int>;
         std::vector<double> *Charge_d = new std::vector<double>;
 
+        std::vector<double> *CMSPartonPt = new std::vector<double>;
+        std::vector<double> *CMSPartonEta = new std::vector<double>;
+        std::vector<double> *CMSPartonPhi = new std::vector<double>;
+        std::vector<double> *CMSPartonEnergy = new std::vector<double>;
+        std::vector<int> *CMSPartonPdgId = new std::vector<int>;
+        std::vector<int> *CMSPartonCharge = new std::vector<int>;
+
         std::vector<int> *JetId = new std::vector<int>;
         std::vector<double> *JetPt = new std::vector<double>;
         std::vector<double> *JetEta = new std::vector<double>;
@@ -90,6 +97,8 @@ public:
     bool charge_d = false;
     vector<PrefixAndSuffix> level;
     std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match;
+    std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match_gen;
+    std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match_reco;
     std::vector<std::vector<EventsAnalyzer::JetAndDaughters>> levelsjetsdaughters;
     std::vector<std::vector<std::vector<JetBranch::threeplanes>>> planes_arr;
     bool SaveParticles = false;
@@ -138,10 +147,29 @@ public:
     void DeriveLevelsJetsDaughters()
     {
         levelsjetsdaughters.clear();
-        for (auto &branchvector : Branches)
+        if (SampleType != "CMSParton")
         {
-            auto jetsdaughters = DeriveJetsDaughtersSampleType(branchvector);
-            levelsjetsdaughters.push_back(jetsdaughters);
+            for (auto &branchvector : Branches)
+            {
+                auto jetsdaughters = DeriveJetsDaughtersSampleType(branchvector);
+                levelsjetsdaughters.push_back(jetsdaughters);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < Branches.size(); i++)
+            {
+                if (i != 0)
+                {
+                    auto jetsdaughters = ExtractJetsAndDaughters(Branches.at(i));
+                    levelsjetsdaughters.push_back(jetsdaughters);
+                }
+                else
+                {
+                    auto jetsdaughters = ClusterJetsAndDaughters2(Branches.at(i));
+                    levelsjetsdaughters.push_back(jetsdaughters);
+                }
+            }
         }
     }
     void RecoSplitPlanes()
@@ -152,6 +180,8 @@ public:
         for (int level = 0; level < levelsjetsdaughters.size(); level++)
         {
             auto jetsdaughters = levelsjetsdaughters.at(level);
+            // if (level == 2 && jetsdaughters.size() != 0)
+            //     std::cout << "Recoplanes: " << level << " " << jetsdaughters.size() << std::endl;
             for (int i = 0; i < jetsdaughters.size(); i++)
             {
                 auto jetdaughters = jetsdaughters.at(i).daughters;
@@ -190,10 +220,15 @@ public:
     }
     void MatchPlanes()
     {
-        if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" &&
+        if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" && SampleType != "CMSParton" &&
             (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) &&
             (options.inputFolder.find("AngularLund") == std::string::npos && options.inputFolder.find("DipoleLund") == std::string::npos))
             match = JetBranch::matchPlanes(planes_arr.at(1), planes_arr.at(0), "second", 0.5);
+        if (SampleType == "CMSParton")
+        {
+            match_gen = JetBranch::matchPlanes(planes_arr.at(1), planes_arr.at(0), "second", 0.5);
+            match_reco = JetBranch::matchPlanes(planes_arr.at(2), planes_arr.at(1), "second", 0.5);
+        }
     }
     void SavePlanes()
     {
@@ -206,7 +241,7 @@ public:
             }
         }
         treeEvents.assign("GeneratorWeight", 1.0);
-        if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" &&
+        if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" && SampleType != "CMSParton" &&
             (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) &&
             (options.inputFolder.find("AngularLund") == std::string::npos && options.inputFolder.find("DipoleLund") == std::string::npos))
         {
@@ -214,6 +249,25 @@ public:
             {
                 treeEvents.push_back("match2", match.first.at(0).at(i));
                 treeEvents.push_back("match3", match.second.at(0).at(i));
+            }
+        }
+        // std::cout << "macth1: " << match_gen.first.at(0).size() << " " << match_gen.second.at(0).size() << std::endl;
+        // std::cout << "macth2: " << match_reco.first.at(0).size() << " " << match_reco.second.at(0).size() << std::endl;
+        // if (match_gen.first.at(0).size() != 0)
+        // {
+        //     std::cout << "macth1: " << match_gen.first.at(0).size() << " " << match_gen.second.at(0).size() << std::endl;
+        // }
+        if (SampleType == "CMSParton")
+        {
+            for (int i = 0; i < match_gen.first.at(0).size(); i++)
+            {
+                treeEvents.push_back("match12", match_gen.first.at(0).at(i));
+                treeEvents.push_back("match13", match_gen.second.at(0).at(i));
+            }
+            for (int i = 0; i < match_reco.first.at(0).size(); i++)
+            {
+                treeEvents.push_back("match22", match_reco.first.at(0).at(i));
+                treeEvents.push_back("match23", match_reco.second.at(0).at(i));
             }
         }
         if (SampleType == "CMSMCGen")
@@ -403,6 +457,83 @@ public:
         }
         return jetsdaughters;
     }
+    std::vector<EventsAnalyzer::JetAndDaughters> ClusterJetsAndDaughters2(EventsAnalyzer::BranchVectors &branchvector)
+    {
+        std::vector<PseudoJet> particles;
+        std::vector<ParticleInfo> particlesinfo;
+        for (size_t i = 0; i < branchvector.CMSPartonPt->size(); ++i)
+        {
+            TLorentzVector p;
+            p.SetPtEtaPhiE(branchvector.CMSPartonPt->at(i), branchvector.CMSPartonEta->at(i),
+                           branchvector.CMSPartonPhi->at(i), branchvector.CMSPartonEnergy->at(i));
+            PseudoJet particle = PseudoJet(p.Px(), p.Py(), p.Pz(), p.Energy());
+            double px = particle.px();
+            double py = particle.py();
+            double pz = particle.pz();
+            double E = particle.E();
+            // 检查是否为无效值（例如 NaN 或无穷大）
+            if (std::isnan(px) || std::isnan(py) || std::isnan(pz) || std::isnan(E))
+            {
+                std::cerr << "Invalid PseudoJet data: ";
+                std::cerr << "px = " << px << ", py = " << py << ", pz = " << pz << ", E = " << E << std::endl;
+                continue;
+            }
+
+            int pdgid = branchvector.CMSPartonPdgId->at(i);
+            int charge;
+            if (pdgid == 1 || pdgid == 4 || pdgid == 6)
+            {
+                charge = 2;
+            }
+            else if (pdgid == 2 || pdgid == 3 || pdgid == 5)
+            {
+                charge = -1;
+            }
+            else if (pdgid == 1 || pdgid == 4 || pdgid == 6)
+            {
+                charge = -2;
+            }
+            else if (pdgid == -2 || pdgid == -3 || pdgid == -5)
+            {
+                charge = 1;
+            }
+            else
+            {
+                charge = 0;
+            }
+
+            ParticleInfo particleInfo(pdgid, charge, branchvector.CMSPartonPt->at(i), branchvector.CMSPartonEta->at(i),
+                                      branchvector.CMSPartonPhi->at(i), branchvector.CMSPartonEnergy->at(i));
+            particlesinfo.push_back(particleInfo);
+            particle.set_user_index(i);
+            particle.set_user_info(new FlavHistory(branchvector.CMSPartonPdgId->at(i)));
+            particles.push_back(particle);
+        }
+        // JetDefinition jet_def(antikt_algorithm, 0.4);
+        JetDefinition jet_def(antikt_algorithm, 0.8);
+        ClusterSequence cs(particles, jet_def);
+        auto csjets = cs.inclusive_jets(30);
+        auto new_end =
+            std::remove_if(csjets.begin(), csjets.end(), [](const PseudoJet &jet)
+                           { return std::abs(jet.eta()) > 2.5; });
+        csjets.erase(new_end, csjets.end());
+        csjets = sorted_by_pt(csjets);
+        int jetnum = csjets.size();
+        vector<JetAndDaughters> jetsdaughters(jetnum, JetAndDaughters());
+        for (int i = 0; i < jetnum; i++)
+        {
+            jetsdaughters.at(i).jetid = i;
+            jetsdaughters.at(i).jet = PseudoJetToTLorentzVector(csjets.at(i));
+            for (auto &particle : csjets.at(i).constituents())
+            {
+                int user_index = particle.user_index();
+                jetsdaughters.at(i).daughters.push_back(particlesinfo.at(user_index));
+                TLorentzVector p;
+                p.SetPtEtaPhiE(particle.pt(), particle.eta(), particle.phi(), particle.e());
+            }
+        }
+        return jetsdaughters;
+    }
     void InitSampleType()
     {
         SampleType = options.SampleType;
@@ -430,7 +561,7 @@ public:
             if (SampleType == "PrivateMCParton")
                 suffixs = {"_Parton"};
         }
-        if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen")
+        if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen" || SampleType == "CMSParton")
         {
             //    if(options.inputFolder.find("Run3") != std::string::npos||options.inputFolder.find("Run2022") != std::string::npos) t->Add((TString)options.inputFolder + "/Chunk*.root/JetsAndDaughters");
             //    else t->Add((TString)options.inputFolder + "/Chunk*.root/jetInfos/JetsAndDaughters");
@@ -445,14 +576,19 @@ public:
                 prefixs = {"Gen", "Reco"};
                 suffixs = {""};
             }
-            if ((SampleType == "CMSData"))
+            if (SampleType == "CMSData")
             {
                 prefixs = {"Reco"};
                 suffixs = {""};
             }
-            if ((SampleType == "CMSGen"))
+            if (SampleType == "CMSGen")
             {
                 prefixs = {"Gen"};
+                suffixs = {""};
+            }
+            if (SampleType == "CMSParton")
+            {
+                prefixs = {"Parton", "Gen", "Reco"};
                 suffixs = {""};
             }
         }
@@ -552,10 +688,17 @@ public:
             }
         }
         treeEvents.addBranches("GeneratorWeight/D");
-        if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton")
+        if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" && SampleType != "CMSParton")
         {
             treeEvents.addBranches("match2/vI");
             treeEvents.addBranches("match3/vI");
+        }
+        if (SampleType == "CMSParton")
+        {
+            treeEvents.addBranches("match12/vI");
+            treeEvents.addBranches("match13/vI");
+            treeEvents.addBranches("match22/vI");
+            treeEvents.addBranches("match23/vI");
         }
         if (SampleType == "CMSMCGen")
         {
@@ -568,55 +711,66 @@ public:
         auto it = Branches.begin();
         for (const auto &prefix : prefixs)
         {
-            for (const auto &suffix : suffixs)
+            if (prefix == "Parton")
             {
-                TString prefixTStr = (TString)prefix;
-                TString suffixTStr = (TString)suffix;
-                it->Prefix = prefixTStr;
-                it->Suffix = suffixTStr;
-                if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen")
+                t->SetBranchAddress("Partons_Pt_prunedGenParticles", &it->CMSPartonPt);
+                t->SetBranchAddress("Partons_Eta_prunedGenParticles", &it->CMSPartonEta);
+                t->SetBranchAddress("Partons_Phi_prunedGenParticles", &it->CMSPartonPhi);
+                t->SetBranchAddress("Partons_Energy_prunedGenParticles", &it->CMSPartonEnergy);
+                t->SetBranchAddress("Partons_PdgId_prunedGenParticles", &it->CMSPartonPdgId);
+                ++it;
+            }
+            else
+            {
+                for (const auto &suffix : suffixs)
                 {
-                    t->SetBranchAddress(prefixTStr + "JetPt" + suffixTStr, &it->JetPt);
-                    ApplyJetEnergyScale(prefixTStr, &it->JetPt);
-                    t->SetBranchAddress(prefixTStr + "JetEta" + suffixTStr, &it->JetEta);
-                    t->SetBranchAddress(prefixTStr + "JetPhi" + suffixTStr, &it->JetPhi);
-                    t->SetBranchAddress(prefixTStr + "JetEnergy" + suffixTStr, &it->JetEnergy);
-                    t->SetBranchAddress(prefixTStr + "JetMatching" + suffixTStr, &it->JetMatching);
-                    t->SetBranchAddress(prefixTStr + "DaughterJetId" + suffixTStr, &it->JetId);
-                    prefixTStr = (TString)prefix + "Daughter";
-                    suffixTStr = (TString)suffix;
-                    t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &it->Charge);
-                }
-                t->SetBranchAddress(prefixTStr + "Pt" + suffixTStr, &it->Pt);
-                t->SetBranchAddress(prefixTStr + "Eta" + suffixTStr, &it->Eta);
-                t->SetBranchAddress(prefixTStr + "Phi" + suffixTStr, &it->Phi);
-                t->SetBranchAddress(prefixTStr + "Energy" + suffixTStr, &it->Energy);
-                t->SetBranchAddress(prefixTStr + "PdgId" + suffixTStr, &it->PdgId);
-                if (SampleType == "PrivateMC" || SampleType == "PrivateMCParton")
-                {
-                    TBranch *branch = t->GetBranch(prefixTStr + "Charge" + suffixTStr);
-                    if (branch)
+                    TString prefixTStr = (TString)prefix;
+                    TString suffixTStr = (TString)suffix;
+                    it->Prefix = prefixTStr;
+                    it->Suffix = suffixTStr;
+                    if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen" || SampleType == "CMSParton")
                     {
-                        TLeaf *leaf = branch->GetLeaf(branch->GetName());
-                        if (leaf)
+                        t->SetBranchAddress(prefixTStr + "JetPt" + suffixTStr, &it->JetPt);
+                        ApplyJetEnergyScale(prefixTStr, &it->JetPt);
+                        t->SetBranchAddress(prefixTStr + "JetEta" + suffixTStr, &it->JetEta);
+                        t->SetBranchAddress(prefixTStr + "JetPhi" + suffixTStr, &it->JetPhi);
+                        t->SetBranchAddress(prefixTStr + "JetEnergy" + suffixTStr, &it->JetEnergy);
+                        t->SetBranchAddress(prefixTStr + "JetMatching" + suffixTStr, &it->JetMatching);
+                        t->SetBranchAddress(prefixTStr + "DaughterJetId" + suffixTStr, &it->JetId);
+                        prefixTStr = (TString)prefix + "Daughter";
+                        suffixTStr = (TString)suffix;
+                        t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &it->Charge);
+                    }
+                    t->SetBranchAddress(prefixTStr + "Pt" + suffixTStr, &it->Pt);
+                    t->SetBranchAddress(prefixTStr + "Eta" + suffixTStr, &it->Eta);
+                    t->SetBranchAddress(prefixTStr + "Phi" + suffixTStr, &it->Phi);
+                    t->SetBranchAddress(prefixTStr + "Energy" + suffixTStr, &it->Energy);
+                    t->SetBranchAddress(prefixTStr + "PdgId" + suffixTStr, &it->PdgId);
+                    if (SampleType == "PrivateMC" || SampleType == "PrivateMCParton")
+                    {
+                        TBranch *branch = t->GetBranch(prefixTStr + "Charge" + suffixTStr);
+                        if (branch)
                         {
-                            std::string typeName = leaf->GetTypeName();
-                            if (typeName == "vector<double>" || typeName == "std::vector<double>" || typeName == "vector<Double_t>")
+                            TLeaf *leaf = branch->GetLeaf(branch->GetName());
+                            if (leaf)
                             {
-                                charge_d = true;
-                                t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &(it->Charge_d));
-                                std::cout << "Branch " << prefixTStr + "Charge" + suffixTStr << " is of type vector<double>." << std::endl;
-                            }
-                            else
-                            {
-                                t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &it->Charge);
-                                std::cout << "Branch " << prefixTStr + "Charge" + suffixTStr << " is of type vector<int>." << std::endl;
+                                std::string typeName = leaf->GetTypeName();
+                                if (typeName == "vector<double>" || typeName == "std::vector<double>" || typeName == "vector<Double_t>")
+                                {
+                                    charge_d = true;
+                                    t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &(it->Charge_d));
+                                    std::cout << "Branch " << prefixTStr + "Charge" + suffixTStr << " is of type vector<double>." << std::endl;
+                                }
+                                else
+                                {
+                                    t->SetBranchAddress(prefixTStr + "Charge" + suffixTStr, &it->Charge);
+                                    std::cout << "Branch " << prefixTStr + "Charge" + suffixTStr << " is of type vector<int>." << std::endl;
+                                }
                             }
                         }
                     }
+                    ++it;
                 }
-
-                ++it;
             }
         }
     }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Jan  9 12:25:30 2025 by ROOT version 6.32.04
+// Mon Feb 10 14:18:00 2025 by ROOT version 6.32.04
 // from TTree CMSJetsAndDaughters/Informations of Jets and Daughters
 // found on file: /storage/xiaoxue/code/data/CMSMC/ghost/QCD_Pt-15to7000_Flat_herwig7-Run3Summer22/Chunk0.root
 //////////////////////////////////////////////////////////
@@ -125,6 +125,11 @@ public :
    vector<double>  *cHadrons_Eta_slimmedGenJetsFlavourInfos;
    vector<double>  *cHadrons_Phi_slimmedGenJetsFlavourInfos;
    vector<double>  *cHadrons_Energy_slimmedGenJetsFlavourInfos;
+   vector<int>     *Partons_PdgId_prunedGenParticles;
+   vector<double>  *Partons_Pt_prunedGenParticles;
+   vector<double>  *Partons_Eta_prunedGenParticles;
+   vector<double>  *Partons_Phi_prunedGenParticles;
+   vector<double>  *Partons_Energy_prunedGenParticles;
    vector<int>     *bHadrons_PdgId_prunedGenParticles;
    vector<double>  *bHadrons_Pt_prunedGenParticles;
    vector<double>  *bHadrons_Eta_prunedGenParticles;
@@ -248,6 +253,11 @@ public :
    TBranch        *b_cHadrons_Eta_slimmedGenJetsFlavourInfos;   //!
    TBranch        *b_cHadrons_Phi_slimmedGenJetsFlavourInfos;   //!
    TBranch        *b_cHadrons_Energy_slimmedGenJetsFlavourInfos;   //!
+   TBranch        *b_Partons_PdgId_prunedGenParticles;   //!
+   TBranch        *b_Partons_Pt_prunedGenParticles;   //!
+   TBranch        *b_Partons_Eta_prunedGenParticles;   //!
+   TBranch        *b_Partons_Phi_prunedGenParticles;   //!
+   TBranch        *b_Partons_Energy_prunedGenParticles;   //!
    TBranch        *b_bHadrons_PdgId_prunedGenParticles;   //!
    TBranch        *b_bHadrons_Pt_prunedGenParticles;   //!
    TBranch        *b_bHadrons_Eta_prunedGenParticles;   //!
@@ -421,6 +431,11 @@ void CMSJetsAndDaughters::Init(TTree *tree)
    cHadrons_Eta_slimmedGenJetsFlavourInfos = 0;
    cHadrons_Phi_slimmedGenJetsFlavourInfos = 0;
    cHadrons_Energy_slimmedGenJetsFlavourInfos = 0;
+   Partons_PdgId_prunedGenParticles = 0;
+   Partons_Pt_prunedGenParticles = 0;
+   Partons_Eta_prunedGenParticles = 0;
+   Partons_Phi_prunedGenParticles = 0;
+   Partons_Energy_prunedGenParticles = 0;
    bHadrons_PdgId_prunedGenParticles = 0;
    bHadrons_Pt_prunedGenParticles = 0;
    bHadrons_Eta_prunedGenParticles = 0;
@@ -541,6 +556,11 @@ void CMSJetsAndDaughters::Init(TTree *tree)
    fChain->SetBranchAddress("cHadrons_Eta_slimmedGenJetsFlavourInfos", &cHadrons_Eta_slimmedGenJetsFlavourInfos, &b_cHadrons_Eta_slimmedGenJetsFlavourInfos);
    fChain->SetBranchAddress("cHadrons_Phi_slimmedGenJetsFlavourInfos", &cHadrons_Phi_slimmedGenJetsFlavourInfos, &b_cHadrons_Phi_slimmedGenJetsFlavourInfos);
    fChain->SetBranchAddress("cHadrons_Energy_slimmedGenJetsFlavourInfos", &cHadrons_Energy_slimmedGenJetsFlavourInfos, &b_cHadrons_Energy_slimmedGenJetsFlavourInfos);
+   fChain->SetBranchAddress("Partons_PdgId_prunedGenParticles", &Partons_PdgId_prunedGenParticles, &b_Partons_PdgId_prunedGenParticles);
+   fChain->SetBranchAddress("Partons_Pt_prunedGenParticles", &Partons_Pt_prunedGenParticles, &b_Partons_Pt_prunedGenParticles);
+   fChain->SetBranchAddress("Partons_Eta_prunedGenParticles", &Partons_Eta_prunedGenParticles, &b_Partons_Eta_prunedGenParticles);
+   fChain->SetBranchAddress("Partons_Phi_prunedGenParticles", &Partons_Phi_prunedGenParticles, &b_Partons_Phi_prunedGenParticles);
+   fChain->SetBranchAddress("Partons_Energy_prunedGenParticles", &Partons_Energy_prunedGenParticles, &b_Partons_Energy_prunedGenParticles);
    fChain->SetBranchAddress("bHadrons_PdgId_prunedGenParticles", &bHadrons_PdgId_prunedGenParticles, &b_bHadrons_PdgId_prunedGenParticles);
    fChain->SetBranchAddress("bHadrons_Pt_prunedGenParticles", &bHadrons_Pt_prunedGenParticles, &b_bHadrons_Pt_prunedGenParticles);
    fChain->SetBranchAddress("bHadrons_Eta_prunedGenParticles", &bHadrons_Eta_prunedGenParticles, &b_bHadrons_Eta_prunedGenParticles);
