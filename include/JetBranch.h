@@ -777,6 +777,165 @@ public:
     }
     return std::make_pair(match_results2, match_results3);
   }
+  static vector<std::vector<JetBranch::threeplanes>>
+  GetmatchloopPlanes(vector<std::vector<JetBranch::threeplanes>> &src_threeplanes,
+                     vector<std::vector<std::vector<ParticleInfo>>> &dst_pseudojets,
+                     TString opt = "second", double drcutweight = 1)
+  {
+    std::vector<std::vector<JetBranch::threeplanes>> dst_threeplanes = src_threeplanes;
+    for (auto &sub_vector : dst_threeplanes)
+    {
+      sub_vector.clear(); // 清空每个子 vector
+    }
+    std::vector<JetBranch::PlaneVariables> src_plane, dst_plane;
+    vector<std::vector<int>> match_results2;
+    vector<std::vector<int>> match_results3;
+    if (opt.EqualTo("second"))
+    {
+      for (size_t i = 0; i < src_threeplanes.size(); i++)
+      {
+        std::vector<int> match_results02;
+        std::vector<int> match_results03;
+        for (size_t j = 0; j < src_threeplanes.at(i).size(); j++)
+        {
+          match_results02.push_back(-1);
+          match_results03.push_back(-1);
+          src_threeplanes[i][j].first.isgg = false;
+          src_threeplanes[i][j].first.isqq = false;
+          src_threeplanes[i][j].second.isgg = false;
+          src_threeplanes[i][j].second.isqq = false;
+          src_threeplanes[i][j].third.isgg = false;
+          src_threeplanes[i][j].third.isqq = false;
+
+          src_threeplanes[i][j].first.harder_flav = 0;
+          src_threeplanes[i][j].first.softer_flav = 0;
+          src_threeplanes[i][j].second.harder_flav = 0;
+          src_threeplanes[i][j].second.softer_flav = 0;
+          src_threeplanes[i][j].third.harder_flav = 0;
+          src_threeplanes[i][j].third.softer_flav = 0;
+
+          src_threeplanes[i][j].first.harder_init_pdgid = 0;
+          src_threeplanes[i][j].first.harder_init_descri = 0;
+          src_threeplanes[i][j].first.harder_final_pdgid = 0;
+          src_threeplanes[i][j].first.harder_final_descri = 0;
+          src_threeplanes[i][j].first.softer_init_pdgid = 0;
+          src_threeplanes[i][j].first.softer_init_descri = 0;
+          src_threeplanes[i][j].first.softer_final_pdgid = 0;
+          src_threeplanes[i][j].first.softer_final_descri = 0;
+
+          src_threeplanes[i][j].second.harder_init_pdgid = 0;
+          src_threeplanes[i][j].second.harder_init_descri = 0;
+          src_threeplanes[i][j].second.harder_final_pdgid = 0;
+          src_threeplanes[i][j].second.harder_final_descri = 0;
+          src_threeplanes[i][j].second.softer_init_pdgid = 0;
+          src_threeplanes[i][j].second.softer_init_descri = 0;
+          src_threeplanes[i][j].second.softer_final_pdgid = 0;
+          src_threeplanes[i][j].second.softer_final_descri = 0;
+
+          src_threeplanes[i][j].third.harder_init_pdgid = 0;
+          src_threeplanes[i][j].third.harder_init_descri = 0;
+          src_threeplanes[i][j].third.harder_final_pdgid = 0;
+          src_threeplanes[i][j].third.harder_final_descri = 0;
+          src_threeplanes[i][j].third.softer_init_pdgid = 0;
+          src_threeplanes[i][j].third.softer_init_descri = 0;
+          src_threeplanes[i][j].third.softer_final_pdgid = 0;
+          src_threeplanes[i][j].third.softer_final_descri = 0;
+
+          for (size_t k = 0; k < dst_pseudojets.at(i).size(); k++)
+          {
+            std::vector<ParticleInfo> constituents = dst_pseudojets.at(i).at(k);
+            double z1cut = 0;
+            double z2cut = 0;
+            double kt1cut = 1;
+            double kt2cut = 0;
+            double issecondsoft = true;
+            vector<JetBranch::twoplanes> twoplanes;
+            std::vector<PseudoJet> particles;
+            std::vector<ParticleInfo> particlesinfo;
+            for (size_t cs = 0; cs < constituents.size(); ++cs)
+            {
+              TLorentzVector p;
+              p.SetPtEtaPhiE(constituents.at(cs).pt, constituents.at(cs).eta,
+                             constituents.at(cs).phi, constituents.at(cs).e);
+              PseudoJet particle = PseudoJet(p.Px(), p.Py(), p.Pz(), p.Energy());
+              int pdgid = constituents.at(i).pdgid;
+              ParticleInfo particleInfo(pdgid, constituents.at(i).chargeInt);
+              particlesinfo.push_back(particleInfo);
+              particle.set_user_index(cs);
+              particle.set_user_info(new FlavHistory(pdgid));
+              particles.push_back(particle);
+            }
+            JetDefinition jet_def_CA(cambridge_algorithm,
+                                     JetDefinition::max_allowable_R);
+            fastjet::contrib::FlavRecombiner flav_recombiner;
+            jet_def_CA.set_recombiner(&flav_recombiner);
+
+            double alpha = 1.0;
+            double omega = 3.0 - alpha;
+            fastjet::contrib::FlavRecombiner::FlavSummation flav_summation =
+                fastjet::contrib::FlavRecombiner::net;
+            auto ifn_plugin = new IFNPlugin(jet_def_CA, alpha, omega, flav_summation);
+            JetDefinition IFN_jet_def(ifn_plugin);
+            IFN_jet_def.delete_plugin_when_unused();
+            ClusterSequence cs_IFN(particles, IFN_jet_def);
+            vector<PseudoJet> jets_IFN = sorted_by_pt(cs_IFN.inclusive_jets());
+            PseudoJet j0 = jets_IFN[0];
+            PseudoJet j1, j2;
+            std::vector<std::pair<PseudoJet, PseudoJet>> looppseudojets;
+            if (j0.has_parents(j1, j2))
+              looppseudojets = {{j1, j2}};
+            while (looppseudojets.size() != 0)
+            {
+              for (int pseudo = 0; pseudo < looppseudojets.size(); pseudo++)
+              {
+                PseudoJet harder = (looppseudojets.at(pseudo).first.modp() > looppseudojets.at(pseudo).second.modp()) ? looppseudojets.at(pseudo).first : looppseudojets.at(pseudo).second;
+                PseudoJet softer = (looppseudojets.at(pseudo).first.modp() > looppseudojets.at(pseudo).second.modp()) ? looppseudojets.at(pseudo).second : looppseudojets.at(pseudo).first;
+                double deltaR = PseudoJetToTLorentzVector(harder).DeltaR(PseudoJetToTLorentzVector(softer));
+                int pdgid1 = JetBranch::GetIFNFlavour(harder);
+                int pdgid2 = JetBranch::GetIFNFlavour(softer);
+                // clang-format off
+                PlaneVariables pseudoplanes = {
+                    harder, softer, PseudoJetToTLorentzVector(harder), PseudoJetToTLorentzVector(softer), 
+                    0, deltaR, 0, 0, {0, 0, 0}, harder.constituents(), softer.constituents(), 
+                    0, 0, 0, 0, {}, {}, 
+                    GetIFNFlavour(harder), GetIFNFlavour(softer), 
+                    GetIFNPdgid(softer, false), GetIFNDescri(softer, false), 
+                    GetIFNPdgid(softer, true), GetIFNDescri(softer, true), 
+                    GetIFNPdgid(harder, false), GetIFNDescri(harder, false), 
+                    GetIFNPdgid(harder, true), GetIFNDescri(harder, true), 
+                    0, 0, 0, 0};
+                // clang-format on
+                if (matchPlanes(src_threeplanes[i][j].second, pseudoplanes, drcutweight))
+                {
+                  JetBranch::threeplanes pseudo_threeplanes;
+                  pseudo_threeplanes.second = pseudoplanes;
+                  dst_threeplanes.at(i).push_back(pseudo_threeplanes);
+                  break;
+                }
+              }
+              if (dst_threeplanes.at(i).size() != 0)
+                break;
+              std::vector<std::pair<PseudoJet, PseudoJet>> temp;
+              for (int pseudo = 0; pseudo < looppseudojets.size(); pseudo++)
+              {
+                PseudoJet j3, j4, j5, j6;
+                if (looppseudojets.at(pseudo).first.has_parents(j3, j4))
+                {
+                  temp.push_back({j3, j4});
+                }
+                if (looppseudojets.at(pseudo).second.has_parents(j5, j6))
+                {
+                  temp.push_back({j5, j6});
+                }
+              }
+              looppseudojets = temp;
+            }
+          }
+        }
+      }
+    }
+    return dst_threeplanes;
+  }
   static std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
   matchPlanesLeadingJet(vector<std::vector<JetBranch::threeplanes>> &src_threeplanes,
                         vector<std::vector<JetBranch::threeplanes>> &dst_threeplanes,

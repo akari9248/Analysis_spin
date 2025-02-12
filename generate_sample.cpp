@@ -97,9 +97,12 @@ public:
     bool charge_d = false;
     vector<PrefixAndSuffix> level;
     std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match;
+    std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match_loop;
     std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match_gen;
     std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match_reco;
     std::vector<std::vector<EventsAnalyzer::JetAndDaughters>> levelsjetsdaughters;
+    std::vector<std::vector<std::vector<std::vector<ParticleInfo>>>> pseudojets_arr;
+    std::vector<std::vector<std::vector<JetBranch::threeplanes>>> pseudojets_planes_arr;
     std::vector<std::vector<std::vector<JetBranch::threeplanes>>> planes_arr;
     bool SaveParticles = false;
     Hists weightcut;
@@ -177,6 +180,12 @@ public:
         planes_arr = std::vector<std::vector<std::vector<JetBranch::threeplanes>>>(
             level.size(), vector<std::vector<JetBranch::threeplanes>>(
                               1, std::vector<JetBranch::threeplanes>()));
+        pseudojets_planes_arr = std::vector<std::vector<std::vector<JetBranch::threeplanes>>>(
+            level.size(), vector<std::vector<JetBranch::threeplanes>>(
+                              1, std::vector<JetBranch::threeplanes>()));
+        pseudojets_arr = std::vector<std::vector<std::vector<std::vector<ParticleInfo>>>>(
+            level.size(), vector<std::vector<std::vector<ParticleInfo>>>(
+                              1, std::vector<std::vector<ParticleInfo>>()));
         for (int level = 0; level < levelsjetsdaughters.size(); level++)
         {
             auto jetsdaughters = levelsjetsdaughters.at(level);
@@ -186,11 +195,13 @@ public:
             {
                 auto jetdaughters = jetsdaughters.at(i).daughters;
                 auto planes = RecoPlane::JetConstituents_threeplanes(jetdaughters);
+                // auto pseudojets = RecoPlane::CAJet(jetdaughters);
                 planes.first.initJet = jetsdaughters.at(i).jet;
                 planes.second.initJet = jetsdaughters.at(i).jet;
                 planes.third.initJet = jetsdaughters.at(i).jet;
                 AssignFlavour(planes);
                 planes_arr.at(level).at(0).push_back(planes);
+                pseudojets_arr.at(level).at(0).push_back(jetdaughters);
             }
         }
         AssignMatchedThreePlanes();
@@ -223,7 +234,14 @@ public:
         if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" && SampleType != "CMSParton" &&
             (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) &&
             (options.inputFolder.find("AngularLund") == std::string::npos && options.inputFolder.find("DipoleLund") == std::string::npos))
+        {
             match = JetBranch::matchPlanes(planes_arr.at(1), planes_arr.at(0), "second", 0.5);
+            auto planes_matchloop1 = planes_arr.at(1);
+            auto planes_matchloop2 = JetBranch::GetmatchloopPlanes(planes_matchloop1, pseudojets_arr.at(0), "second", 0.5);
+            match_loop = JetBranch::matchPlanes(planes_matchloop1, planes_matchloop2, "second", 0.5);
+            pseudojets_planes_arr.at(0) = planes_matchloop1;
+            pseudojets_planes_arr.at(1) = planes_matchloop2;
+        }
         if (SampleType == "CMSParton")
         {
             match_gen = JetBranch::matchPlanes(planes_arr.at(1), planes_arr.at(0), "second", 0.5);
@@ -240,6 +258,14 @@ public:
                 RecoPlane::SavePlanes(planes, treeEvents, i, level.at(levelindex).prefix, level.at(levelindex).suffix, SaveParticles, SampleType);
             }
         }
+        for (int levelindex = 0; levelindex < level.size(); levelindex++)
+        {
+            for (int i = 0; i < pseudojets_planes_arr.at(levelindex).at(0).size(); i++)
+            {
+                auto planes = pseudojets_planes_arr.at(levelindex).at(0).at(i);
+                RecoPlane::SaveLoopPlanes(planes, treeEvents, i, level.at(levelindex).prefix, level.at(levelindex).suffix, SaveParticles, SampleType);
+            }
+        }
         treeEvents.assign("GeneratorWeight", 1.0);
         if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" && SampleType != "CMSParton" &&
             (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) &&
@@ -250,13 +276,11 @@ public:
                 treeEvents.push_back("match2", match.first.at(0).at(i));
                 treeEvents.push_back("match3", match.second.at(0).at(i));
             }
+            for (int i = 0; i < match_loop.first.at(0).size(); i++)
+            {
+                treeEvents.push_back("matchloop2", match_loop.first.at(0).at(i));
+            }
         }
-        // std::cout << "macth1: " << match_gen.first.at(0).size() << " " << match_gen.second.at(0).size() << std::endl;
-        // std::cout << "macth2: " << match_reco.first.at(0).size() << " " << match_reco.second.at(0).size() << std::endl;
-        // if (match_gen.first.at(0).size() != 0)
-        // {
-        //     std::cout << "macth1: " << match_gen.first.at(0).size() << " " << match_gen.second.at(0).size() << std::endl;
-        // }
         if (SampleType == "CMSParton")
         {
             for (int i = 0; i < match_gen.first.at(0).size(); i++)
@@ -561,7 +585,8 @@ public:
             if (SampleType == "PrivateMCParton")
                 suffixs = {"_Parton"};
         }
-        if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen" || SampleType == "CMSParton")
+        // if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen" || SampleType == "CMSParton")
+        if (SampleType.find("CMS") != std::string::npos)
         {
             //    if(options.inputFolder.find("Run3") != std::string::npos||options.inputFolder.find("Run2022") != std::string::npos) t->Add((TString)options.inputFolder + "/Chunk*.root/JetsAndDaughters");
             //    else t->Add((TString)options.inputFolder + "/Chunk*.root/jetInfos/JetsAndDaughters");
@@ -591,6 +616,11 @@ public:
                 prefixs = {"Parton", "Gen", "Reco"};
                 suffixs = {""};
             }
+            if (SampleType == "CMSPartonReco")
+            {
+                prefixs = {"Parton", "Reco"};
+                suffixs = {""};
+            }
         }
         for (auto prefix : prefixs)
         {
@@ -618,13 +648,15 @@ public:
                     "init_descri1", "init_descri2", "init_descri3", "init_descri4", "init_descri5", "init_descri6",
                     "final_pdgid1", "final_pdgid2", "final_pdgid3", "final_pdgid4", "final_pdgid5", "final_pdgid6",
                     "final_descri1", "final_descri2", "final_descri3", "final_descri4", "final_descri5", "final_descri6",
+                    "init_loop_pdgid3", "init_loop_pdgid4", "init_loop_descri3", "init_loop_descri4",
+                    "final_loop_pdgid3", "final_loop_pdgid4", "final_loop_descri3", "final_loop_descri4",
                     "nbHadrons1", "nbHadrons2", "nbHadrons3", "nbHadrons4", "nbHadrons5", "nbHadrons6",
                     "ncHadrons1", "ncHadrons2", "ncHadrons3", "ncHadrons4", "ncHadrons5", "ncHadrons6",
                     "z1", "kt1", "theta1", "deltaR1", "eec1",
                     "z2", "kt2", "theta2", "deltaR2", "eec2",
                     "z3", "kt3", "theta3", "deltaR3", "eec3",
                     "n1x", "n1y", "n1z", "n2x", "n2y", "n2z", "n3x", "n3y", "n3z",
-                    "type1", "type2", "type3", "Phi2", "Phi3",
+                    "type1", "type2", "typeloop2", "type3", "Phi2", "Phi3",
                     "dPhi12_X2", "Theta2", "Theta22", "dPhi12_X3", "Theta3", "Theta23",
                     "jpt", "jeta", "jphi", "je",
                     "primaryindex"};
@@ -657,7 +689,7 @@ public:
                 }
                 for (auto &branch_name : branch_names)
                 {
-                    if (branch_name == "type1" || branch_name == "type2" || branch_name == "type3" ||
+                    if (branch_name == "type1" || branch_name == "type2" || branch_name == "typeloop2" || branch_name == "type3" ||
                         branch_name == "ntracks1" || branch_name == "ntracks2" || branch_name == "ntracks3" || branch_name == "ntracks4" ||
                         branch_name == "ntracks5" || branch_name == "ntracks6" ||
                         branch_name == "nparticles1" || branch_name == "nparticles2" || branch_name == "nparticles3" || branch_name == "nparticles4" ||
@@ -668,6 +700,8 @@ public:
                         branch_name == "init_descri1" || branch_name == "init_descri2" || branch_name == "init_descri3" || branch_name == "init_descri4" || branch_name == "init_descri5" || branch_name == "init_descri6" ||
                         branch_name == "final_pdgid1" || branch_name == "final_pdgid2" || branch_name == "final_pdgid3" || branch_name == "final_pdgid4" || branch_name == "final_pdgid5" || branch_name == "final_pdgid6" ||
                         branch_name == "final_descri1" || branch_name == "final_descri2" || branch_name == "final_descri3" || branch_name == "final_descri4" || branch_name == "final_descri5" || branch_name == "final_descri6" ||
+                        branch_name == "init_loop_pdgid3" || branch_name == "init_loop_pdgid4" || branch_name == "init_loop_descri3" || branch_name == "init_loop_descri4" ||
+                        branch_name == "final_loop_pdgid3" || branch_name == "final_loop_pdgid4" || branch_name == "final_loop_descri3" || branch_name == "final_loop_descri4" ||
                         branch_name == "nbHadrons1" || branch_name == "nbHadrons2" || branch_name == "nbHadrons3" || branch_name == "nbHadrons4" || branch_name == "nbHadrons5" || branch_name == "nbHadrons6" ||
                         branch_name == "ncHadrons1" || branch_name == "ncHadrons2" || branch_name == "ncHadrons3" || branch_name == "ncHadrons4" || branch_name == "ncHadrons5" || branch_name == "ncHadrons6" ||
                         branch_name == "particle1_pid" || branch_name == "particle1_jetid" ||
@@ -692,6 +726,7 @@ public:
         {
             treeEvents.addBranches("match2/vI");
             treeEvents.addBranches("match3/vI");
+            treeEvents.addBranches("matchloop2/vI");
         }
         if (SampleType == "CMSParton")
         {

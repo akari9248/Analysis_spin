@@ -129,6 +129,47 @@ public:
         issecondsoft);
     return threeplanes;
   }
+
+  static fastjet::PseudoJet CAJet(vector<ParticleInfo> constituents)
+  {
+    std::vector<PseudoJet> particles;
+    std::vector<ParticleInfo> particlesinfo;
+    int bnum = 0;
+    for (size_t i = 0; i < constituents.size(); ++i)
+    {
+      TLorentzVector p;
+      p.SetPtEtaPhiE(constituents.at(i).pt, constituents.at(i).eta,
+                     constituents.at(i).phi, constituents.at(i).e);
+      PseudoJet particle = PseudoJet(p.Px(), p.Py(), p.Pz(), p.Energy());
+      int pdgid = constituents.at(i).pdgid;
+      ParticleInfo particleInfo(pdgid, constituents.at(i).chargeInt);
+      particlesinfo.push_back(particleInfo);
+      particle.set_user_index(i);
+      particle.set_user_info(new FlavHistory(pdgid));
+      particles.push_back(particle);
+      if ((abs(pdgid / 100 % 10) == 5 ||
+           abs(pdgid / 1000 % 10) == 5))
+        bnum++;
+    }
+    JetDefinition jet_def_CA(cambridge_algorithm,
+                             JetDefinition::max_allowable_R);
+    fastjet::contrib::FlavRecombiner flav_recombiner;
+    jet_def_CA.set_recombiner(&flav_recombiner);
+
+    double alpha = 1.0;
+    double omega = 3.0 - alpha;
+    fastjet::contrib::FlavRecombiner::FlavSummation flav_summation =
+        fastjet::contrib::FlavRecombiner::net;
+    auto ifn_plugin = new IFNPlugin(jet_def_CA, alpha, omega, flav_summation);
+    JetDefinition IFN_jet_def(ifn_plugin);
+    IFN_jet_def.delete_plugin_when_unused();
+    ClusterSequence cs_IFN(particles, IFN_jet_def);
+    vector<PseudoJet> jets_IFN = sorted_by_pt(cs_IFN.inclusive_jets());
+    PseudoJet j0, j1, j2, j3, j4;
+    j0 = jets_IFN[0];
+
+    return j0;
+  }
   // static JetBranch::BhadronPlanes
   // JetConstituents_bhadronplanes(vector<ParticleInfo> constituents)
   // {
@@ -355,8 +396,32 @@ public:
       treeEvents.push_back(prefix + "particle4_jetid" + suffix, jetindex);
     }
   }
+  static void SaveLoopPlanes(JetBranch::threeplanes threeplanes, TreeEvents &treeEvents,
+                             int jetindex, string prefix = "", string suffix = "",
+                             bool SaveParticles = true, std::string SampleType = "PrivateMC")
+  {
+    treeEvents.push_back(prefix + "init_loop_pdgid3" + suffix,
+                         threeplanes.second.harder_init_pdgid);
+    treeEvents.push_back(prefix + "init_loop_descri3" + suffix,
+                         threeplanes.second.harder_init_descri);
+    treeEvents.push_back(prefix + "final_loop_pdgid3" + suffix,
+                         threeplanes.second.harder_final_pdgid);
+    treeEvents.push_back(prefix + "final_loop_descri3" + suffix,
+                         threeplanes.second.harder_final_descri);
+
+    treeEvents.push_back(prefix + "init_loop_pdgid4" + suffix,
+                         threeplanes.second.softer_init_pdgid);
+    treeEvents.push_back(prefix + "init_loop_descri4" + suffix,
+                         threeplanes.second.softer_init_descri);
+    treeEvents.push_back(prefix + "final_loop_pdgid4" + suffix,
+                         threeplanes.second.softer_final_pdgid);
+    treeEvents.push_back(prefix + "final_loop_descri4" + suffix,
+                         threeplanes.second.softer_final_descri);
+
+    treeEvents.push_back(prefix + "typeloop2" + suffix, JetObservable::determineType(threeplanes.second.softer_flav, threeplanes.second.harder_flav));
+  }
   static void SavePlanes(JetBranch::threeplanes threeplanes, TreeEvents &treeEvents,
-                         int jetindex, string prefix = "", string suffix = "", 
+                         int jetindex, string prefix = "", string suffix = "",
                          bool SaveParticles = true, std::string SampleType = "PrivateMC")
   {
     JetObservable JetObservable1(threeplanes.first.harder_constituents_info);
