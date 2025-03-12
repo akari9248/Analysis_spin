@@ -150,7 +150,7 @@ public:
     void DeriveLevelsJetsDaughters()
     {
         levelsjetsdaughters.clear();
-        if (SampleType != "CMSParton")
+        if (SampleType != "CMSParton" && SampleType != "CMSPartonReco")
         {
             for (auto &branchvector : Branches)
             {
@@ -189,13 +189,10 @@ public:
         for (int level = 0; level < levelsjetsdaughters.size(); level++)
         {
             auto jetsdaughters = levelsjetsdaughters.at(level);
-            // if (level == 2 && jetsdaughters.size() != 0)
-            //     std::cout << "Recoplanes: " << level << " " << jetsdaughters.size() << std::endl;
             for (int i = 0; i < jetsdaughters.size(); i++)
             {
                 auto jetdaughters = jetsdaughters.at(i).daughters;
                 auto planes = RecoPlane::JetConstituents_threeplanes(jetdaughters);
-                // auto pseudojets = RecoPlane::CAJet(jetdaughters);
                 planes.first.initJet = jetsdaughters.at(i).jet;
                 planes.second.initJet = jetsdaughters.at(i).jet;
                 planes.third.initJet = jetsdaughters.at(i).jet;
@@ -258,14 +255,14 @@ public:
                 RecoPlane::SavePlanes(planes, treeEvents, i, level.at(levelindex).prefix, level.at(levelindex).suffix, SaveParticles, SampleType);
             }
         }
-        for (int levelindex = 0; levelindex < level.size(); levelindex++)
-        {
-            for (int i = 0; i < pseudojets_planes_arr.at(levelindex).at(0).size(); i++)
-            {
-                auto planes = pseudojets_planes_arr.at(levelindex).at(0).at(i);
-                RecoPlane::SaveLoopPlanes(planes, treeEvents, i, level.at(levelindex).prefix, level.at(levelindex).suffix, SaveParticles, SampleType);
-            }
-        }
+        // for (int levelindex = 0; levelindex < level.size(); levelindex++)
+        // {
+        //     for (int i = 0; i < pseudojets_planes_arr.at(levelindex).at(0).size(); i++)
+        //     {
+        //         auto planes = pseudojets_planes_arr.at(levelindex).at(0).at(i);
+        //         RecoPlane::SaveLoopPlanes(planes, treeEvents, i, level.at(levelindex).prefix, level.at(levelindex).suffix, SaveParticles, SampleType);
+        //     }
+        // }
         treeEvents.assign("GeneratorWeight", 1.0);
         if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" && SampleType != "CMSParton" &&
             (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) &&
@@ -276,10 +273,10 @@ public:
                 treeEvents.push_back("match2", match.first.at(0).at(i));
                 treeEvents.push_back("match3", match.second.at(0).at(i));
             }
-            for (int i = 0; i < match_loop.first.at(0).size(); i++)
-            {
-                treeEvents.push_back("matchloop2", match_loop.first.at(0).at(i));
-            }
+            // for (int i = 0; i < match_loop.first.at(0).size(); i++)
+            // {
+            //     treeEvents.push_back("matchloop2", match_loop.first.at(0).at(i));
+            // }
         }
         if (SampleType == "CMSParton")
         {
@@ -572,7 +569,7 @@ public:
             TString rootname = "*.root";
             if (options.inputFolder.find("sherpa") != std::string::npos || options.inputFolder.find("Sherpa") != std::string::npos)
                 rootname = "*Cluster*.root";
-            for (int i = 1; i <= 100; ++i)
+            for (int i = 1; i <= 50; ++i)
             {
                 t->Add((TString)options.inputFolder +
                        Form("/Chunk%d/", i) + rootname + "/JetsAndDaughters");
@@ -644,17 +641,36 @@ public:
                     "pt4", "eta4", "phi4", "e4", "ntracks4", "nparticles4", "flavour4", "pTD4", "sigma14", "sigma24", "sigma4",
                     "pt5", "eta5", "phi5", "e5", "ntracks5", "nparticles5", "flavour5", "pTD5", "sigma15", "sigma25", "sigma5",
                     "pt6", "eta6", "phi6", "e6", "ntracks6", "nparticles6", "flavour6", "pTD6", "sigma16", "sigma26", "sigma6",
+
+                    // "pt31", "eta31", "phi31", "e31", "ntracks31", "nparticles31", "flavour31", "pTD31", "sigma131", "sigma231", "sigma31",
+                    // "pt41", "eta41", "phi41", "e41", "ntracks41", "nparticles41", "flavour41", "pTD41", "sigma141", "sigma241", "sigma41",
+                    // "pt51", "eta51", "phi51", "e51", "ntracks51", "nparticles51", "flavour51", "pTD51", "sigma151", "sigma251", "sigma51",
+                    // "pt61", "eta61", "phi61", "e61", "ntracks61", "nparticles61", "flavour61", "pTD61", "sigma161", "sigma261", "sigma61",
+                    // "pt32", "eta32", "phi32", "e32", "ntracks32", "nparticles32", "flavour32", "pTD32", "sigma132", "sigma232", "sigma32",
+                    // "pt42", "eta42", "phi42", "e42", "ntracks42", "nparticles42", "flavour42", "pTD42", "sigma142", "sigma242", "sigma42",
+                    // "pt52", "eta52", "phi52", "e52", "ntracks52", "nparticles52", "flavour52", "pTD52", "sigma152", "sigma252", "sigma52",
+                    // "pt62", "eta62", "phi62", "e62", "ntracks62", "nparticles62", "flavour62", "pTD62", "sigma162", "sigma262", "sigma62",
+
                     "init_pdgid1", "init_pdgid2", "init_pdgid3", "init_pdgid4", "init_pdgid5", "init_pdgid6",
+                    // "init_pdgid31", "init_pdgid32", "init_pdgid41", "init_pdgid42", "init_pdgid51", "init_pdgid52", "init_pdgid61", "init_pdgid62",
                     "init_descri1", "init_descri2", "init_descri3", "init_descri4", "init_descri5", "init_descri6",
+                    // "init_descri31", "init_descri32", "init_descri41", "init_descri42", "init_descri51", "init_descri52", "init_descri61", "init_descri62",
+
                     "final_pdgid1", "final_pdgid2", "final_pdgid3", "final_pdgid4", "final_pdgid5", "final_pdgid6",
+                    // "final_pdgid31", "final_pdgid32", "final_pdgid41", "final_pdgid42", "final_pdgid51", "final_pdgid52", "final_pdgid61", "final_pdgid62",
                     "final_descri1", "final_descri2", "final_descri3", "final_descri4", "final_descri5", "final_descri6",
-                    "init_loop_pdgid3", "init_loop_pdgid4", "init_loop_descri3", "init_loop_descri4",
-                    "final_loop_pdgid3", "final_loop_pdgid4", "final_loop_descri3", "final_loop_descri4",
+                    // "final_descri31", "final_descri32", "final_descri41", "final_descri42", "final_descri51", "final_descri52", "final_descri61", "final_descri62",
+
+                    // "init_loop_pdgid3", "init_loop_pdgid4", "init_loop_descri3", "init_loop_descri4",
+                    // "final_loop_pdgid3", "final_loop_pdgid4", "final_loop_descri3", "final_loop_descri4",
+
                     "nbHadrons1", "nbHadrons2", "nbHadrons3", "nbHadrons4", "nbHadrons5", "nbHadrons6",
                     "ncHadrons1", "ncHadrons2", "ncHadrons3", "ncHadrons4", "ncHadrons5", "ncHadrons6",
+
                     "z1", "kt1", "theta1", "deltaR1", "eec1",
                     "z2", "kt2", "theta2", "deltaR2", "eec2",
                     "z3", "kt3", "theta3", "deltaR3", "eec3",
+
                     "n1x", "n1y", "n1z", "n2x", "n2y", "n2z", "n3x", "n3y", "n3z",
                     "type1", "type2", "typeloop2", "type3", "Phi2", "Phi3",
                     "dPhi12_X2", "Theta2", "Theta22", "dPhi12_X3", "Theta3", "Theta23",
@@ -689,28 +705,35 @@ public:
                 }
                 for (auto &branch_name : branch_names)
                 {
-                    if (branch_name == "type1" || branch_name == "type2" || branch_name == "typeloop2" || branch_name == "type3" ||
-                        branch_name == "ntracks1" || branch_name == "ntracks2" || branch_name == "ntracks3" || branch_name == "ntracks4" ||
-                        branch_name == "ntracks5" || branch_name == "ntracks6" ||
-                        branch_name == "nparticles1" || branch_name == "nparticles2" || branch_name == "nparticles3" || branch_name == "nparticles4" ||
-                        branch_name == "nparticles5" || branch_name == "nparticles6" ||
-                        branch_name == "flavour1" || branch_name == "flavour2" || branch_name == "flavour3" || branch_name == "flavour4" ||
-                        branch_name == "flavour5" || branch_name == "flavour6" ||
-                        branch_name == "init_pdgid1" || branch_name == "init_pdgid2" || branch_name == "init_pdgid3" || branch_name == "init_pdgid4" || branch_name == "init_pdgid5" || branch_name == "init_pdgid6" ||
-                        branch_name == "init_descri1" || branch_name == "init_descri2" || branch_name == "init_descri3" || branch_name == "init_descri4" || branch_name == "init_descri5" || branch_name == "init_descri6" ||
-                        branch_name == "final_pdgid1" || branch_name == "final_pdgid2" || branch_name == "final_pdgid3" || branch_name == "final_pdgid4" || branch_name == "final_pdgid5" || branch_name == "final_pdgid6" ||
-                        branch_name == "final_descri1" || branch_name == "final_descri2" || branch_name == "final_descri3" || branch_name == "final_descri4" || branch_name == "final_descri5" || branch_name == "final_descri6" ||
-                        branch_name == "init_loop_pdgid3" || branch_name == "init_loop_pdgid4" || branch_name == "init_loop_descri3" || branch_name == "init_loop_descri4" ||
-                        branch_name == "final_loop_pdgid3" || branch_name == "final_loop_pdgid4" || branch_name == "final_loop_descri3" || branch_name == "final_loop_descri4" ||
-                        branch_name == "nbHadrons1" || branch_name == "nbHadrons2" || branch_name == "nbHadrons3" || branch_name == "nbHadrons4" || branch_name == "nbHadrons5" || branch_name == "nbHadrons6" ||
-                        branch_name == "ncHadrons1" || branch_name == "ncHadrons2" || branch_name == "ncHadrons3" || branch_name == "ncHadrons4" || branch_name == "ncHadrons5" || branch_name == "ncHadrons6" ||
-                        branch_name == "particle1_pid" || branch_name == "particle1_jetid" ||
-                        branch_name == "particle2_pid" || branch_name == "particle2_jetid" ||
-                        branch_name == "particle3_pid" || branch_name == "particle3_jetid" ||
-                        branch_name == "particle4_pid" || branch_name == "particle4_jetid" ||
-                        branch_name == "particle5_pid" || branch_name == "particle5_jetid" ||
-                        branch_name == "particle6_pid" || branch_name == "particle6_jetid" ||
-                        branch_name == "primaryindex" || branch_name == "nbhadrons" || branch_name == "nchadrons")
+                    // if (branch_name == "type1" || branch_name == "type2" || branch_name == "typeloop2" || branch_name == "type3" ||
+                    //     branch_name == "ntracks1" || branch_name == "ntracks2" || branch_name == "ntracks3" || branch_name == "ntracks4" ||
+                    //     branch_name == "ntracks5" || branch_name == "ntracks6" ||
+                    //     branch_name == "nparticles1" || branch_name == "nparticles2" || branch_name == "nparticles3" || branch_name == "nparticles4" ||
+                    //     branch_name == "nparticles5" || branch_name == "nparticles6" ||
+                    //     branch_name == "flavour1" || branch_name == "flavour2" || branch_name == "flavour3" || branch_name == "flavour4" ||
+                    //     branch_name == "flavour5" || branch_name == "flavour6" ||
+                    //     branch_name == "init_pdgid1" || branch_name == "init_pdgid2" || branch_name == "init_pdgid3" || branch_name == "init_pdgid4" || branch_name == "init_pdgid5" || branch_name == "init_pdgid6" ||
+                    //     branch_name == "init_descri1" || branch_name == "init_descri2" || branch_name == "init_descri3" || branch_name == "init_descri4" || branch_name == "init_descri5" || branch_name == "init_descri6" ||
+                    //     branch_name == "final_pdgid1" || branch_name == "final_pdgid2" || branch_name == "final_pdgid3" || branch_name == "final_pdgid4" || branch_name == "final_pdgid5" || branch_name == "final_pdgid6" ||
+                    //     branch_name == "final_descri1" || branch_name == "final_descri2" || branch_name == "final_descri3" || branch_name == "final_descri4" || branch_name == "final_descri5" || branch_name == "final_descri6" ||
+                    //     branch_name == "init_loop_pdgid3" || branch_name == "init_loop_pdgid4" || branch_name == "init_loop_descri3" || branch_name == "init_loop_descri4" ||
+                    //     branch_name == "final_loop_pdgid3" || branch_name == "final_loop_pdgid4" || branch_name == "final_loop_descri3" || branch_name == "final_loop_descri4" ||
+                    //     branch_name == "nbHadrons1" || branch_name == "nbHadrons2" || branch_name == "nbHadrons3" || branch_name == "nbHadrons4" || branch_name == "nbHadrons5" || branch_name == "nbHadrons6" ||
+                    //     branch_name == "ncHadrons1" || branch_name == "ncHadrons2" || branch_name == "ncHadrons3" || branch_name == "ncHadrons4" || branch_name == "ncHadrons5" || branch_name == "ncHadrons6" ||
+                    //     branch_name == "particle1_pid" || branch_name == "particle1_jetid" ||
+                    //     branch_name == "particle2_pid" || branch_name == "particle2_jetid" ||
+                    //     branch_name == "particle3_pid" || branch_name == "particle3_jetid" ||
+                    //     branch_name == "particle4_pid" || branch_name == "particle4_jetid" ||
+                    //     branch_name == "particle5_pid" || branch_name == "particle5_jetid" ||
+                    //     branch_name == "particle6_pid" || branch_name == "particle6_jetid" ||
+                    //     branch_name == "primaryindex" || branch_name == "nbhadrons" || branch_name == "nchadrons")
+                    if (branch_name.find("type") != std::string::npos || branch_name.find("ntracks") != std::string::npos ||
+                        branch_name.find("nparticles") != std::string::npos || branch_name.find("flavour") != std::string::npos ||
+                        branch_name.find("pdgid") != std::string::npos || branch_name.find("descri") != std::string::npos ||
+                        branch_name.find("pid") != std::string::npos || branch_name.find("jetid") != std::string::npos ||
+                        branch_name.find("index") != std::string::npos ||
+                        branch_name.find("nbhadrons") != std::string::npos || branch_name.find("nchadrons") != std::string::npos ||
+                        branch_name.find("nbHadrons") != std::string::npos || branch_name.find("ncHadrons") != std::string::npos)
                     {
                         treeEvents.addBranches(prefix + branch_name + suffix + "/vI");
                     }
@@ -726,7 +749,7 @@ public:
         {
             treeEvents.addBranches("match2/vI");
             treeEvents.addBranches("match3/vI");
-            treeEvents.addBranches("matchloop2/vI");
+            // treeEvents.addBranches("matchloop2/vI");
         }
         if (SampleType == "CMSParton")
         {
@@ -763,7 +786,8 @@ public:
                     TString suffixTStr = (TString)suffix;
                     it->Prefix = prefixTStr;
                     it->Suffix = suffixTStr;
-                    if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen" || SampleType == "CMSParton")
+                    // if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen" || SampleType == "CMSParton" || SampleType == "CMSPartonReco")
+                    if (SampleType.find("CMS") != std::string::npos)
                     {
                         t->SetBranchAddress(prefixTStr + "JetPt" + suffixTStr, &it->JetPt);
                         ApplyJetEnergyScale(prefixTStr, &it->JetPt);
@@ -906,7 +930,7 @@ public:
                     return this->events->GenPassDijet;
                 });
         }
-        if ((SampleType == "CMSData"))
+        if ((SampleType == "CMSData" || SampleType == "CMSPartonReco"))
         {
             AddSelection(
                 EventSelection, "Reco DiJet Selection",
@@ -929,14 +953,22 @@ public:
                 EventSelection, "Overweighted Events Removal",
                 [this]
                 {
-                    if (this->Branches.at(0).JetPt->size() > 0)
+                    if (this->Branches.back().JetPt->size() > 0)
                     {
-                        int bin = this->weightcut["GeneratorWeightCutSmoothHist"]->FindBin(this->Branches.at(0).JetPt->at(0));
+                        int bin = this->weightcut["GeneratorWeightCutSmoothHist"]->FindBin(this->Branches.back().JetPt->at(0));
                         if (this->events->GeneratorWeight > this->weightcut["GeneratorWeightCutSmoothHist"]->GetBinContent(bin))
                         {
                             return false;
                         }
                     }
+                    // if (this->Branches.at(0).JetPt->size() > 0)
+                    // {
+                    //     int bin = this->weightcut["GeneratorWeightCutSmoothHist"]->FindBin(this->Branches.at(0).JetPt->at(0));
+                    //     if (this->events->GeneratorWeight > this->weightcut["GeneratorWeightCutSmoothHist"]->GetBinContent(bin))
+                    //     {
+                    //         return false;
+                    //     }
+                    // }
                     return true;
                 });
         }
@@ -1079,7 +1111,7 @@ public:
     void InitPlaneSelection()
     {
         if (SampleType == "PrivateMC" || SampleType == "PrivateMCParton" ||
-            SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSGen")
+            SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSGen" || SampleType == "CMSParton" || SampleType == "CMSPartonReco")
         {
             AddSelection(
                 PlaneSelection, (std::string)TString::Format("Plane2 JetPt = [ %d , %d ]", options.j2_ptlow, options.j2_pthigh),

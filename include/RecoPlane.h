@@ -437,6 +437,23 @@ public:
     auto width5 = JetObservable5.jetwidth();
     auto width6 = JetObservable6.jetwidth();
 
+    JetObservable JetObservable31(threeplanes.second.harder_harder_constituents_info);
+    JetObservable JetObservable32(threeplanes.second.harder_softer_constituents_info);
+    JetObservable JetObservable41(threeplanes.second.softer_harder_constituents_info);
+    JetObservable JetObservable42(threeplanes.second.softer_softer_constituents_info);
+    JetObservable JetObservable51(threeplanes.third.harder_harder_constituents_info);
+    JetObservable JetObservable52(threeplanes.third.harder_softer_constituents_info);
+    JetObservable JetObservable61(threeplanes.third.softer_harder_constituents_info);
+    JetObservable JetObservable62(threeplanes.third.softer_softer_constituents_info);
+    auto width31 = JetObservable31.jetwidth();
+    auto width32 = JetObservable32.jetwidth();
+    auto width41 = JetObservable41.jetwidth();
+    auto width42 = JetObservable42.jetwidth();
+    auto width51 = JetObservable51.jetwidth();
+    auto width52 = JetObservable52.jetwidth();
+    auto width61 = JetObservable61.jetwidth();
+    auto width62 = JetObservable62.jetwidth();
+
     SpinObservable spinobservable2(threeplanes.first.harder_constituents_info,
                                    threeplanes.first.softer_constituents_info,
                                    threeplanes.second.harder_constituents_info,
@@ -552,6 +569,142 @@ public:
     treeEvents.push_back(prefix + "sigma16" + suffix, width6.sigma1);
     treeEvents.push_back(prefix + "sigma26" + suffix, width6.sigma2);
 
+    // treeEvents.push_back(prefix + "pt31" + suffix, threeplanes.second.harder_harder.pt());
+    // treeEvents.push_back(prefix + "eta31" + suffix,
+    //                      threeplanes.second.harder_harder.eta());
+    // treeEvents.push_back(prefix + "phi31" + suffix,
+    //                      threeplanes.second.harder_harder.phi());
+    // treeEvents.push_back(prefix + "e31" + suffix, threeplanes.second.harder_harder.e());
+    // treeEvents.push_back(prefix + "ntracks31" + suffix,
+    //                      threeplanes.second.harder_harder_ntracks);
+    // treeEvents.push_back(prefix + "nparticles31" + suffix,
+    //                      threeplanes.second.harder_harder_nparticles);
+    // treeEvents.push_back(prefix + "flavour31" + suffix,
+    //                      JetBranch::GetIFNFlavour(threeplanes.second.harder_harder));
+    // treeEvents.push_back(prefix + "pTD31" + suffix, JetObservable31.pTD());
+    // treeEvents.push_back(prefix + "sigma31" + suffix, width31.sigma);
+    // treeEvents.push_back(prefix + "sigma131" + suffix, width31.sigma1);
+    // treeEvents.push_back(prefix + "sigma231" + suffix, width31.sigma2);
+
+    // treeEvents.push_back(prefix + "pt32" + suffix, threeplanes.second.harder_softer.pt());
+    // treeEvents.push_back(prefix + "eta32" + suffix,
+    //                      threeplanes.second.harder_softer.eta());
+    // treeEvents.push_back(prefix + "phi32" + suffix,
+    //                      threeplanes.second.harder_softer.phi());
+    // treeEvents.push_back(prefix + "e32" + suffix, threeplanes.second.harder_softer.e());
+    // treeEvents.push_back(prefix + "ntracks32" + suffix,
+    //                      threeplanes.second.harder_softer_ntracks);
+    // treeEvents.push_back(prefix + "nparticles32" + suffix,
+    //                      threeplanes.second.harder_softer_nparticles);
+    // treeEvents.push_back(prefix + "flavour32" + suffix,
+    //                      JetBranch::GetIFNFlavour(threeplanes.second.harder_softer));
+    // treeEvents.push_back(prefix + "pTD32" + suffix, JetObservable32.pTD());
+    // treeEvents.push_back(prefix + "sigma32" + suffix, width32.sigma);
+    // treeEvents.push_back(prefix + "sigma132" + suffix, width32.sigma1);
+    // treeEvents.push_back(prefix + "sigma232" + suffix, width32.sigma2);
+
+    // treeEvents.push_back(prefix + "pt41" + suffix, threeplanes.second.softer_harder.pt());
+    // treeEvents.push_back(prefix + "eta41" + suffix,
+    //                      threeplanes.second.softer_harder.eta());
+    // treeEvents.push_back(prefix + "phi41" + suffix,
+    //                      threeplanes.second.softer_harder.phi());
+    // treeEvents.push_back(prefix + "e41" + suffix, threeplanes.second.softer_harder.e());
+    // treeEvents.push_back(prefix + "ntracks41" + suffix,
+    //                      threeplanes.second.softer_harder_ntracks);
+    // treeEvents.push_back(prefix + "nparticles41" + suffix,
+    //                      threeplanes.second.softer_harder_nparticles);
+    // treeEvents.push_back(prefix + "flavour41" + suffix,
+    //                      JetBranch::GetIFNFlavour(threeplanes.second.softer_harder));
+    // treeEvents.push_back(prefix + "pTD41" + suffix, JetObservable41.pTD());
+    // treeEvents.push_back(prefix + "sigma41" + suffix, width41.sigma);
+    // treeEvents.push_back(prefix + "sigma141" + suffix, width41.sigma1);
+    // treeEvents.push_back(prefix + "sigma241" + suffix, width41.sigma2);
+
+    // treeEvents.push_back(prefix + "pt42" + suffix, threeplanes.second.softer_softer.pt());
+    // treeEvents.push_back(prefix + "eta42" + suffix,
+    //                      threeplanes.second.softer_softer.eta());
+    // treeEvents.push_back(prefix + "phi42" + suffix,
+    //                      threeplanes.second.softer_softer.phi());
+    // treeEvents.push_back(prefix + "e42" + suffix, threeplanes.second.softer_softer.e());
+    // treeEvents.push_back(prefix + "ntracks42" + suffix,
+    //                      threeplanes.second.softer_softer_ntracks);
+    // treeEvents.push_back(prefix + "nparticles42" + suffix,
+    //                      threeplanes.second.softer_softer_nparticles);
+    // treeEvents.push_back(prefix + "flavour42" + suffix,
+    //                      JetBranch::GetIFNFlavour(threeplanes.second.softer_softer));
+    // treeEvents.push_back(prefix + "pTD42" + suffix, JetObservable42.pTD());
+    // treeEvents.push_back(prefix + "sigma42" + suffix, width42.sigma);
+    // treeEvents.push_back(prefix + "sigma142" + suffix, width42.sigma1);
+    // treeEvents.push_back(prefix + "sigma242" + suffix, width42.sigma2);
+
+    // treeEvents.push_back(prefix + "pt51" + suffix, threeplanes.third.harder_harder.pt());
+    // treeEvents.push_back(prefix + "eta51" + suffix,
+    //                      threeplanes.third.harder_harder.eta());
+    // treeEvents.push_back(prefix + "phi51" + suffix,
+    //                      threeplanes.third.harder_harder.phi());
+    // treeEvents.push_back(prefix + "e51" + suffix, threeplanes.third.harder_harder.e());
+    // treeEvents.push_back(prefix + "ntracks51" + suffix,
+    //                      threeplanes.third.harder_harder_ntracks);
+    // treeEvents.push_back(prefix + "nparticles51" + suffix,
+    //                      threeplanes.third.harder_harder_nparticles);
+    // treeEvents.push_back(prefix + "flavour51" + suffix,
+    //                      JetBranch::GetIFNFlavour(threeplanes.third.harder_harder));
+    // treeEvents.push_back(prefix + "pTD51" + suffix, JetObservable51.pTD());
+    // treeEvents.push_back(prefix + "sigma51" + suffix, width51.sigma);
+    // treeEvents.push_back(prefix + "sigma151" + suffix, width51.sigma1);
+    // treeEvents.push_back(prefix + "sigma251" + suffix, width51.sigma2);
+
+    // treeEvents.push_back(prefix + "pt52" + suffix, threeplanes.third.harder_softer.pt());
+    // treeEvents.push_back(prefix + "eta52" + suffix,
+    //                      threeplanes.third.harder_softer.eta());
+    // treeEvents.push_back(prefix + "phi52" + suffix,
+    //                      threeplanes.third.harder_softer.phi());
+    // treeEvents.push_back(prefix + "e52" + suffix, threeplanes.third.harder_softer.e());
+    // treeEvents.push_back(prefix + "ntracks52" + suffix,
+    //                      threeplanes.third.harder_softer_ntracks);
+    // treeEvents.push_back(prefix + "nparticles52" + suffix,
+    //                      threeplanes.third.harder_softer_nparticles);
+    // treeEvents.push_back(prefix + "flavour52" + suffix,
+    //                      JetBranch::GetIFNFlavour(threeplanes.third.harder_softer));
+    // treeEvents.push_back(prefix + "pTD52" + suffix, JetObservable52.pTD());
+    // treeEvents.push_back(prefix + "sigma52" + suffix, width52.sigma);
+    // treeEvents.push_back(prefix + "sigma152" + suffix, width52.sigma1);
+    // treeEvents.push_back(prefix + "sigma252" + suffix, width52.sigma2);
+
+    // treeEvents.push_back(prefix + "pt61" + suffix, threeplanes.third.softer_harder.pt());
+    // treeEvents.push_back(prefix + "eta61" + suffix,
+    //                      threeplanes.third.softer_harder.eta());
+    // treeEvents.push_back(prefix + "phi61" + suffix,
+    //                      threeplanes.third.softer_harder.phi());
+    // treeEvents.push_back(prefix + "e61" + suffix, threeplanes.third.softer_harder.e());
+    // treeEvents.push_back(prefix + "ntracks61" + suffix,
+    //                      threeplanes.third.softer_harder_ntracks);
+    // treeEvents.push_back(prefix + "nparticles61" + suffix,
+    //                      threeplanes.third.softer_harder_nparticles);
+    // treeEvents.push_back(prefix + "flavour61" + suffix,
+    //                      JetBranch::GetIFNFlavour(threeplanes.third.softer_harder));
+    // treeEvents.push_back(prefix + "pTD61" + suffix, JetObservable61.pTD());
+    // treeEvents.push_back(prefix + "sigma61" + suffix, width61.sigma);
+    // treeEvents.push_back(prefix + "sigma161" + suffix, width61.sigma1);
+    // treeEvents.push_back(prefix + "sigma261" + suffix, width61.sigma2);
+
+    // treeEvents.push_back(prefix + "pt62" + suffix, threeplanes.third.softer_softer.pt());
+    // treeEvents.push_back(prefix + "eta62" + suffix,
+    //                      threeplanes.third.softer_softer.eta());
+    // treeEvents.push_back(prefix + "phi62" + suffix,
+    //                      threeplanes.third.softer_softer.phi());
+    // treeEvents.push_back(prefix + "e62" + suffix, threeplanes.third.softer_softer.e());
+    // treeEvents.push_back(prefix + "ntracks62" + suffix,
+    //                      threeplanes.third.softer_softer_ntracks);
+    // treeEvents.push_back(prefix + "nparticles62" + suffix,
+    //                      threeplanes.third.softer_softer_nparticles);
+    // treeEvents.push_back(prefix + "flavour62" + suffix,
+    //                      JetBranch::GetIFNFlavour(threeplanes.third.softer_softer));
+    // treeEvents.push_back(prefix + "pTD62" + suffix, JetObservable62.pTD());
+    // treeEvents.push_back(prefix + "sigma62" + suffix, width62.sigma);
+    // treeEvents.push_back(prefix + "sigma162" + suffix, width62.sigma1);
+    // treeEvents.push_back(prefix + "sigma262" + suffix, width62.sigma2);
+
     treeEvents.push_back(prefix + "init_pdgid1" + suffix,
                          threeplanes.first.harder_init_pdgid);
     treeEvents.push_back(prefix + "init_descri1" + suffix,
@@ -605,6 +758,78 @@ public:
                          threeplanes.third.softer_final_pdgid);
     treeEvents.push_back(prefix + "final_descri6" + suffix,
                          threeplanes.third.softer_final_descri);
+
+    // treeEvents.push_back(prefix + "init_pdgid31" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.second.harder_harder, false));
+    // treeEvents.push_back(prefix + "init_descri31" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.second.harder_harder, false));
+    // treeEvents.push_back(prefix + "final_pdgid31" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.second.harder_harder, true));
+    // treeEvents.push_back(prefix + "final_descri31" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.second.harder_harder, true));
+
+    // treeEvents.push_back(prefix + "init_pdgid32" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.second.harder_softer, false));
+    // treeEvents.push_back(prefix + "init_descri32" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.second.harder_softer, false));
+    // treeEvents.push_back(prefix + "final_pdgid32" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.second.harder_softer, true));
+    // treeEvents.push_back(prefix + "final_descri32" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.second.harder_softer, true));
+
+    // treeEvents.push_back(prefix + "init_pdgid41" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.second.softer_harder, false));
+    // treeEvents.push_back(prefix + "init_descri41" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.second.softer_harder, false));
+    // treeEvents.push_back(prefix + "final_pdgid41" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.second.softer_harder, true));
+    // treeEvents.push_back(prefix + "final_descri41" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.second.softer_harder, true));
+
+    // treeEvents.push_back(prefix + "init_pdgid42" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.second.softer_softer, false));
+    // treeEvents.push_back(prefix + "init_descri42" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.second.softer_softer, false));
+    // treeEvents.push_back(prefix + "final_pdgid42" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.second.softer_softer, true));
+    // treeEvents.push_back(prefix + "final_descri42" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.second.softer_softer, true));
+
+    // treeEvents.push_back(prefix + "init_pdgid51" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.third.harder_harder, false));
+    // treeEvents.push_back(prefix + "init_descri51" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.third.harder_harder, false));
+    // treeEvents.push_back(prefix + "final_pdgid51" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.third.harder_harder, true));
+    // treeEvents.push_back(prefix + "final_descri51" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.third.harder_harder, true));
+
+    // treeEvents.push_back(prefix + "init_pdgid52" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.third.harder_softer, false));
+    // treeEvents.push_back(prefix + "init_descri52" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.third.harder_softer, false));
+    // treeEvents.push_back(prefix + "final_pdgid52" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.third.harder_softer, true));
+    // treeEvents.push_back(prefix + "final_descri52" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.third.harder_softer, true));
+
+    // treeEvents.push_back(prefix + "init_pdgid61" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.third.softer_harder, false));
+    // treeEvents.push_back(prefix + "init_descri61" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.third.softer_harder, false));
+    // treeEvents.push_back(prefix + "final_pdgid61" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.third.softer_harder, true));
+    // treeEvents.push_back(prefix + "final_descri61" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.third.softer_harder, true));
+
+    // treeEvents.push_back(prefix + "init_pdgid62" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.third.softer_softer, false));
+    // treeEvents.push_back(prefix + "init_descri62" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.third.softer_softer, false));
+    // treeEvents.push_back(prefix + "final_pdgid62" + suffix,
+    //                      JetBranch::GetIFNPdgid(threeplanes.third.softer_softer, true));
+    // treeEvents.push_back(prefix + "final_descri62" + suffix,
+    //                      JetBranch::GetIFNDescri(threeplanes.third.softer_softer, true));
 
     treeEvents.push_back(prefix + "nbHadrons1" + suffix,
                          threeplanes.first.harder_ghostb);

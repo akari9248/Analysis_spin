@@ -48,6 +48,10 @@ public:
   {
     PseudoJet harder;
     PseudoJet softer;
+    PseudoJet harder_harder;
+    PseudoJet harder_softer;
+    PseudoJet softer_harder;
+    PseudoJet softer_softer;
     TLorentzVector harder_vect;
     TLorentzVector softer_vect;
     double theta;
@@ -57,12 +61,28 @@ public:
     TVector3 n;
     vector<PseudoJet> harder_constituents;
     vector<PseudoJet> softer_constituents;
+    vector<PseudoJet> harder_harder_constituents;
+    vector<PseudoJet> harder_softer_constituents;
+    vector<PseudoJet> softer_harder_constituents;
+    vector<PseudoJet> softer_softer_constituents;
     int harder_ntracks;
     int softer_ntracks;
     int harder_nparticles;
     int softer_nparticles;
+    int harder_harder_ntracks;
+    int softer_harder_ntracks;
+    int harder_harder_nparticles;
+    int softer_harder_nparticles;
+    int harder_softer_ntracks;
+    int softer_softer_ntracks;
+    int harder_softer_nparticles;
+    int softer_softer_nparticles;
     vector<ParticleInfo> harder_constituents_info;
     vector<ParticleInfo> softer_constituents_info;
+    vector<ParticleInfo> harder_harder_constituents_info;
+    vector<ParticleInfo> harder_softer_constituents_info;
+    vector<ParticleInfo> softer_harder_constituents_info;
+    vector<ParticleInfo> softer_softer_constituents_info;
     int softer_flav;
     int harder_flav;
     int softer_init_pdgid;
@@ -88,7 +108,10 @@ public:
       GetPlaneVector();
       harder_ntracks = GetNtracks(harder_constituents, particlesinfo);
       softer_ntracks = GetNtracks(softer_constituents, particlesinfo);
-
+      harder_harder_ntracks = GetNtracks(harder_harder_constituents, particlesinfo);
+      softer_harder_ntracks = GetNtracks(softer_harder_constituents, particlesinfo);
+      harder_softer_ntracks = GetNtracks(harder_softer_constituents, particlesinfo);
+      softer_softer_ntracks = GetNtracks(softer_softer_constituents, particlesinfo);
       for (int i = 0; i < harder_constituents.size(); i++)
       {
         auto particle = harder_constituents.at(i);
@@ -123,6 +146,42 @@ public:
       softer_ghostc = softer_ghostc_temp;
       harder_nparticles = harder_constituents.size() - harder_ghostb - harder_ghostc;
       softer_nparticles = softer_constituents.size() - softer_ghostb - softer_ghostc;
+      harder_harder_nparticles = harder_harder_constituents.size();
+      softer_harder_nparticles = softer_harder_constituents.size();
+      harder_softer_nparticles = harder_softer_constituents.size();
+      softer_softer_nparticles = softer_softer_constituents.size();
+      for (int i = 0; i < harder_harder_constituents.size(); i++)
+      {
+        auto particle = harder_harder_constituents.at(i);
+        harder_harder_constituents_info.push_back(ParticleInfo(
+            particlesinfo.at(particle.user_index()).pdgid,
+            particlesinfo.at(particle.user_index()).charge, particle.pt(),
+            particle.eta(), particle.phi(), particle.e()));
+      }
+      for (int i = 0; i < harder_softer_constituents.size(); i++)
+      {
+        auto particle = harder_softer_constituents.at(i);
+        harder_softer_constituents_info.push_back(ParticleInfo(
+            particlesinfo.at(particle.user_index()).pdgid,
+            particlesinfo.at(particle.user_index()).charge, particle.pt(),
+            particle.eta(), particle.phi(), particle.e()));
+      }
+      for (int i = 0; i < softer_harder_constituents.size(); i++)
+      {
+        auto particle = softer_harder_constituents.at(i);
+        softer_harder_constituents_info.push_back(ParticleInfo(
+            particlesinfo.at(particle.user_index()).pdgid,
+            particlesinfo.at(particle.user_index()).charge, particle.pt(),
+            particle.eta(), particle.phi(), particle.e()));
+      }
+      for (int i = 0; i < softer_softer_constituents.size(); i++)
+      {
+        auto particle = softer_softer_constituents.at(i);
+        softer_softer_constituents_info.push_back(ParticleInfo(
+            particlesinfo.at(particle.user_index()).pdgid,
+            particlesinfo.at(particle.user_index()).charge, particle.pt(),
+            particle.eta(), particle.phi(), particle.e()));
+      }
     }
     void GetPlaneVector()
     {
@@ -208,10 +267,10 @@ public:
   {
     PseudoJet j1, j2, j3, j4, jinit;
     PlaneVariables maxPrimary = {
-        PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+        PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
         0.0, 0.0, TVector3()};
     PlaneVariables maxSecondary = {
-        PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+        PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
         0.0, 0.0, TVector3()};
     jinit = j0;
 
@@ -220,6 +279,18 @@ public:
 
       PseudoJet primaryHarder = (j1.modp() > j2.modp()) ? j1 : j2;
       PseudoJet primarySofter = (j1.modp() > j2.modp()) ? j2 : j1;
+      PseudoJet primaryHarder_harder, primaryHarder_softer, j11, j12;
+      if (primaryHarder.has_parents(j11, j12))
+      {
+        primaryHarder_harder = (j11.modp() > j12.modp()) ? j11 : j12;
+        primaryHarder_softer = (j11.modp() > j12.modp()) ? j12 : j11;
+      }
+      PseudoJet primarySofter_harder, primarySofter_softer, j21, j22;
+      if (primarySofter.has_parents(j21, j22))
+      {
+        primarySofter_harder = (j21.modp() > j22.modp()) ? j21 : j22;
+        primarySofter_softer = (j21.modp() > j22.modp()) ? j22 : j21;
+      }
       double primaryTheta = primaryHarder.delta_phi_to(primarySofter);
       double primaryDeltaR = primaryHarder.delta_R(primarySofter);
       double primaryZ =
@@ -231,6 +302,10 @@ public:
       {
         maxPrimary = {primaryHarder,
                       primarySofter,
+                      primaryHarder_harder,
+                      primaryHarder_softer,
+                      primarySofter_harder,
+                      primarySofter_softer,
                       PseudoJetToTLorentzVector(primaryHarder),
                       PseudoJetToTLorentzVector(primarySofter),
                       primaryTheta,
@@ -239,9 +314,13 @@ public:
                       primaryKt,
                       TVector3(),
                       primaryHarder.constituents(),
-                      primarySofter.constituents()};
+                      primarySofter.constituents(),
+                      primaryHarder_harder.constituents(),
+                      primaryHarder_softer.constituents(),
+                      primarySofter_harder.constituents(),
+                      primarySofter_softer.constituents()};
         maxSecondary = {
-            PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+            PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
             0.0, 0.0, TVector3()};
         PseudoJet secondplanejet = primaryHarder;
         if (issecondsoft)
@@ -250,6 +329,18 @@ public:
         {
           PseudoJet secondaryHarder = (j3.modp() > j4.modp()) ? j3 : j4;
           PseudoJet secondarySofter = (j3.modp() > j4.modp()) ? j4 : j3;
+          PseudoJet secondaryHarder_harder, secondaryHarder_softer, j31, j32;
+          if (secondaryHarder.has_parents(j31, j32))
+          {
+            secondaryHarder_harder = (j31.modp() > j32.modp()) ? j31 : j32;
+            secondaryHarder_softer = (j31.modp() > j32.modp()) ? j32 : j31;
+          }
+          PseudoJet secondarySofter_harder, secondarySofter_softer, j41, j42;
+          if (secondarySofter.has_parents(j41, j42))
+          {
+            secondarySofter_harder = (j41.modp() > j42.modp()) ? j41 : j42;
+            secondarySofter_softer = (j41.modp() > j42.modp()) ? j42 : j41;
+          }
           double secondaryTheta = secondaryHarder.delta_phi_to(secondarySofter);
           double secondaryDeltaR =
               secondaryHarder.delta_R(secondarySofter);
@@ -260,6 +351,10 @@ public:
           {
             maxSecondary = {secondaryHarder,
                             secondarySofter,
+                            secondaryHarder_harder,
+                            secondaryHarder_softer,
+                            secondarySofter_harder,
+                            secondarySofter_softer,
                             PseudoJetToTLorentzVector(secondaryHarder),
                             PseudoJetToTLorentzVector(secondarySofter),
                             secondaryTheta,
@@ -268,7 +363,11 @@ public:
                             secondaryKt,
                             TVector3(),
                             secondaryHarder.constituents(),
-                            secondarySofter.constituents()};
+                            secondarySofter.constituents(),
+                            secondaryHarder_harder.constituents(),
+                            secondaryHarder_softer.constituents(),
+                            secondarySofter_harder.constituents(),
+                            secondarySofter_softer.constituents()};
           }
           secondplanejet = secondaryHarder;
         }
@@ -394,27 +493,37 @@ public:
   {
     PseudoJet j1, j2, j3, j4, jinit;
     PlaneVariables maxPrimary = {
-        PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+        PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
         0.0, 0.0, TVector3()};
     PlaneVariables maxSecondary = {
-        PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+        PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
         0.0, 0.0, TVector3()};
     PlaneVariables maxThirdary = {
-        PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+        PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
         0.0, 0.0, TVector3()};
     jinit = j0;
-
     std::vector<bool> isselects;
     while (j0.has_parents(j1, j2))
     {
       PseudoJet primaryHarder = (j1.modp() > j2.modp()) ? j1 : j2;
       PseudoJet primarySofter = (j1.modp() > j2.modp()) ? j2 : j1;
+      PseudoJet primaryHarder_harder, primaryHarder_softer, j11, j12;
+      if (primaryHarder.has_parents(j11, j12))
+      {
+        primaryHarder_harder = (j11.modp() > j12.modp()) ? j11 : j12;
+        primaryHarder_softer = (j11.modp() > j12.modp()) ? j12 : j11;
+      }
+      PseudoJet primarySofter_harder, primarySofter_softer, j21, j22;
+      if (primarySofter.has_parents(j21, j22))
+      {
+        primarySofter_harder = (j21.modp() > j22.modp()) ? j21 : j22;
+        primarySofter_softer = (j21.modp() > j22.modp()) ? j22 : j21;
+      }
       double primaryTheta = primaryHarder.delta_phi_to(primarySofter);
       double primaryDeltaR = primaryHarder.delta_R(primarySofter);
       double primaryZ =
           primarySofter.modp() / (primarySofter.modp() + primaryHarder.modp());
       double primaryKt = primarySofter.modp() * primaryDeltaR;
-
       // PseudoJet primaryHarder = (j1.pt() > j2.pt()) ? j1 : j2;
       // PseudoJet primarySofter = (j1.pt() > j2.pt()) ? j2 : j1;
       // double primaryTheta = primaryHarder.delta_phi_to(primarySofter);
@@ -425,11 +534,32 @@ public:
       // double primaryKt = primarySofter.modp() * sin(primaryTheta);
       // Update maxPrimary if this kt is larger
       bool isselect = false;
+      std::vector<PseudoJet> vec1, vec2, vec3, vec4;
+      if (!primaryHarder_harder.has_structure())
+        vec1 = {};
+      else
+        vec1 = primaryHarder_harder.constituents();
+      if (!primaryHarder_softer.has_structure())
+        vec2 = {};
+      else
+        vec2 = primaryHarder_softer.constituents();
+      if (!primarySofter_harder.has_structure())
+        vec3 = {};
+      else
+        vec3 = primarySofter_harder.constituents();
+      if (!primarySofter_softer.has_structure())
+        vec4 = {};
+      else
+        vec4 = primarySofter_softer.constituents();
       if (primaryKt > maxPrimary.kt && primaryZ > z1cut && primaryKt < kt1cut)
       {
         isselect = true;
         maxPrimary = {primaryHarder,
                       primarySofter,
+                      primaryHarder_harder,
+                      primaryHarder_softer,
+                      primarySofter_harder,
+                      primarySofter_softer,
                       PseudoJetToTLorentzVector(primaryHarder),
                       PseudoJetToTLorentzVector(primarySofter),
                       primaryTheta,
@@ -438,12 +568,16 @@ public:
                       primaryKt,
                       TVector3(),
                       primaryHarder.constituents(),
-                      primarySofter.constituents()};
+                      primarySofter.constituents(),
+                      vec1,
+                      vec2,
+                      vec3,
+                      vec4};
         maxSecondary = {
-            PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+            PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
             0.0, 0.0, TVector3()};
         maxThirdary = {
-            PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
+            PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), TLorentzVector(), TLorentzVector(), 0.0, 0.0,
             0.0, 0.0, TVector3()};
         PseudoJet secondplanejet = primaryHarder;
         PseudoJet thirdplanejet = primaryHarder;
@@ -453,16 +587,49 @@ public:
         {
           PseudoJet secondaryHarder = (j3.modp() > j4.modp()) ? j3 : j4;
           PseudoJet secondarySofter = (j3.modp() > j4.modp()) ? j4 : j3;
+          PseudoJet secondaryHarder_harder, secondaryHarder_softer, j31, j32;
+          if (secondaryHarder.has_parents(j31, j32))
+          {
+            secondaryHarder_harder = (j31.modp() > j32.modp()) ? j31 : j32;
+            secondaryHarder_softer = (j31.modp() > j32.modp()) ? j32 : j31;
+          }
+          PseudoJet secondarySofter_harder, secondarySofter_softer, j41, j42;
+          if (secondarySofter.has_parents(j41, j42))
+          {
+            secondarySofter_harder = (j41.modp() > j42.modp()) ? j41 : j42;
+            secondarySofter_softer = (j41.modp() > j42.modp()) ? j42 : j41;
+          }
           double secondaryTheta = secondaryHarder.delta_phi_to(secondarySofter);
           double secondaryDeltaR =
               secondaryHarder.delta_R(secondarySofter);
           double secondaryZ = secondarySofter.modp() /
                               (secondarySofter.modp() + secondaryHarder.modp());
           double secondaryKt = secondarySofter.modp() * secondaryDeltaR;
+          std::vector<PseudoJet> vec1, vec2, vec3, vec4;
+          if (!secondaryHarder_harder.has_structure())
+            vec1 = {};
+          else
+            vec1 = secondaryHarder_harder.constituents();
+          if (!secondaryHarder_softer.has_structure())
+            vec2 = {};
+          else
+            vec2 = secondaryHarder_softer.constituents();
+          if (!secondarySofter_harder.has_structure())
+            vec3 = {};
+          else
+            vec3 = secondarySofter_harder.constituents();
+          if (!secondarySofter_softer.has_structure())
+            vec4 = {};
+          else
+            vec4 = secondarySofter_softer.constituents();
           if (secondaryKt > maxSecondary.kt && secondaryZ > z2cut && secondaryKt > kt2cut)
           {
             maxSecondary = {secondaryHarder,
                             secondarySofter,
+                            secondaryHarder_harder,
+                            secondaryHarder_softer,
+                            secondarySofter_harder,
+                            secondarySofter_softer,
                             PseudoJetToTLorentzVector(secondaryHarder),
                             PseudoJetToTLorentzVector(secondarySofter),
                             secondaryTheta,
@@ -471,7 +638,11 @@ public:
                             secondaryKt,
                             TVector3(),
                             secondaryHarder.constituents(),
-                            secondarySofter.constituents()};
+                            secondarySofter.constituents(),
+                            vec1,
+                            vec2,
+                            vec3,
+                            vec4};
           }
           secondplanejet = secondaryHarder;
         }
@@ -479,6 +650,18 @@ public:
         {
           PseudoJet thirdaryHarder = (j3.modp() > j4.modp()) ? j3 : j4;
           PseudoJet thirdarySofter = (j3.modp() > j4.modp()) ? j4 : j3;
+          PseudoJet thirdaryHarder_harder, thirdaryHarder_softer, j31, j32;
+          if (thirdaryHarder.has_parents(j31, j32))
+          {
+            thirdaryHarder_harder = (j31.modp() > j32.modp()) ? j31 : j32;
+            thirdaryHarder_softer = (j31.modp() > j32.modp()) ? j32 : j31;
+          }
+          PseudoJet thirdarySofter_harder, thirdarySofter_softer, j41, j42;
+          if (thirdarySofter.has_parents(j41, j42))
+          {
+            thirdarySofter_harder = (j41.modp() > j42.modp()) ? j41 : j42;
+            thirdarySofter_softer = (j41.modp() > j42.modp()) ? j42 : j41;
+          }
           double thirdaryTheta = thirdaryHarder.delta_phi_to(thirdarySofter);
           double thirdaryDeltaR =
               thirdaryHarder.delta_R(thirdarySofter);
@@ -494,10 +677,31 @@ public:
           // double thirdaryZ = thirdarySofter.modp() /
           //                    (thirdarySofter.modp() + thirdaryHarder.modp());
           // double thirdaryKt = thirdarySofter.pt() * thirdaryDeltaR;
+          std::vector<PseudoJet> vec1, vec2, vec3, vec4;
+          if (!thirdaryHarder_harder.has_structure())
+            vec1 = {};
+          else
+            vec1 = thirdaryHarder_harder.constituents();
+          if (!thirdaryHarder_softer.has_structure())
+            vec2 = {};
+          else
+            vec2 = thirdaryHarder_softer.constituents();
+          if (!thirdarySofter_harder.has_structure())
+            vec3 = {};
+          else
+            vec3 = thirdarySofter_harder.constituents();
+          if (!thirdarySofter_softer.has_structure())
+            vec4 = {};
+          else
+            vec4 = thirdarySofter_softer.constituents();
           if (thirdaryKt > maxThirdary.kt && thirdaryZ > z2cut && thirdaryKt > kt2cut)
           {
             maxThirdary = {thirdaryHarder,
                            thirdarySofter,
+                           thirdaryHarder_harder,
+                           thirdaryHarder_softer,
+                           thirdarySofter_harder,
+                           thirdarySofter_softer,
                            PseudoJetToTLorentzVector(thirdaryHarder),
                            PseudoJetToTLorentzVector(thirdarySofter),
                            thirdaryTheta,
@@ -506,7 +710,11 @@ public:
                            thirdaryKt,
                            TVector3(),
                            thirdaryHarder.constituents(),
-                           thirdarySofter.constituents()};
+                           thirdarySofter.constituents(),
+                           vec1,
+                           vec2,
+                           vec3,
+                           vec4};
           }
           thirdplanejet = thirdaryHarder;
         }
@@ -895,9 +1103,10 @@ public:
                 int pdgid2 = JetBranch::GetIFNFlavour(softer);
                 // clang-format off
                 PlaneVariables pseudoplanes = {
-                    harder, softer, PseudoJetToTLorentzVector(harder), PseudoJetToTLorentzVector(softer), 
-                    0, deltaR, 0, 0, {0, 0, 0}, harder.constituents(), softer.constituents(), 
-                    0, 0, 0, 0, {}, {}, 
+                    harder, softer, PseudoJet(), PseudoJet(), PseudoJet(), PseudoJet(), 
+                    PseudoJetToTLorentzVector(harder), PseudoJetToTLorentzVector(softer), 
+                    0, deltaR, 0, 0, {0, 0, 0}, harder.constituents(), softer.constituents(), {}, {}, {}, {},
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {}, {}, {}, {}, {}, {}, 
                     GetIFNFlavour(harder), GetIFNFlavour(softer), 
                     GetIFNPdgid(softer, false), GetIFNDescri(softer, false), 
                     GetIFNPdgid(softer, true), GetIFNDescri(softer, true), 
