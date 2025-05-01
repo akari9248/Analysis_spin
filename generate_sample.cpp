@@ -1720,7 +1720,7 @@ public:
          options.jdEnergyUncertainty.find("JERDn") != std::string::npos ||
          options.jdEnergyUncertainty.find("JERNm") != std::string::npos ||
          options.jdEnergyUncertainty.find("JES") != std::string::npos ||
-         options.jdEnergyUncertainty.find("JESRaw") != std::string::npos ))
+         options.jdEnergyUncertainty.find("Raw") != std::string::npos ))
     {
       t->SetBranchAddress(prefixTStr + "JetPt" + options.jdEnergyUncertainty, jetpt_vector);
     }

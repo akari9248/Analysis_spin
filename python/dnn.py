@@ -231,6 +231,23 @@ def build_multiLabel_classification_model(input_dim,output_dim, hidden_units, l2
     model.add(layers.Dense(output_dim, activation='softmax'))
 
     return model
+# import tensorflow as tf
+# from tensorflow.keras import layers, regularizers
+# from tensorflow.keras.layers import BatchNormalization
+# def build_multiLabel_classification_model2(input_dim, output_dim, hidden_units, l2_reg=0.0, dropout_rate=0):
+#     model = tf.keras.Sequential()
+#     # 第一层输入层并进行批量标准化
+#     model.add(layers.InputLayer(input_shape=(input_dim,)))
+#     model.add(BatchNormalization())  # 标准化输入数据
+#     # 添加隐藏层
+#     for units in hidden_units:
+#         model.add(layers.Dense(units, activation=None, kernel_regularizer=regularizers.l2(l2_reg)))  # 不设置激活函数
+#         model.add(BatchNormalization())  # 批量标准化
+#         model.add(layers.ReLU())  # 激活函数 ReLU
+#         model.add(Dropout(dropout_rate))  # Dropout 层
+#     # 输出层
+#     model.add(layers.Dense(output_dim, activation='softmax'))  # 使用 softmax 激活函数进行多标签分类
+#     return model
 def build_conv1d_classification_model(input_length, num_features, l2_reg=0.0, dropout_rate=0):
     model = tf.keras.Sequential()
     
@@ -585,7 +602,7 @@ def convert_to_one_hot_fourlabel2(labels,match):
 def convert_to_one_hot_fourlabel3(labels,match,final_descri3,final_descri4):
     one_hot_labels = np.zeros((labels.shape[0], 4))
     for i, label in enumerate(labels):
-        if (((abs(final_descri3[i]) > 0 and abs(final_descri3[i]) <= 5) and final_descri4[i] == 21) or ((abs(final_descri4[i]) > 0 and abs(final_descri4[i]) <= 5) and final_descri3[i] == 21)) and (match[i] >= 0):
+        if ((abs(final_descri3[i]) > 0 and abs(final_descri3[i]) <= 5 and final_descri4[i] == 21) or (abs(final_descri4[i]) > 0 and abs(final_descri4[i]) <= 5 and final_descri3[i] == 21)) and (match[i] >= 0):
             one_hot_labels[i, 3] = 1  
         elif (final_descri3[i] == 21) and (final_descri4[i] == 21) and (match[i] >= 0):
             one_hot_labels[i, 1] = 1  
@@ -593,6 +610,33 @@ def convert_to_one_hot_fourlabel3(labels,match,final_descri3,final_descri4):
             one_hot_labels[i, 2] = 1  
         elif (final_descri3[i] == 0) and (final_descri4[i] == 0) and (match[i] < 0):
             one_hot_labels[i, 0] = 1  
+    return one_hot_labels
+def convert_to_one_hot_fivelabel(labels,match):
+    one_hot_labels = np.zeros((labels.shape[0], 5))
+    for i, label in enumerate(labels):
+        if np.array_equal(label, [3]) and (match[i] >= 0):
+            one_hot_labels[i, 3] = 1  
+        elif (np.array_equal(label, [1]) or np.array_equal(label, [5]) and (match[i] >= 0)):
+            one_hot_labels[i, 1] = 1  
+        elif (np.array_equal(label, [2]) or np.array_equal(label, [4]) and (match[i] >= 0)):
+            one_hot_labels[i, 2] = 1  
+        elif np.array_equal(label, [0]) and (match[i] < 0):
+            one_hot_labels[i, 0] = 1  
+        elif np.array_equal(label, [0]) and (match[i] >= 0):
+            one_hot_labels[i, 4] = 1 
+    return one_hot_labels
+def convert_to_one_hot_fourlabel_reco(labels,match1, match2):
+    one_hot_labels = np.zeros((labels.shape[0], 4))
+    for i, label in enumerate(labels):
+        if i < len(match1) and i < len(match2):
+            if np.array_equal(label, [3]) and (match1[i] >= 0) and (match2[i] >= 0):
+                one_hot_labels[i, 3] = 1  
+            elif np.array_equal(label, [1]) and (match1[i] >= 0) and (match2[i] >= 0):
+                one_hot_labels[i, 1] = 1  
+            elif (np.array_equal(label, [2]) or np.array_equal(label, [4]) and (match1[i] >= 0)  and (match2[i] >= 0)):
+                one_hot_labels[i, 2] = 1  
+            elif np.array_equal(label, [0]) and (match1[i] < 0 or match2[i] < 0):
+                one_hot_labels[i, 0] = 1  
     return one_hot_labels
 def convert_to_one_hot_sevenlabel(labels,match):
     one_hot_labels = np.zeros((labels.shape[0], 7))
@@ -906,6 +950,7 @@ def train_and_save_model_ThreeLabel(X_train, Y_train, X_val, Y_val,hidden_units=
     )  
     return model
 from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import ReduceLROnPlateau
 def train_and_save_model_MultiLabel(X_train, Y_train, X_val, Y_val,hidden_units=[16],learning_rate=0.0001,l2_reg=0,model = tf.keras.Sequential(), file_suffix=''):
     #hidden_units=math.ceil((X_train.shape[1]+1)/2)
     #hidden_units=math.ceil((X_train.shape[1]+1)*2.0/3)
@@ -917,14 +962,14 @@ def train_and_save_model_MultiLabel(X_train, Y_train, X_val, Y_val,hidden_units=
     # roc_auc_callback = RocAucCallback()
     # roc_auc_callback.training_data = (X_train, Y_train)
     # roc_auc_callback.validation_data = (X_val, Y_val)
+    lr_scheduler = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, min_lr=1e-6, verbose=1)
     early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
     history = model.fit(
         X_train, Y_train,
-        epochs=100,
+        epochs=200,
         batch_size=256,
         validation_data=(X_val, Y_val),
-        # callbacks=[early_stopping]
-        callbacks=[]
+        callbacks=[early_stopping, lr_scheduler]
     ) 
     
     plt.figure(figsize=(8, 6))
@@ -944,6 +989,237 @@ def train_and_save_model_MultiLabel(X_train, Y_train, X_val, Y_val,hidden_units=
     plt.show() 
     
     return model
+
+from sklearn.metrics import roc_curve, auc, f1_score, precision_score, recall_score, confusion_matrix
+import matplotlib.pyplot as plt
+import tensorflow as tf
+import numpy as np
+import os
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.optimizers import Adam
+from sklearn.model_selection import GridSearchCV
+from scikeras.wrappers import KerasClassifier
+# def build_multiLabel_classification_model(input_dim, num_labels, hidden_units=[16], l2_reg=0, dropout_rate=0.5):
+#     model = tf.keras.Sequential()
+#     model.add(tf.keras.layers.InputLayer(input_dim=input_dim))
+#     for units in hidden_units:
+#         model.add(tf.keras.layers.Dense(units, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(l2_reg)))
+#         model.add(tf.keras.layers.Dropout(dropout_rate))
+#     model.add(tf.keras.layers.Dense(num_labels, activation='softmax'))  # 多分类问题使用 softmax 激活函数
+#     return model
+from sklearn.metrics import confusion_matrix
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+def plot_confusion_matrix(y_true, y_pred, title='Confusion Matrix', filename=None, normalize=None):
+    """
+    This function prints and plots the confusion matrix.
+    Parameters:
+    - y_true: true labels
+    - y_pred: predicted labels
+    - title: title for the plot
+    - filename: filename to save the plot
+    - normalize: 'true' for true normalization, 'pred' for predicted normalization, None for no normalization
+    """
+    cm = confusion_matrix(np.argmax(y_true, axis=1), np.argmax(y_pred, axis=1))
+    if normalize == 'true':
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]  # Normalize by row (true label)
+    elif normalize == 'pred':
+        cm = cm.astype('float') / cm.sum(axis=0)[np.newaxis, :]  # Normalize by column (predicted label)
+    plt.figure(figsize=(8, 6))
+    plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)  # 调整边距
+    plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(cm.shape[1])
+    plt.xticks(tick_marks, range(cm.shape[1]), rotation=45)
+    plt.yticks(tick_marks, range(cm.shape[0]))
+    # Labeling the matrix
+    thresholds = cm.max() / 2.0
+    for i, j in np.ndindex(cm.shape):
+        if normalize is not None:
+            plt.text(j, i, f"{cm[i, j]:.0f}\n({cm[i, j]:.2f})",
+                     horizontalalignment="center",
+                     color="white" if cm[i, j] > thresholds else "black")
+        else:
+            plt.text(j, i, f"{cm[i, j]:.0f}",
+                     horizontalalignment="center",
+                     color="white" if cm[i, j] > thresholds else "black")
+    # plt.tight_layout()
+    plt.xlabel('Predicted label')
+    plt.ylabel('True label')
+    if filename:
+        plt.savefig(filename, format='pdf')
+    plt.show()
+def train_and_save_model_MultiLabel_Grid(X_train, Y_train, X_val, Y_val,
+                                           hidden_units=[16], learning_rate=0.0001,
+                                           l2_reg=0, batch_size=256, dropout_rate=0.5, model=None, sample_path1=''):
+    if model is None or (isinstance(model, tf.keras.Sequential) and len(model.layers) == 0):
+        model = build_multiLabel_classification_model(X_train.shape[1], Y_train.shape[1],
+                                                       hidden_units=hidden_units, l2_reg=l2_reg, 
+                                                       dropout_rate=dropout_rate)
+        adam_optimizer = Adam(learning_rate=learning_rate)
+        model.compile(optimizer=adam_optimizer, 
+                      loss='categorical_crossentropy', 
+                      metrics=['accuracy'])
+    # Generate a unique file suffix based on the parameters
+    file_suffix = f"hidden{hidden_units}_lr{learning_rate}_l2{l2_reg}_batch{batch_size}_dropout{dropout_rate}"
+    early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+    history = model.fit(
+        X_train, Y_train, epochs=100, batch_size=batch_size,
+        validation_data=(X_val, Y_val), callbacks=[early_stopping]
+    )
+    # Plotting loss and saving the graph
+    plt.figure(figsize=(8, 6))
+    plt.plot(history.history['loss'], label='Training Loss')
+    plt.plot(history.history['val_loss'], label='Validation Loss')
+    plt.title('Loss vs. Epoch')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.grid(True)
+    plot_file_name = f'loss_vs_epoch_{file_suffix}.pdf'
+    plot_file_path = os.path.join(sample_path1+'/loss_epoch/', plot_file_name)
+    plt.savefig(plot_file_path, format='pdf')
+    plt.close()
+    # Save the model
+    model_save_path = os.path.join(sample_path1+'/models/Foulabel_' + file_suffix)
+    model.save(model_save_path)
+    # Get predictions
+    y_pred_val = model.predict(X_val)
+    y_pred_train = model.predict(X_train)
+    y_true_val = Y_val
+    y_true_train = Y_train
+    # Plot ROC for all classes - Training Set
+    plt.figure(figsize=(10, 8))
+    for i in range(y_true_train.shape[1]):
+        fpr_train, tpr_train, _ = roc_curve(y_true_train[:, i], y_pred_train[:, i])
+        roc_auc_train = auc(fpr_train, tpr_train)
+        plt.plot(fpr_train, tpr_train, label=f'Train ROC Curve - Label {i} (AUC = {roc_auc_train:.4f})')
+    plt.plot([0, 1], [0, 1], linestyle='--', color='grey')
+    plt.title('ROC Curves for Training Set', fontsize = 18)
+    plt.xlabel('False Positive Rate', fontsize = 18)
+    plt.ylabel('True Positive Rate', fontsize = 18)
+    plt.legend(loc='lower right', fontsize = 12)
+    roc_train_file_name = f'roc_curves_train_{file_suffix}.pdf'
+    roc_train_file_path = os.path.join(sample_path1+'/roc/', roc_train_file_name)
+    plt.savefig(roc_train_file_path, format='pdf')
+    plt.close()
+    # Plot ROC for all classes - Validation Set
+    plt.figure(figsize=(10, 8))
+    for i in range(y_true_val.shape[1]):
+        fpr_val, tpr_val, _ = roc_curve(y_true_val[:, i], y_pred_val[:, i])
+        roc_auc_val = auc(fpr_val, tpr_val)
+        plt.plot(fpr_val, tpr_val, label=f'Val ROC Curve - Label {i} (AUC = {roc_auc_val:.4f})')
+    plt.plot([0, 1], [0, 1], linestyle='--', color='grey')
+    plt.title('ROC Curves for Validation Set', fontsize = 18)
+    plt.xlabel('False Positive Rate', fontsize = 18)
+    plt.ylabel('True Positive Rate', fontsize = 18)
+    plt.legend(loc='lower right', fontsize = 12)
+    roc_val_file_name = f'roc_curves_val_{file_suffix}.pdf'
+    roc_val_file_path = os.path.join(sample_path1+'/roc/', roc_val_file_name)
+    plt.savefig(roc_val_file_path, format='pdf')
+    plt.close()
+    confusion_matrix_file_path = os.path.join(sample_path1 + '/confusion_matrix/' + file_suffix)
+    if not os.path.exists(confusion_matrix_file_path):
+        os.makedirs(confusion_matrix_file_path)
+    plot_confusion_matrix(y_true_train, y_pred_train, title='Confusion Matrix - Training Set (Unnormalized)', filename=confusion_matrix_file_path+ '/confusion_matrix_train_unnormalized.pdf')
+    plot_confusion_matrix(y_true_train, y_pred_train, title='Confusion Matrix - Training Set (X-axis Normalized)', normalize='pred', filename=confusion_matrix_file_path+ '/confusion_matrix_train_x_normalized.pdf')
+    plot_confusion_matrix(y_true_train, y_pred_train, title='Confusion Matrix - Training Set (Y-axis Normalized)', normalize='true', filename=confusion_matrix_file_path+ '/confusion_matrix_train_y_normalized.pdf')
+    plot_confusion_matrix(y_true_val, y_pred_val, title='Confusion Matrix - Validation Set (Unnormalized)', filename=confusion_matrix_file_path+ '/confusion_matrix_val_unnormalized.pdf')
+    plot_confusion_matrix(y_true_val, y_pred_val, title='Confusion Matrix - Validation Set (X-axis Normalized)', normalize='pred', filename=confusion_matrix_file_path+ '/confusion_matrix_val_x_normalized.pdf')
+    plot_confusion_matrix(y_true_val, y_pred_val, title='Confusion Matrix - Validation Set (Y-axis Normalized)', normalize='true', filename=confusion_matrix_file_path+ '/confusion_matrix_val_y_normalized.pdf')
+    metrics = {
+        "loss": history.history['loss'],
+        "val_loss": history.history['val_loss'],
+        "accuracy": history.history['accuracy'],
+        "val_accuracy": history.history['val_accuracy'],
+        "f1_score": f1_score(np.argmax(y_true_val, axis=1), np.argmax(y_pred_val, axis=1), average='micro'),
+        "precision": precision_score(np.argmax(y_true_val, axis=1), np.argmax(y_pred_val, axis=1), average='macro'),
+        "recall": recall_score(np.argmax(y_true_val, axis=1), np.argmax(y_pred_val, axis=1), average='macro')
+    }
+    return model, metrics
+from tensorflow.keras import metrics
+def grid_search(X_train, Y_train, X_val, Y_val, param_grid, sample_path1):
+    if sample_path1 == '':
+        sample_path1 = '/storage/shuangyuan/code/analysis_spin/Machine_learning/GridSearch'
+    early_stopping = EarlyStopping(monitor='loss', patience=5, restore_best_weights=True)
+    # 创建模型的函数，包含超参数
+    def create_model(hidden_units, learning_rate, l2_reg, batch_size, dropout_rate):
+        # 使用传入的超参数构建模型
+        model = build_multiLabel_classification_model(X_train.shape[1], Y_train.shape[1], hidden_units=hidden_units, l2_reg=l2_reg, dropout_rate=dropout_rate)
+        model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
+        return model
+    # 将模型创建函数传递给 KerasClassifier
+    model = KerasClassifier(model=create_model, epochs=100, verbose=0, callbacks=[early_stopping])
+    # 使用 GridSearchCV 进行网格搜索
+    grid_search = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=20, cv=3, verbose=1, scoring='neg_log_loss')
+    grid_search.fit(X_train, Y_train)
+    # 输出最佳参数和分数
+    print(f"Best parameters: {grid_search.best_params_}")
+    print(f"Best score: {grid_search.best_score_}")
+    # 获取最佳模型
+    best_model = grid_search.best_estimator_
+    best_model = best_model.model  # 如果需要，你可以再次访问模型实例
+    print(type(best_model))
+    # 获取最佳超参数
+    best_params = grid_search.best_params_
+    hidden_units = best_params['model__hidden_units']
+    learning_rate = best_params['model__learning_rate']
+    l2_reg = best_params['model__l2_reg']
+    batch_size = best_params['model__batch_size']
+    if not os.path.exists(sample_path1 + '/bestmodel/'):
+        os.makedirs(sample_path1 + '/bestmodel/')
+    with open(sample_path1 + '/bestmodel/best_params.txt', 'w') as f:
+        f.write(f"Best parameters: {grid_search.best_params_}\n")
+        f.write(f"Best score: {grid_search.best_score_}\n")
+    # 保存最佳模型
+    # best_model_filename = f'best_model_hidden{hidden_units}_lr{learning_rate}_l2{l2_reg}_batch{batch_size}.h5'   
+    # best_model.save('/storage/shuangyuan/code/analysis_spin/Machine_learning/GridSearch/bestmodel/' + best_model_filename)
+    # print(f"Best model saved as {best_model_filename}")
+    # 存储每个模型的训练指标
+    all_metrics = {}
+    for i, model in enumerate(grid_search.cv_results_['params']):
+        suffix = f"model_{i}"
+        hidden_units = model['model__hidden_units']
+        learning_rate = model['model__learning_rate']
+        l2_reg = model['model__l2_reg']
+        batch_size = model['model__batch_size']
+        dropout_rate = model['model__dropout_rate']
+        # 训练并保存每个模型
+        file_suffix = f"grid_{suffix}_hidden{hidden_units}_lr{learning_rate}_l2{l2_reg}_batch{batch_size}_dropout{dropout_rate}"
+        _, metrics = train_and_save_model_MultiLabel_Grid(X_train, Y_train, X_val, Y_val, 
+                                                     hidden_units=hidden_units, 
+                                                     learning_rate=learning_rate, 
+                                                     l2_reg=l2_reg, 
+                                                     batch_size=batch_size,
+                                                     dropout_rate=dropout_rate,
+                                                     sample_path1=sample_path1)
+        all_metrics[suffix] = metrics
+    return best_model, all_metrics
+# 你可以调用grid_search来执行网格搜索并获取最佳模型
+# best_model, all_metrics = grid_search(X_train, Y_train, X_val, Y_val)
+from tensorflow.keras.models import save_model
+def save_model_info(model, history, best_params, file_suffix):
+    # 创建保存文件的目录
+    save_dir = '/storage/shuangyuan/code/analysis_spin/Machine_learning/GridSearch/bestmodel/'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    # 保存训练历史到CSV
+    history_df = pd.DataFrame(history.history)
+    history_file_name = f'history_{file_suffix}.csv'
+    history_file_path = os.path.join(save_dir, history_file_name)
+    history_df.to_csv(history_file_path, index=False)
+    # 保存最佳超参数到JSON
+    best_params_file_name = f'best_params_{file_suffix}.json'
+    best_params_file_path = os.path.join(save_dir, best_params_file_name)
+    with open(best_params_file_path, 'w') as json_file:
+        json.dump(best_params, json_file, indent=4)
+    # 保存模型到文件
+    model_file_name = f'model_{file_suffix}.h5'
+    model_file_path = os.path.join(save_dir, model_file_name)
+    save_model(model, model_file_path)
+    print(f"Model, history, and best parameters saved under {save_dir}")
 def save_predictions_to_root(X_data,train_val_index,full_predictions,root_filename,branch_name):
     data_dict = {name: X_data[:, i] for i, name in enumerate(branch_name)}
     data_dict['score'] = full_predictions

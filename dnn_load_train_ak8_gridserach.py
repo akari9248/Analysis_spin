@@ -54,8 +54,8 @@ def main(args):
             Y_data_index=["type2"]
             final_descri3_index=["final_descri3"]
             final_descri4_index=["final_descri4"]
-            level_prefix=""
-            level_suffix="_Hadron"
+            level_prefix="Reco"
+            level_suffix=""
             #X_data_supp, *_ = dnn.LoadROOTFile(sample_paths=[sample_path1],entries=args.entries)
             X_data0,X_data_shape =  dnn.Extract_flat_features(X_data,branch_to_index,select_item,level_prefix,level_suffix,return_shape=True)
             # 创建一个StandardScaler对象
@@ -77,6 +77,9 @@ def main(args):
             # indices_type = np.ones(len(indices_type), dtype=bool)
             X_data1 = X_data0[indices_type] # type: ignore
             Y_data1 = Y_data0[indices_type]
+            final_nan_mask = np.isnan(X_data1).any(axis=1)
+            X_data1 = X_data1[~final_nan_mask]
+            Y_data1 = Y_data1[~final_nan_mask]
             select_index_train,select_index_val = dnn.custom_train_test_split_indices(len(X_data1),test_size=0.2,random_state=42)
             X_data1_train = X_data1[select_index_train]
             X_data1_val = X_data1[select_index_val]
@@ -98,11 +101,13 @@ def main(args):
             ###### Add validation branch ##########
             train_val_index0 = dnn.modify_array_advanced(indices_type,select_index_train,select_index_val)
             train_val_index = dnn.ShapeAlign(train_val_index0,X_data_shape) 
-            train_val_index_full = train_val_index_full + train_val_index if len(train_val_index_full) != 0 else train_val_index
+            train_val_index_full = train_val_index_full + train_val_index if len(train_val_index_full) != 0 else train_val_index       
+            assert not np.isnan(X_data1_train).any(), "训练集存在NaN!"
+            assert not np.isnan(X_data1_val).any(), "验证集存在NaN!"
             #train_val_index = dnn.ShapeAlign(train_val_index0,X_data_shape) +dnn.CreateAlignedShapeArr(X_data_supp_shape, -1)
-            del X_data,X_data0, X_data1, Y_data, Y_data0, Y_data1, match_data, final_descri3_data, final_descri4_data, select_index_train, select_index_val, X_data1_train, X_data1_val, Y_data1_train, Y_data1_val, train_val_index0, train_val_index
+            del X_data,X_data0, X_data1, Y_data, Y_data0, Y_data1, match_data,select_index_train,select_index_val,X_data1_train,X_data1_val,Y_data1_train,Y_data1_val,train_val_index0,train_val_index
         if mode == "Prediction":
-            folder_name = '/storage/shuangyuan/code/analysis_spin/Machine_learning/ML/Datasets_reco/Prediction_ak8/'+basefolder_name
+            folder_name = '/storage/shuangyuan/code/analysis_spin/Machine_learning/ML/Datasets_newflavour/Prediction_ak8_730_gridsearch/'+basefolder_name
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
             model = load_model(model_path)
@@ -146,26 +151,14 @@ def main(args):
             dnn.save_multiclass_predictions_to_root(Xdata_full,root_filename=folder_name+f"Chunk{iter}",branch_names=branch_names,branch_types=branch_types)
             del X_data, Xdata_full, X_data_predict, full_predictions
     if mode == "Train":
-        ######################### model train : X_data3_train , X_data3_val , Y_data1_train , Y_data1_val #####################################
-        hidden_units=[128, 64]
-        # hidden_units=[256,128,64]
-        learning_rate=0.0001
-        l2_reg=0.0001
-        file_suffix='herwig730_off_ak8_standardscaler_3'
-        model = dnn.train_and_save_model_MultiLabel(X_train=X_data1_train_full,X_val=X_data1_val_full,Y_train=Y_data1_train_full,Y_val=Y_data1_val_full,hidden_units=hidden_units,learning_rate=learning_rate,l2_reg=l2_reg,model=model,file_suffix=file_suffix)
-        #model.save("ML/model/Threelabel_"+suffix)
-        model.save("ML/model/Fourlabel1_"+suffix)
-        ######################## roc curve ##############################
-        predictions_train = model.predict(X_data1_train_full,batch_size=256)
-        predictions_val = model.predict(X_data1_val_full,batch_size=256)
-        dnn.plot_roc_curve_threeLabel(Y_data1_train_full,predictions_train,folder_name+"train"+suffix)
-        dnn.plot_roc_curve_threeLabel(Y_data1_val_full,predictions_val,folder_name+"val"+suffix)
-        #args.model_path = "ML/model/Threelabel_"+suffix
-        args.model_path = "ML/model/Fourlabel1_"+suffix
-        args.mode = "Prediction"
-        args.train_val_index_full = train_val_index_full
-        del X_data1_train_full,X_data1_val_full,Y_data1_train_full,Y_data1_val_full
-        main(args)
+        param_grid = {
+            'model__hidden_units': [[256, 128, 128], [256, 128, 32], [64, 32, 32]],
+            'model__learning_rate': [0.001, 0.0005],
+            'model__l2_reg': [0, 0.0001],
+            'model__batch_size': [128, 256, 512],
+            'model__dropout_rate': [0.0, 0.1, 0.3]
+        }
+        best_model, all_metrics = dnn.grid_search(X_train=X_data1_train_full,X_val=X_data1_val_full,Y_train=Y_data1_train_full,Y_val=Y_data1_val_full, param_grid=param_grid,sample_path1=sample_path1)
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the binary classification model.")
