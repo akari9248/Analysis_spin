@@ -183,6 +183,23 @@ def custom_train_test_split_indices(n_samples, test_size=0.2, random_state=None)
     train_idx = indices[test_set_size:]
     
     return train_idx, test_idx
+def custom_train_val_test_split_indices(n_samples, val_size=0.2, test_size=0.2, random_state=None):
+    if random_state is not None:
+        np.random.seed(random_state)
+    
+    indices = np.arange(n_samples)
+    
+    np.random.shuffle(indices)
+    
+    test_set_size = int(n_samples * test_size)
+    val_set_size = int(n_samples * val_size)
+    train_set_size = n_samples - test_set_size - val_set_size
+
+    test_idx = indices[:test_set_size]
+    val_idx = indices[test_set_size:test_set_size+val_set_size]
+    train_idx = indices[test_set_size+val_set_size:]
+    
+    return train_idx, val_idx, test_idx
 def build_binary_classification_model(input_dim,  hidden_units, l2_reg=0.0, dropout_rate=0):
     # 使用Keras的序列模型API
     model = tf.keras.Sequential()
@@ -1140,6 +1157,7 @@ def train_and_save_model_MultiLabel_Grid(X_train, Y_train, X_val, Y_val,
     }
     return model, metrics
 from tensorflow.keras import metrics
+import json
 def grid_search(X_train, Y_train, X_val, Y_val, param_grid, sample_path1):
     if sample_path1 == '':
         sample_path1 = '/storage/shuangyuan/code/analysis_spin/Machine_learning/GridSearch'
@@ -1154,13 +1172,24 @@ def grid_search(X_train, Y_train, X_val, Y_val, param_grid, sample_path1):
     model = KerasClassifier(model=create_model, epochs=100, verbose=0, callbacks=[early_stopping])
     # 使用 GridSearchCV 进行网格搜索
     grid_search = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=20, cv=3, verbose=1, scoring='neg_log_loss')
+    # grid_search = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=20, cv=3, verbose=1, 
+    #                            scoring={'log_loss': 'neg_log_loss', 'roc_auc': 'roc_auc', refit='neg_log_loss'})
     grid_search.fit(X_train, Y_train)
     # 输出最佳参数和分数
     print(f"Best parameters: {grid_search.best_params_}")
     print(f"Best score: {grid_search.best_score_}")
     # 获取最佳模型
-    best_model = grid_search.best_estimator_
-    best_model = best_model.model  # 如果需要，你可以再次访问模型实例
+    best_estimator = grid_search.best_estimator_
+    # best_model = best_model.model  # 如果需要，你可以再次访问模型实例
+    if hasattr(best_estimator, 'model_'):
+        best_model = best_estimator.model_
+    elif hasattr(best_estimator, 'model'):
+        if callable(best_estimator.model):
+            best_model = best_estimator.model()
+        else:
+            best_model = best_estimator.model
+    else:
+        best_model = best_estimator
     print(type(best_model))
     # 获取最佳超参数
     best_params = grid_search.best_params_
@@ -1177,8 +1206,15 @@ def grid_search(X_train, Y_train, X_val, Y_val, param_grid, sample_path1):
     # best_model_filename = f'best_model_hidden{hidden_units}_lr{learning_rate}_l2{l2_reg}_batch{batch_size}.h5'   
     # best_model.save('/storage/shuangyuan/code/analysis_spin/Machine_learning/GridSearch/bestmodel/' + best_model_filename)
     # print(f"Best model saved as {best_model_filename}")
+    # 准备CSV记录文件
+    results_dir = os.path.join(sample_path1, 'bestmodel', 'metrics')
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+    csv_path = os.path.join(results_dir, 'grid_search_results.csv')
+    csv_exists = os.path.exists(csv_path)
     # 存储每个模型的训练指标
     all_metrics = {}
+    results_list = []
     for i, model in enumerate(grid_search.cv_results_['params']):
         suffix = f"model_{i}"
         hidden_units = model['model__hidden_units']
@@ -1195,7 +1231,45 @@ def grid_search(X_train, Y_train, X_val, Y_val, param_grid, sample_path1):
                                                      batch_size=batch_size,
                                                      dropout_rate=dropout_rate,
                                                      sample_path1=sample_path1)
-        all_metrics[suffix] = metrics
+        # 保存当前模型的详细metrics
+        model_metrics = {
+            "params": model,
+            **metrics
+        }
+        all_metrics[file_suffix] = model_metrics
+        
+        # 保存到JSON
+        json_path = os.path.join(results_dir, f'metrics_{file_suffix}.json')
+        with open(json_path, 'w') as f:
+            json.dump(model_metrics, f, indent=2)
+        
+        # 准备CSV行数据
+        csv_row = {
+            "model_id": file_suffix,
+            "hidden_units": hidden_units,
+            "learning_rate": learning_rate,
+            "l2_reg": l2_reg,
+            "batch_size": batch_size,
+            "dropout_rate": dropout_rate,
+            "best_val_loss": np.min(metrics["val_loss"]),
+            "best_val_accuracy": np.max(metrics["val_accuracy"]),
+            "final_train_loss": metrics["loss"][-1],
+            "final_val_loss": metrics["val_loss"][-1],
+            "final_train_accuracy": metrics["accuracy"][-1],
+            "final_val_accuracy": metrics["val_accuracy"][-1],
+            "f1_score": metrics["f1_score"],
+            "precision": metrics["precision"],
+            "recall": metrics["recall"]
+        }
+        results_list.append(csv_row)
+    results_df = pd.DataFrame(results_list)
+    results_df.to_csv(csv_path, mode='a' if csv_exists else 'w', 
+                      header=not csv_exists, index=False)
+    # 保存所有metrics的汇总JSON
+    all_metrics_path = os.path.join(results_dir, 'all_metrics.json')
+    with open(all_metrics_path, 'w') as f:
+        json.dump(all_metrics, f, indent=2)
+    print(f"All metrics saved to {results_dir}")
     return best_model, all_metrics
 # 你可以调用grid_search来执行网格搜索并获取最佳模型
 # best_model, all_metrics = grid_search(X_train, Y_train, X_val, Y_val)
