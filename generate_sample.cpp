@@ -100,11 +100,13 @@ public:
   std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match_loop;
   std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match_gen;
   std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match_reco;
+  std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match_recotoparton;
+  std::pair<std::vector<std::vector<Int_t>>, std::vector<std::vector<Int_t>>> match_recotogen;
   std::vector<std::vector<EventsAnalyzer::JetAndDaughters>> levelsjetsdaughters;
   std::vector<std::vector<std::vector<std::vector<ParticleInfo>>>> pseudojets_arr;
   std::vector<std::vector<std::vector<JetBranch::threeplanes>>> pseudojets_planes_arr;
   std::vector<std::vector<std::vector<JetBranch::threeplanes>>> planes_arr;
-  bool SaveParticles = false;
+  bool SaveParticles = true;
   Hists weightcut;
   Hists pileupweight;
   // todo: Add particle selection (1. Particle Energy scale )
@@ -150,7 +152,7 @@ public:
   void DeriveLevelsJetsDaughters()
   {
     levelsjetsdaughters.clear();
-    if (SampleType != "CMSParton" && SampleType != "CMSPartonReco")
+    if (SampleType != "CMSParton" && SampleType != "CMSPartonReco" && SampleType != "CMSMCMatching")
     {
       for (auto &branchvector : Branches)
       {
@@ -205,13 +207,15 @@ public:
   }
   void AssignMatchedThreePlanes()
   {
-    if (SampleType == "CMSMCGen")
+    if (SampleType == "CMSMCGen" || SampleType == "CMSMCReco")
     {
+
       for (int level = 0; level < planes_arr.size(); level++)
       {
         for (int i = 0; i < planes_arr.at(level).at(0).size(); i++)
         {
           int matchindex = Branches.at(level).JetMatching->at(i);
+          // int matchindex = matchs.at(i);
           if (matchindex != -1 && planes_arr.at(planes_arr.size() - level - 1).at(0).size() > matchindex)
           {
             planes_arr.at(level).at(0).at(i).ismatched = true;
@@ -225,10 +229,50 @@ public:
         }
       }
     }
+    if (SampleType == "CMSMCMatching")
+    {
+      std::vector<TLorentzVector> parton_jets, reco_jets;
+      for (auto &planes : levelsjetsdaughters.at(0))
+        parton_jets.push_back(planes.jet);
+      for (auto &planes : levelsjetsdaughters.at(2))
+        reco_jets.push_back(planes.jet);
+      std::vector<int> matchs = Matching::matchJet(reco_jets, parton_jets, 0.4);
+
+      for (int level = 2; level < planes_arr.size(); level++)
+      {
+        for (int i = 0; i < planes_arr.at(level).at(0).size(); i++)
+        {
+          int matchindex_RecotoGen = Branches.at(level).JetMatching->at(i);
+          int matchindex_RecotoParton = matchs.at(i);
+          if (matchindex_RecotoGen != -1 && planes_arr.at(1).at(0).size() > matchindex_RecotoGen)
+          {
+            planes_arr.at(level).at(0).at(i).ismatched = true;
+            planes_arr.at(1).at(0).at(matchindex_RecotoGen).ismatched = true;
+            planes_arr.at(level).at(0).at(i).matchedthreeplanes = planes_arr.at(1).at(0).at(matchindex_RecotoGen).Getpseudothreeplanes();
+          }
+          else
+          {
+            planes_arr.at(level).at(0).at(i).matchedthreeplanes = JetBranch::pseudothreeplanes();
+          }
+
+          if (matchindex_RecotoParton != -1 && planes_arr.at(0).at(0).size() > matchindex_RecotoParton)
+          {
+            planes_arr.at(level).at(0).at(i).ismatched2 = true;
+            planes_arr.at(0).at(0).at(matchindex_RecotoParton).ismatched2 = true;
+            planes_arr.at(level).at(0).at(i).matchedthreeplanes2 = planes_arr.at(0).at(0).at(matchindex_RecotoParton).Getpseudothreeplanes();
+          }
+          else
+          {
+            planes_arr.at(level).at(0).at(i).matchedthreeplanes2 = JetBranch::pseudothreeplanes();
+          }
+        }
+      }
+    }
   }
   void MatchPlanes()
   {
-    if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" && SampleType != "CMSParton" && SampleType != "GetGen" &&
+    if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" &&
+        SampleType != "CMSParton" && SampleType != "GetGen" && SampleType != "CMSMCMatching" &&
         (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) &&
         (options.inputFolder.find("AngularLund") == std::string::npos && options.inputFolder.find("DipoleLund") == std::string::npos))
     {
@@ -243,6 +287,11 @@ public:
     {
       match_gen = JetBranch::matchPlanes(planes_arr.at(1), planes_arr.at(0), "second", 0.5);
       match_reco = JetBranch::matchPlanes(planes_arr.at(2), planes_arr.at(1), "second", 0.5);
+    }
+    if (SampleType == "CMSMCMatching")
+    {
+      match_recotogen = JetBranch::matchPlanes(planes_arr.at(2), planes_arr.at(1), "second", 0.5);
+      match_recotoparton = JetBranch::matchPlanes(planes_arr.at(2), planes_arr.at(0), "second", 0.5);
     }
   }
   void SavePlanes()
@@ -264,7 +313,8 @@ public:
     //     }
     // }
     treeEvents.assign("GeneratorWeight", 1.0);
-    if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" && SampleType != "CMSParton" && SampleType != "GetGen" &&
+    if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" &&
+        SampleType != "CMSParton" && SampleType != "GetGen" && SampleType != "CMSMCMatching" &&
         (options.inputFolder.find("sherpa") == std::string::npos && options.inputFolder.find("Sherpa") == std::string::npos) &&
         (options.inputFolder.find("AngularLund") == std::string::npos && options.inputFolder.find("DipoleLund") == std::string::npos))
     {
@@ -291,15 +341,45 @@ public:
         treeEvents.push_back("match23", match_reco.second.at(0).at(i));
       }
     }
-    if (SampleType == "CMSMCGen")
+    if (SampleType == "CMSMCMatching")
     {
+      for (int i = 0; i < match_recotoparton.first.at(0).size(); i++)
+      {
+        treeEvents.push_back("RecotoParton_match2", match_recotoparton.first.at(0).at(i));
+        treeEvents.push_back("RecotoParton_match3", match_recotoparton.second.at(0).at(i));
+      }
+      for (int i = 0; i < match_recotogen.first.at(0).size(); i++)
+      {
+        treeEvents.push_back("RecotoGen_match2", match_recotogen.first.at(0).at(i));
+        treeEvents.push_back("RecotoGen_match3", match_recotogen.second.at(0).at(i));
+      }
       for (int levelindex = 0; levelindex < level.size(); levelindex++)
       {
-        if (level.at(levelindex).prefix == "Gen")
+        if (level.at(levelindex).prefix == "Reco")
         {
           for (auto &plane : planes_arr.at(levelindex).at(0))
           {
-            treeEvents.push_back("MatchedRecoPhi", plane.matchedthreeplanes.deltaPhi);
+            treeEvents.push_back("MatchedGenPhi", plane.matchedthreeplanes.deltaPhi);
+            treeEvents.push_back("MatchedPartonPhi", plane.matchedthreeplanes2.deltaPhi);
+          }
+        }
+      }
+    }
+    if (SampleType == "CMSMCGen" || SampleType == "CMSMCReco")
+    {
+      std::string level_ = "";
+      if (SampleType == "CMSMCGen")
+        level_ = "Gen";
+      else if (SampleType == "CMSMCReco")
+        level_ = "Reco";
+
+      for (int levelindex = 0; levelindex < level.size(); levelindex++)
+      {
+        if (level.at(levelindex).prefix == level_)
+        {
+          for (auto &plane : planes_arr.at(levelindex).at(0))
+          {
+            treeEvents.push_back("JetMatchedPhi", plane.matchedthreeplanes.deltaPhi);
           }
         }
       }
@@ -308,7 +388,8 @@ public:
     {
       treeEvents.assign("GeneratorWeight", events->GeneratorWeight);
     }
-    if (options.inputFolder.find("sherpa") != std::string::npos || options.inputFolder.find("Sherpa") != std::string::npos || options.inputFolder.find("Angular") != std::string::npos)
+    if (options.inputFolder.find("sherpa") != std::string::npos || options.inputFolder.find("Sherpa") != std::string::npos ||
+        options.inputFolder.find("Angular") != std::string::npos || options.inputFolder.find("dipole") != std::string::npos)
     {
       treeEvents.assign("GeneratorWeight", events->BiasSelectionWeight);
     }
@@ -317,7 +398,7 @@ public:
   {
     if (SampleType == "PrivateMC" || SampleType == "PrivateMCParton" || (SampleType == "GetGen" && options.inputFolder.find("Angular") != std::string::npos))
       return ClusterJetsAndDaughters(branchvector);
-    if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen" ||
+    if (SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSMCGen" || SampleType == "CMSGen" || SampleType == "CMSMCReco" ||
         (SampleType == "GetGen" && options.inputFolder.find("QCD") != std::string::npos))
       return ExtractJetsAndDaughters(branchvector);
     return {};
@@ -463,6 +544,18 @@ public:
                        { return std::abs(jet.eta()) > 2.5; });
     csjets.erase(new_end, csjets.end());
     csjets = sorted_by_pt(csjets);
+
+    // for (const auto &hist : cs.history())
+    // {
+    //   if (hist.parent1 < 0 || hist.parent2 < 0)
+    //     continue;
+
+    //   if (cs.exclusive_jets(hist.dij).size() == 1)
+    //   {
+    //     std::cout << hist.dij << std::endl;
+    //     break;
+    //   }
+    // }
     int jetnum = csjets.size();
     int njet = 2;
     if (njet <= jetnum && njet != -1)
@@ -574,7 +667,7 @@ public:
       TString rootname = "*.root";
       if (options.inputFolder.find("sherpa") != std::string::npos || options.inputFolder.find("Sherpa") != std::string::npos)
         rootname = "*Cluster*.root";
-      for (int i = 1; i <= 50; ++i)
+      for (int i = 1; i <= 150; ++i)
       {
         t->Add((TString)options.inputFolder +
                Form("/Chunk%d/", i) + rootname + "/JetsAndDaughters");
@@ -595,19 +688,25 @@ public:
       // /storage/shuangyuan/code/analysis_spin/dataset/Run3Summer22EE_13TeV6_0_spinon_600_800_pythia
       //    if(options.inputFolder.find("Run3") != std::string::npos||options.inputFolder.find("Run2022") != std::string::npos) t->Add((TString)options.inputFolder + "/Chunk*.root/JetsAndDaughters");
       //    else t->Add((TString)options.inputFolder + "/Chunk*.root/jetInfos/JetsAndDaughters");
-      if (options.inputFolder.find("Run3Summer22EE_13TeV6_0_spinon_600_800_pythia") != std::string::npos)
+      if (options.inputFolder.find("Run3Summer22EE_13TeV6_0") != std::string::npos ||
+          options.inputFolder.find("Private") != std::string::npos)
       {
-        for (int i = 0; i < 100; i++)
-        {
-          t->Add((TString)options.inputFolder + TString::Format("/Chunk%d/", i) + "jetsinfo*.root/JetsAndDaughters");
-        }
+        // for (int i = 0; i < 100; i++)
+        // {
+        t->Add((TString)options.inputFolder + "/jetsinfo*.root/JetsAndDaughters");
+        // }
       }
       else
       {
         t->Add((TString)options.inputFolder + "/Chunk*.root/JetsAndDaughters");
       }
-      
+
       if (SampleType == "CMSMC")
+      {
+        prefixs = {"Gen", "Reco"};
+        suffixs = {""};
+      }
+      if (SampleType == "CMSMCReco")
       {
         prefixs = {"Gen", "Reco"};
         suffixs = {""};
@@ -627,7 +726,7 @@ public:
         prefixs = {"Gen"};
         suffixs = {""};
       }
-      if (SampleType == "CMSParton")
+      if (SampleType == "CMSParton" || SampleType == "CMSMCMatching")
       {
         prefixs = {"Parton", "Gen", "Reco"};
         suffixs = {""};
@@ -769,11 +868,11 @@ public:
       }
     }
     treeEvents.addBranches("GeneratorWeight/D");
-    if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "PrivateMCParton" && SampleType != "CMSParton" && SampleType != "GetGen")
+    if (SampleType != "CMSData" && SampleType != "CMSGen" && SampleType != "CMSMCMatching" &&
+        SampleType != "PrivateMCParton" && SampleType != "CMSParton" && SampleType != "GetGen")
     {
       treeEvents.addBranches("match2/vI");
       treeEvents.addBranches("match3/vI");
-      // treeEvents.addBranches("matchloop2/vI");
     }
     if (SampleType == "CMSParton")
     {
@@ -782,9 +881,18 @@ public:
       treeEvents.addBranches("match22/vI");
       treeEvents.addBranches("match23/vI");
     }
-    if (SampleType == "CMSMCGen")
+    if (SampleType == "CMSMCMatching")
     {
-      treeEvents.addBranches("MatchedRecoPhi/vD");
+      treeEvents.addBranches("RecotoParton_match2/vI");
+      treeEvents.addBranches("RecotoParton_match3/vI");
+      treeEvents.addBranches("RecotoGen_match2/vI");
+      treeEvents.addBranches("RecotoGen_match3/vI");
+      treeEvents.addBranches("MatchedPartonPhi/vD");
+      treeEvents.addBranches("MatchedGenPhi/vD");
+    }
+    if (SampleType == "CMSMCGen" || SampleType == "CMSMCReco")
+    {
+      treeEvents.addBranches("JetMatchedPhi/vD");
     }
   }
   void InitAnalyzeBranch()
@@ -954,7 +1062,8 @@ public:
             return this->events->GenPassDijet;
           });
     }
-    if ((SampleType == "CMSData" || SampleType == "CMSPartonReco"))
+    if ((SampleType == "CMSData" || SampleType == "CMSPartonReco" ||
+         SampleType == "CMSMCReco" || SampleType == "CMSMCMatching"))
     {
       AddSelection(
           EventSelection, "Reco DiJet Selection",
@@ -994,7 +1103,7 @@ public:
             return this->events->TriggerBits->back();
           });
     }
-    if (options.inputFolder.find("Flat_herwig") != std::string::npos)
+    if (options.inputFolder.find("15to7000") != std::string::npos)
     {
       cout << "Add events selection: Overweighted Events Removal" << endl;
       weightcut = Hists("table/OverWeightedEventRemoval/GeneratorWeightcut.root");
@@ -1058,6 +1167,25 @@ public:
   {
     if (SampleType == "CMSMCGen")
       return;
+    if (SampleType.find("CMS") != std::string::npos && SampleType != "CMSGen")
+    {
+      AddSelection(
+          JetSelection, "Jet HotZone removal",
+          [this]
+          {
+            auto &jetsdaughters = this->levelsjetsdaughters.back();
+            jetsdaughters.erase(
+                std::remove_if(jetsdaughters.begin(), jetsdaughters.end(),
+                               [this](const JetAndDaughters &jd)
+                               {
+                                 return !this->events->RecoJetPassHotZone->at(jd.jetid);
+                               }),
+                jetsdaughters.end());
+            return true;
+          });
+    }
+    if (SampleType == "CMSMCReco" || (SampleType == "CMSMCMatching"))
+      return;
     AddSelection(
         JetSelection, (std::string)TString::Format("JetPt = [ %d , %d ]", options.jinit_ptlow, options.jinit_pthigh),
         [this]
@@ -1090,23 +1218,6 @@ public:
           }
           return true;
         });
-    if (SampleType.find("CMS") != std::string::npos && SampleType != "CMSGen")
-    {
-      AddSelection(
-          JetSelection, "Jet HotZone removal",
-          [this]
-          {
-            auto &jetsdaughters = this->levelsjetsdaughters.back();
-            jetsdaughters.erase(
-                std::remove_if(jetsdaughters.begin(), jetsdaughters.end(),
-                               [this](const JetAndDaughters &jd)
-                               {
-                                 return !this->events->RecoJetPassHotZone->at(jd.jetid);
-                               }),
-                jetsdaughters.end());
-            return true;
-          });
-    }
   }
   void InitParticleSelection()
   {
@@ -1160,7 +1271,8 @@ public:
   void InitPlaneSelection()
   {
     if (SampleType == "PrivateMC" || SampleType == "PrivateMCParton" ||
-        SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSGen" || SampleType == "CMSParton" || SampleType == "CMSPartonReco")
+        SampleType == "CMSMC" || SampleType == "CMSData" || SampleType == "CMSGen" ||
+        SampleType == "CMSParton" || SampleType == "CMSPartonReco")
     {
       AddSelection(
           PlaneSelection, (std::string)TString::Format("Plane2 JetPt = [ %d , %d ]", options.j2_ptlow, options.j2_pthigh),
@@ -1216,16 +1328,22 @@ public:
             return true;
           });
     }
-    if (SampleType == "CMSMCGen")
+    if (SampleType == "CMSMCGen" || SampleType == "CMSMCReco" ||  SampleType == "CMSMCMatching")
     {
+      std::string level_ = "";
+      if (SampleType == "CMSMCGen")
+        level_ = "Gen";
+      else
+        level_ = "Reco";
+
       AddSelection(
-          PlaneSelection, (std::string)TString::Format("Gen JetPt = [ %d , %d ]", options.jinit_ptlow, options.jinit_pthigh),
-          [this]
+          PlaneSelection, level_ + (std::string)TString::Format(" JetPt = [ %d , %d ]", options.jinit_ptlow, options.jinit_pthigh),
+          [this, level_]
           {
             for (int i = 0; i < level.size(); i++)
             {
               auto planes = &planes_arr.at(i);
-              if (level.at(i).prefix == "Gen")
+              if (level.at(i).prefix == level_)
               {
                 planes_arr.at(i).at(0).erase(
                     std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
@@ -1235,28 +1353,28 @@ public:
                                    }),
                     planes_arr.at(i).at(0).end());
               }
-              else
-              {
-                planes_arr.at(i).at(0).erase(
-                    std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
-                                   [this](const JetBranch::threeplanes &threeplanes)
-                                   {
-                                     return threeplanes.matchedthreeplanes.first.initJet.Pt() < this->options.jinit_ptlow ||
-                                            threeplanes.matchedthreeplanes.first.initJet.Pt() > this->options.jinit_pthigh;
-                                   }),
-                    planes_arr.at(i).at(0).end());
-              }
+              // else
+              // {
+              //   planes_arr.at(i).at(0).erase(
+              //       std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
+              //                      [this](const JetBranch::threeplanes &threeplanes)
+              //                      {
+              //                        return threeplanes.matchedthreeplanes.first.initJet.Pt() < this->options.jinit_ptlow ||
+              //                               threeplanes.matchedthreeplanes.first.initJet.Pt() > this->options.jinit_pthigh;
+              //                      }),
+              //       planes_arr.at(i).at(0).end());
+              // }
             }
             return true;
           });
       AddSelection(
-          PlaneSelection, "Gen Jet Eta = [ -1.7 , 1.7]",
-          [this]
+          PlaneSelection, level_ + " Jet Eta = [ -1.7 , 1.7]",
+          [this, level_]
           {
             for (int i = 0; i < level.size(); i++)
             {
               auto planes = &planes_arr.at(i);
-              if (level.at(i).prefix == "Gen")
+              if (level.at(i).prefix == level_)
               {
                 planes_arr.at(i).at(0).erase(
                     std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
@@ -1264,28 +1382,28 @@ public:
                                    { return abs(threeplanes.first.initJet.Eta()) >= 1.7; }),
                     planes_arr.at(i).at(0).end());
               }
-              else
-              {
-                planes_arr.at(i).at(0).erase(
-                    std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
-                                   [this](const JetBranch::threeplanes &threeplanes)
-                                   {
-                                     return abs(threeplanes.matchedthreeplanes.first.initJet.Eta()) >= 1.7;
-                                   }),
-                    planes_arr.at(i).at(0).end());
-              }
+              // else
+              // {
+              //   planes_arr.at(i).at(0).erase(
+              //       std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
+              //                      [this](const JetBranch::threeplanes &threeplanes)
+              //                      {
+              //                        return abs(threeplanes.matchedthreeplanes.first.initJet.Eta()) >= 1.7;
+              //                      }),
+              //       planes_arr.at(i).at(0).end());
+              // }
             }
             return true;
           });
       AddSelection(
-          PlaneSelection, (std::string)TString::Format("Gen Plane2 JetPt = [ %d , %d ]", options.j2_ptlow, options.j2_pthigh),
-          [this]
+          PlaneSelection, level_ + (std::string)TString::Format(" Plane2 JetPt = [ %d , %d ]", options.j2_ptlow, options.j2_pthigh),
+          [this, level_]
           {
             for (int i = 0; i < level.size(); i++)
             {
               auto planes = &planes_arr.at(i);
 
-              if (level.at(i).prefix == "Gen")
+              if (level.at(i).prefix == level_)
               {
                 planes_arr.at(i).at(0).erase(
                     std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
@@ -1295,17 +1413,17 @@ public:
                                    }),
                     planes_arr.at(i).at(0).end());
               }
-              else
-              {
-                planes_arr.at(i).at(0).erase(
-                    std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
-                                   [this](const JetBranch::threeplanes &threeplanes)
-                                   {
-                                     return threeplanes.matchedthreeplanes.first.softer.pt() < this->options.j2_ptlow ||
-                                            threeplanes.matchedthreeplanes.first.softer.pt() > this->options.j2_pthigh;
-                                   }),
-                    planes_arr.at(i).at(0).end());
-              }
+              // else
+              // {
+              //   planes_arr.at(i).at(0).erase(
+              //       std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
+              //                      [this](const JetBranch::threeplanes &threeplanes)
+              //                      {
+              //                        return threeplanes.matchedthreeplanes.first.softer.pt() < this->options.j2_ptlow ||
+              //                               threeplanes.matchedthreeplanes.first.softer.pt() > this->options.j2_pthigh;
+              //                      }),
+              //       planes_arr.at(i).at(0).end());
+              // }
             }
             return true;
           });
@@ -1344,40 +1462,85 @@ public:
       //     }
       //     return true;
       // });
+
       AddSelection(
-          PlaneSelection, "Gen Plane2 Exist (Reco Jet must matched to Gen Jet)",
-          [this]
+          PlaneSelection, level_ + " Plane2 Exist",
+          [this, level_]
           {
             for (int i = 0; i < level.size(); i++)
             {
               auto planes = &planes_arr.at(i);
-              if (level.at(i).prefix == "Gen")
+              if (level.at(i).prefix == level_)
               {
                 planes_arr.at(i).at(0).erase(
                     std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
                                    [this](const JetBranch::threeplanes &threeplanes)
                                    {
-                                     return !threeplanes.ismatched ||
-                                            threeplanes.second.harder_nparticles == 0 ||
+                                     return threeplanes.second.harder_nparticles == 0 ||
                                             threeplanes.second.softer_nparticles == 0;
                                    }),
                     planes_arr.at(i).at(0).end());
               }
               else
               {
+                int index = planes_arr.size() - i - 1;
+                if (SampleType == "CMSMCMatching")
+                  index = planes_arr.size() - 1;
+                bool isempty = true;
+                for (auto &threeplane : planes_arr.at(index).at(0))
+                {
+                  if (threeplane.second.harder_nparticles != 0 && threeplane.second.softer_nparticles != 0)
+                  {
+                    isempty = false;
+                  }
+                }
                 planes_arr.at(i).at(0).erase(
                     std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
-                                   [this](const JetBranch::threeplanes &threeplanes)
+                                   [this, isempty](const JetBranch::threeplanes &threeplanes)
                                    {
-                                     return !threeplanes.ismatched ||
-                                            threeplanes.matchedthreeplanes.second.harder_nparticles == 0 ||
-                                            threeplanes.matchedthreeplanes.second.softer_nparticles == 0;
+                                     return isempty;
+                                     //  return threeplanes.matchedthreeplanes.second.harder_nparticles == 0 ||
+                                     //         threeplanes.matchedthreeplanes.second.softer_nparticles == 0;
                                    }),
                     planes_arr.at(i).at(0).end());
               }
             }
             return true;
           });
+      // AddSelection(
+      //     PlaneSelection, level_ + " Plane2 Exist (Reco Jet must matched to Gen Jet)",
+      //     [this, level_]
+      //     {
+      //       for (int i = 0; i < level.size(); i++)
+      //       {
+      //         auto planes = &planes_arr.at(i);
+      //         if (level.at(i).prefix == level_)
+      //         {
+      //           planes_arr.at(i).at(0).erase(
+      //               std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
+      //                              [this](const JetBranch::threeplanes &threeplanes)
+      //                              {
+      //                                return !threeplanes.ismatched ||
+      //                                       threeplanes.second.harder_nparticles == 0 ||
+      //                                       threeplanes.second.softer_nparticles == 0;
+      //                              }),
+      //               planes_arr.at(i).at(0).end());
+      //         }
+      //         else
+      //         {
+      //           planes_arr.at(i).at(0).erase(
+      //               std::remove_if(planes_arr.at(i).at(0).begin(), planes_arr.at(i).at(0).end(),
+      //                              [this](const JetBranch::threeplanes &threeplanes)
+      //                              {
+      //                                return !threeplanes.ismatched ||
+      //                                       threeplanes.matchedthreeplanes.second.harder_nparticles == 0 ||
+      //                                       threeplanes.matchedthreeplanes.second.softer_nparticles == 0;
+      //                              }),
+      //               planes_arr.at(i).at(0).end());
+      //         }
+      //       }
+      //       return true;
+      //     });
     }
   }
   void InitBranchSelection()
@@ -1720,7 +1883,7 @@ public:
          options.jdEnergyUncertainty.find("JERDn") != std::string::npos ||
          options.jdEnergyUncertainty.find("JERNm") != std::string::npos ||
          options.jdEnergyUncertainty.find("JES") != std::string::npos ||
-         options.jdEnergyUncertainty.find("Raw") != std::string::npos ))
+         options.jdEnergyUncertainty.find("Raw") != std::string::npos))
     {
       t->SetBranchAddress(prefixTStr + "JetPt" + options.jdEnergyUncertainty, jetpt_vector);
     }
